@@ -49,6 +49,12 @@ type LowNodeUtilizationArgs struct {
 
 	// evictionLimits limits the number of evictions per domain. E.g. node, namespace, total.
 	EvictionLimits *api.EvictionLimits `json:"evictionLimits,omitempty"`
+
+	// NetworkCostAware enables network-cost-aware eviction filtering.
+	// When true, pods are only evicted if at least one destination node
+	// offers a lower network cost to the pod's dependency group.
+	// Default: false
+	NetworkCostAware bool `json:"networkCostAware,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true
@@ -71,6 +77,12 @@ type HighNodeUtilizationArgs struct {
 	// considered while considering resources used by pods
 	// but then filtered out before eviction
 	EvictableNamespaces *api.Namespaces `json:"evictableNamespaces,omitempty"`
+
+	// NetworkCostAware enables network-cost-aware eviction filtering.
+	// When true, pods are only evicted if at least one destination node
+	// offers a lower network cost to the pod's dependency group.
+	// Default: false
+	NetworkCostAware bool `json:"networkCostAware,omitempty"`
 }
 
 // MetricsUtilization allow to consume actual resource utilization from metrics

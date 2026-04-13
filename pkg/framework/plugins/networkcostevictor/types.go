@@ -1,0 +1,40 @@
+/*
+Copyright 2025 The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package networkcostevictor
+
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/descheduler/pkg/descheduler/networkcost"
+)
+
+// +k8s:deepcopy-gen=true
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// NetworkCostEvictorArgs holds arguments used to configure the NetworkCostEvictor plugin.
+type NetworkCostEvictorArgs struct {
+	metav1.TypeMeta `json:",inline"`
+
+	// NetworkGroupLabelKey is the label key used to identify pods that belong
+	// to the same communication group. Pods with the same value for this key
+	// are considered to communicate frequently.
+	// Default: "network-group"
+	NetworkGroupLabelKey string `json:"networkGroupLabelKey,omitempty"`
+
+	// TopologyCosts configures the cost model for topology distances.
+	// If nil, defaults are used.
+	TopologyCosts *networkcost.TopologyCostConfig `json:"topologyCosts,omitempty"`
+}

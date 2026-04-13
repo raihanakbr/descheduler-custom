@@ -26,6 +26,7 @@ import (
 
 	"sigs.k8s.io/descheduler/pkg/api"
 	"sigs.k8s.io/descheduler/pkg/descheduler/evictions"
+	"sigs.k8s.io/descheduler/pkg/descheduler/networkcost"
 	nodeutil "sigs.k8s.io/descheduler/pkg/descheduler/node"
 	podutil "sigs.k8s.io/descheduler/pkg/descheduler/pod"
 	"sigs.k8s.io/descheduler/pkg/framework/plugins/nodeutilization/classifier"
@@ -304,6 +305,32 @@ func (l *LowNodeUtilization) Balance(ctx context.Context, nodes []*v1.Node) *fra
 		nodeLimit = l.args.EvictionLimits.Node
 	}
 
+	var networkCostFilter func(*v1.Pod) bool
+	if l.args.NetworkCostAware {
+		destNodes := make([]*v1.Node, 0, len(lowNodes))
+		nodesMap := make(map[string]*v1.Node, len(nodes))
+		for _, node := range nodes {
+			nodesMap[node.Name] = node
+		}
+		for _, ni := range lowNodes {
+			destNodes = append(destNodes, ni.node)
+		}
+
+		costConfig := networkcost.DefaultTopologyCostConfig()
+
+		networkCostFilter = func(pod *v1.Pod) bool {
+			return networkcost.ShouldAllowEviction(
+				pod,
+				networkcost.DefaultNetworkGroupLabelKey,
+				destNodes,
+				l.handle.GetPodsAssignedToNodeFunc(),
+				nodes,
+				nodesMap,
+				costConfig,
+			)
+		}
+	}
+
 	evictPodsFromSourceNodes(
 		ctx,
 		l.args.EvictableNamespaces,
@@ -316,6 +343,7 @@ func (l *LowNodeUtilization) Balance(ctx context.Context, nodes []*v1.Node) *fra
 		continueEvictionCond,
 		l.usageClient,
 		nodeLimit,
+		networkCostFilter,
 	)
 
 	return nil

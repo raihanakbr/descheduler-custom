@@ -196,7 +196,7 @@ func ShouldAllowEviction(
 			continue
 		}
 		candidateCost := ComputePlacementCost(candidate, depPods, nodesMap, config)
-		if candidateCost < currentCost {
+		if candidateCost <= currentCost {
 			klog.V(4).InfoS("Found candidate with lower network cost",
 				"pod", klog.KObj(pod),
 				"currentNode", pod.Spec.NodeName,
