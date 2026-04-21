@@ -1,0 +1,440 @@
+/*
+Copyright 2026 The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package resourcedefragmentation
+
+import (
+	"context"
+	"fmt"
+	"math"
+	"sort"
+
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/sets"
+	"k8s.io/klog/v2"
+
+	"sigs.k8s.io/descheduler/pkg/descheduler/evictions"
+	podutil "sigs.k8s.io/descheduler/pkg/descheduler/pod"
+	frameworktypes "sigs.k8s.io/descheduler/pkg/framework/types"
+)
+
+const PluginName = "ResourceDefragmentation"
+
+// ResourceDefragmentation evicts pods to defragment resource usage across nodes.
+type ResourceDefragmentation struct {
+	logger    klog.Logger
+	handle    frameworktypes.Handle
+	args      *ResourceDefragmentationArgs
+	podFilter podutil.FilterFunc
+}
+
+var _ frameworktypes.BalancePlugin = &ResourceDefragmentation{}
+
+type NodeResourceState struct {
+	AllocatableCPU int64
+	AllocatableMem int64
+	RequestedCPU   int64
+	RequestedMem   int64
+}
+
+type fragmentedNode struct {
+	node           *v1.Node
+	pods           []*v1.Pod
+	imbalanceIndex float64
+	freeSpaceIndex float64
+	priorityIndex  float64
+}
+
+// New builds the plugin from its arguments while passing a handle.
+func New(ctx context.Context, args runtime.Object, handle frameworktypes.Handle) (frameworktypes.Plugin, error) {
+	resourceDefragmentationArgs, ok := args.(*ResourceDefragmentationArgs)
+	if !ok {
+		return nil, fmt.Errorf("want args to be of type ResourceDefragmentationArgs, got %T", args)
+	}
+	logger := klog.FromContext(ctx).WithValues("plugin", PluginName)
+
+	var includedNamespaces, excludedNamespaces sets.Set[string]
+	if resourceDefragmentationArgs.Namespaces != nil {
+		includedNamespaces = sets.New(resourceDefragmentationArgs.Namespaces.Include...)
+		excludedNamespaces = sets.New(resourceDefragmentationArgs.Namespaces.Exclude...)
+	}
+
+	podFilter, err := podutil.NewOptions().
+		WithFilter(podutil.WrapFilterFuncs(handle.Evictor().Filter, handle.Evictor().PreEvictionFilter)).
+		WithNamespaces(includedNamespaces).
+		WithoutNamespaces(excludedNamespaces).
+		BuildFilterFunc()
+	if err != nil {
+		return nil, fmt.Errorf("error initializing pod filter function: %v", err)
+	}
+
+	return &ResourceDefragmentation{
+		logger:    logger,
+		handle:    handle,
+		args:      resourceDefragmentationArgs,
+		podFilter: podFilter,
+	}, nil
+}
+
+// Name retrieves the plugin name.
+func (r *ResourceDefragmentation) Name() string {
+	return PluginName
+}
+
+// Balance extension point implementation for the plugin.
+func (r *ResourceDefragmentation) Balance(ctx context.Context, nodes []*v1.Node) *frameworktypes.Status {
+	logger := klog.FromContext(klog.NewContext(ctx, r.logger)).WithValues("ExtensionPoint", frameworktypes.BalanceExtensionPoint)
+	logger.V(1).Info("Starting resource defragmentation balance pass", "nodeCount", len(nodes))
+
+	nodeStates := make(map[string]*NodeResourceState)
+	var fragmentedNodes []fragmentedNode
+
+	// Step 1: Build the cluster resource state cache once
+	for _, node := range nodes {
+		pods, err := podutil.ListPodsOnANode(node.Name, r.handle.GetPodsAssignedToNodeFunc(), r.podFilter)
+		if err != nil {
+			logger.Error(err, "Error listing pods on node", "node", node.Name)
+			continue
+		}
+
+		var reqCpu, reqMem int64
+		for _, pod := range pods {
+			c, m := getPodRequests(pod)
+			reqCpu += c
+			reqMem += m
+		}
+
+		allocCpu := node.Status.Allocatable.Cpu().MilliValue()
+		allocMem := node.Status.Allocatable.Memory().Value()
+
+		// Protect against division by zero for misconfigured nodes
+		if allocCpu <= 0 || allocMem <= 0 {
+			logger.V(2).Info("Skipping node with zero/negative allocatable resources", "node", node.Name)
+			continue
+		}
+
+		nodeStates[node.Name] = &NodeResourceState{
+			AllocatableCPU: allocCpu,
+			AllocatableMem: allocMem,
+			RequestedCPU:   reqCpu,
+			RequestedMem:   reqMem,
+		}
+
+		imbalanceIndex := r.computeRII(allocCpu, allocMem, reqCpu, reqMem)
+		logger.V(2).Info("Node imbalance index", "node", node.Name, "imbalanceIndex", imbalanceIndex)
+
+		if math.Abs(imbalanceIndex) > r.args.ImbalanceThreshold {
+			logger.V(1).Info("Node is considered fragmented", "node", node.Name, "imbalanceIndex", imbalanceIndex)
+
+			fsi := r.computeFSI(allocCpu, allocMem, reqCpu, reqMem)
+			fn := fragmentedNode{
+				node:           node,
+				pods:           pods,
+				imbalanceIndex: imbalanceIndex,
+				freeSpaceIndex: fsi,
+			}
+			fn.priorityIndex = r.computePriorityIndex(&fn)
+			fragmentedNodes = append(fragmentedNodes, fn)
+		}
+	}
+
+	// Process worst-fragmented nodes first.
+	sort.Slice(fragmentedNodes, func(i, j int) bool {
+		return fragmentedNodes[i].priorityIndex > fragmentedNodes[j].priorityIndex
+	})
+
+	iteration := 0
+	idx := 0
+	for idx < len(fragmentedNodes) && iteration < r.args.MaxEvictions {
+		fn := fragmentedNodes[idx]
+		logger.V(1).Info("Attempting eviction on fragmented node", "node", fn.node.Name, "imbalanceIndex", fn.imbalanceIndex, "iteration", iteration+1)
+
+		pod := r.topsis(fn.node, fn.pods, nodeStates)
+		if pod == nil {
+			logger.V(1).Info("TOPSIS returned no candidate, skipping node", "node", fn.node.Name)
+			idx++
+			continue
+		}
+
+		err := r.handle.Evictor().Evict(ctx, pod, evictions.EvictOptions{StrategyName: PluginName})
+		iteration++
+
+		if err != nil {
+			switch err.(type) {
+			case *evictions.EvictionTotalLimitError:
+				logger.V(1).Info("Total eviction limit reached, stopping")
+				return nil
+			case *evictions.EvictionNodeLimitError:
+				logger.V(1).Info("Node eviction limit reached, skipping node", "node", fn.node.Name)
+				idx++
+				continue
+			default:
+				logger.Error(err, "Eviction failed", "pod", klog.KObj(pod))
+				idx++
+				continue
+			}
+		}
+
+		// Eviction succeeded — update our caches and re-evaluate this node.
+		evictedCpu, evictedMem := getPodRequests(pod)
+
+		// Update the global node state map dynamically
+		if state, exists := nodeStates[fn.node.Name]; exists {
+			state.RequestedCPU -= evictedCpu
+			state.RequestedMem -= evictedMem
+		}
+
+		// Explicitly exclude the evicted pod from the current node's pod list
+		filtered := fn.pods[:0]
+		for _, p := range fn.pods {
+			if p.Namespace != pod.Namespace || p.Name != pod.Name {
+				filtered = append(filtered, p)
+			}
+		}
+		updatedPods := filtered
+
+		// Recalculate node imbalance based on updated cache
+		currentState := nodeStates[fn.node.Name]
+		newImbalance := r.computeRII(currentState.AllocatableCPU, currentState.AllocatableMem, currentState.RequestedCPU, currentState.RequestedMem)
+
+		if math.Abs(newImbalance) <= r.args.ImbalanceThreshold {
+			logger.V(1).Info("Node no longer fragmented, removing from list", "node", fn.node.Name)
+			fragmentedNodes = append(fragmentedNodes[:idx], fragmentedNodes[idx+1:]...)
+			// Do not increment idx — the next element has shifted into position idx.
+		} else {
+			fragmentedNodes[idx].pods = updatedPods
+			fragmentedNodes[idx].imbalanceIndex = newImbalance
+			idx++
+			if idx >= len(fragmentedNodes) {
+				idx = 0 // wrap around to revisit nodes still above threshold
+			}
+		}
+	}
+
+	return nil
+}
+
+// getPodRequests is a helper to sum a pod's requested resources
+func getPodRequests(pod *v1.Pod) (cpu int64, mem int64) {
+	for _, c := range pod.Spec.Containers {
+		cpu += c.Resources.Requests.Cpu().MilliValue()
+		mem += c.Resources.Requests.Memory().Value()
+	}
+	return cpu, mem
+}
+
+// computeRII calculates the Resource Imbalance Index for a node purely mathematically
+func (r *ResourceDefragmentation) computeRII(allocCpu, allocMem, reqCpu, reqMem int64) float64 {
+	rCPU := float64(reqCpu) / float64(allocCpu)
+	rMem := float64(reqMem) / float64(allocMem)
+	return rCPU - rMem
+}
+
+// computeFSI calculates the Free Space Index purely mathematically
+func (r *ResourceDefragmentation) computeFSI(allocCpu, allocMem, reqCpu, reqMem int64) float64 {
+	c := float64(allocCpu-reqCpu) / float64(allocCpu)
+	m := float64(allocMem-reqMem) / float64(allocMem)
+	return c * m
+}
+
+func (r *ResourceDefragmentation) computePriorityIndex(node *fragmentedNode) float64 {
+	wp := 0.5
+	return wp*math.Abs(node.imbalanceIndex) + (1-wp)*(1/(node.freeSpaceIndex+1e-10))
+}
+
+func (r *ResourceDefragmentation) computeC1(nodeRII float64, candidatePod *v1.Pod, allocCpu, allocMem int64) float64 {
+	podCpu, podMem := getPodRequests(candidatePod)
+
+	podCpuRatio := float64(podCpu) / float64(allocCpu)
+	podMemRatio := float64(podMem) / float64(allocMem)
+
+	podRII := podCpuRatio - podMemRatio
+	maxResourceShare := math.Max(podCpuRatio, podMemRatio)
+
+	return nodeRII * podRII * maxResourceShare
+}
+
+// computeC2 checks migration targets without needing to list target pods
+func (r *ResourceDefragmentation) computeC2(candidatePod *v1.Pod, currentNodeName string, nodeStates map[string]*NodeResourceState) float64 {
+	maxImprovement := -1.0
+	canFitElsewhere := false
+	podCpu, podMem := getPodRequests(candidatePod)
+
+	for nodeName, state := range nodeStates {
+		if nodeName == currentNodeName {
+			continue
+		}
+
+		freeCpu := state.AllocatableCPU - state.RequestedCPU
+		freeMem := state.AllocatableMem - state.RequestedMem
+
+		if freeCpu >= podCpu && freeMem >= podMem {
+			canFitElsewhere = true
+
+			// RII Before Pod Simulation
+			RIIBefore := r.computeRII(state.AllocatableCPU, state.AllocatableMem, state.RequestedCPU, state.RequestedMem)
+
+			// RII After Pod Simulation
+			RIIAfter := r.computeRII(state.AllocatableCPU, state.AllocatableMem, state.RequestedCPU+podCpu, state.RequestedMem+podMem)
+
+			improvement := math.Abs(RIIBefore) - math.Abs(RIIAfter)
+			if improvement > maxImprovement {
+				maxImprovement = improvement
+			}
+		}
+	}
+
+	if !canFitElsewhere {
+		return -999.9
+	}
+
+	return maxImprovement
+}
+
+func (r *ResourceDefragmentation) computeC3(candidatePod *v1.Pod, currentState *NodeResourceState) float64 {
+	allocCpu := float64(currentState.AllocatableCPU)
+	allocMem := float64(currentState.AllocatableMem)
+
+	c := float64(currentState.AllocatableCPU-currentState.RequestedCPU) / allocCpu
+	m := float64(currentState.AllocatableMem-currentState.RequestedMem) / allocMem
+
+	podCpu, podMem := getPodRequests(candidatePod)
+	p_c := float64(podCpu) / allocCpu
+	p_m := float64(podMem) / allocMem
+
+	return (c * p_m) + (m * p_c) + (p_c * p_m)
+}
+
+func (r *ResourceDefragmentation) computeC4(candidatePod *v1.Pod) float64 {
+	if candidatePod.Spec.Priority != nil {
+		return float64(*candidatePod.Spec.Priority)
+	}
+	return 0
+}
+
+func (r *ResourceDefragmentation) topsis(node *v1.Node, pods []*v1.Pod, nodeStates map[string]*NodeResourceState) *v1.Pod {
+	if len(pods) == 0 {
+		return nil
+	}
+
+	weights := []float64{0.30, 0.30, 0.25, 0.15}
+	isBenefit := []bool{true, true, true, false}
+
+	nPods := len(pods)
+	nCriteria := len(weights)
+
+	currentState := nodeStates[node.Name]
+	currentNodeRII := r.computeRII(currentState.AllocatableCPU, currentState.AllocatableMem, currentState.RequestedCPU, currentState.RequestedMem)
+
+	matrix := make([][]float64, nPods)
+	for i, pod := range pods {
+		matrix[i] = []float64{
+			r.computeC1(currentNodeRII, pod, currentState.AllocatableCPU, currentState.AllocatableMem),
+			r.computeC2(pod, node.Name, nodeStates),
+			r.computeC3(pod, currentState),
+			r.computeC4(pod),
+		}
+	}
+
+	// Step 1: Normalize the decision matrix (vector normalization)
+	normalizedMatrix := make([][]float64, nPods)
+	for i := 0; i < nPods; i++ {
+		normalizedMatrix[i] = make([]float64, nCriteria)
+	}
+	for j := 0; j < nCriteria; j++ {
+		var sumSquares float64
+		for i := 0; i < nPods; i++ {
+			sumSquares += matrix[i][j] * matrix[i][j]
+		}
+		normFactor := math.Sqrt(sumSquares)
+		for i := 0; i < nPods; i++ {
+			if normFactor == 0 {
+				normalizedMatrix[i][j] = 0
+			} else {
+				normalizedMatrix[i][j] = matrix[i][j] / normFactor
+			}
+		}
+	}
+
+	// Step 2: Apply weights to the normalized matrix
+	weightedMatrix := make([][]float64, nPods)
+	for i := 0; i < nPods; i++ {
+		weightedMatrix[i] = make([]float64, nCriteria)
+		for j := 0; j < nCriteria; j++ {
+			weightedMatrix[i][j] = normalizedMatrix[i][j] * weights[j]
+		}
+	}
+
+	// Step 3: Determine ideal best and ideal worst solutions
+	idealBest := make([]float64, nCriteria)
+	idealWorst := make([]float64, nCriteria)
+	for j := 0; j < nCriteria; j++ {
+		idealBest[j] = weightedMatrix[0][j]
+		idealWorst[j] = weightedMatrix[0][j]
+		for i := 1; i < nPods; i++ {
+			if isBenefit[j] {
+				if weightedMatrix[i][j] > idealBest[j] {
+					idealBest[j] = weightedMatrix[i][j]
+				}
+				if weightedMatrix[i][j] < idealWorst[j] {
+					idealWorst[j] = weightedMatrix[i][j]
+				}
+			} else {
+				if weightedMatrix[i][j] < idealBest[j] {
+					idealBest[j] = weightedMatrix[i][j]
+				}
+				if weightedMatrix[i][j] > idealWorst[j] {
+					idealWorst[j] = weightedMatrix[i][j]
+				}
+			}
+		}
+	}
+
+	// Step 4: Calculate separation measures
+	dPlus := make([]float64, nPods)
+	dMinus := make([]float64, nPods)
+	for i := 0; i < nPods; i++ {
+		for j := 0; j < nCriteria; j++ {
+			dPlus[i] += math.Pow(weightedMatrix[i][j]-idealBest[j], 2)
+			dMinus[i] += math.Pow(weightedMatrix[i][j]-idealWorst[j], 2)
+		}
+		dPlus[i] = math.Sqrt(dPlus[i])
+		dMinus[i] = math.Sqrt(dMinus[i])
+	}
+
+	// Step 5: Calculate relative closeness and select the best eviction candidate.
+	bestCC := -1.0
+	bestIdx := -1
+	for i := 0; i < nPods; i++ {
+		denom := dPlus[i] + dMinus[i]
+		var cc float64
+		if denom == 0 {
+			cc = 0.5 // equidistant — treat as a valid candidate
+		} else {
+			cc = dMinus[i] / denom
+		}
+		if cc > bestCC {
+			bestCC = cc
+			bestIdx = i
+		}
+	}
+
+	if bestIdx == -1 {
+		return nil
+	}
+	return pods[bestIdx]
+}
