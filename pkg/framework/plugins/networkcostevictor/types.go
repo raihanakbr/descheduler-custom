@@ -18,7 +18,6 @@ package networkcostevictor
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/descheduler/pkg/descheduler/networkcost"
 )
 
 // +k8s:deepcopy-gen=true
@@ -33,8 +32,4 @@ type NetworkCostEvictorArgs struct {
 	// are considered to communicate frequently.
 	// Default: "network-group"
 	NetworkGroupLabelKey string `json:"networkGroupLabelKey,omitempty"`
-
-	// TopologyCosts configures the cost model for topology distances.
-	// If nil, defaults are used.
-	TopologyCosts *networkcost.TopologyCostConfig `json:"topologyCosts,omitempty"`
 }

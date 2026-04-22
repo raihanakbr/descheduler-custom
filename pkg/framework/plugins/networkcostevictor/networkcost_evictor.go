@@ -83,17 +83,18 @@ func (n *NetworkCostEvictor) Filter(pod *v1.Pod) bool {
 //     each candidate node's cost.
 //  5. Allows eviction only if at least one candidate offers lower cost.
 func (n *NetworkCostEvictor) PreEvictionFilter(pod *v1.Pod) bool {
+	n.logger.V(1).Info("NetworkCostEvictor PreEvictionFilter called", "pod", klog.KObj(pod), "node", pod.Spec.NodeName)
+
 	// pods without the network-group label are always allowed (opt-in)
 	groupValue, exists := pod.Labels[n.args.NetworkGroupLabelKey]
 	if !exists || groupValue == "" {
+		n.logger.V(2).Info("Pod has no network-group label, allowing eviction", "pod", klog.KObj(pod))
 		return true
 	}
+	n.logger.V(2).Info("Pod has network-group label", "pod", klog.KObj(pod), "group", groupValue)
 
 	// resolve topology cost config
 	costConfig := networkcost.DefaultTopologyCostConfig()
-	if n.args.TopologyCosts != nil {
-		costConfig = *n.args.TopologyCosts
-	}
 
 	// list all ready nodes as candidates
 	nodes, err := nodeutil.ReadyNodes(

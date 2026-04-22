@@ -30,25 +30,5 @@ func ValidateNetworkCostEvictorArgs(obj runtime.Object) error {
 		return fmt.Errorf("networkGroupLabelKey must not be empty")
 	}
 
-	if args.TopologyCosts != nil {
-		if args.TopologyCosts.SameZone < 0 {
-			return fmt.Errorf("topologyCosts.sameZone must be non-negative, got %d", args.TopologyCosts.SameZone)
-		}
-		if args.TopologyCosts.SameRegion < 0 {
-			return fmt.Errorf("topologyCosts.sameRegion must be non-negative, got %d", args.TopologyCosts.SameRegion)
-		}
-		if args.TopologyCosts.CrossRegion < 0 {
-			return fmt.Errorf("topologyCosts.crossRegion must be non-negative, got %d", args.TopologyCosts.CrossRegion)
-		}
-		if args.TopologyCosts.SameZone > args.TopologyCosts.SameRegion {
-			return fmt.Errorf("topologyCosts.sameZone (%d) must not be greater than sameRegion (%d)",
-				args.TopologyCosts.SameZone, args.TopologyCosts.SameRegion)
-		}
-		if args.TopologyCosts.SameRegion > args.TopologyCosts.CrossRegion {
-			return fmt.Errorf("topologyCosts.sameRegion (%d) must not be greater than crossRegion (%d)",
-				args.TopologyCosts.SameRegion, args.TopologyCosts.CrossRegion)
-		}
-	}
-
 	return nil
 }

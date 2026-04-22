@@ -133,6 +133,7 @@ func FindDependencyPods(
 			klog.V(4).InfoS("Error listing pods on node", "node", klog.KObj(node), "err", err)
 			continue
 		}
+		klog.V(4).InfoS("Scanning node for dependency pods", "node", node.Name, "totalPods", len(podsOnNode), "group", groupValue)
 		for _, p := range podsOnNode {
 			// skip the source pod itself
 			if p.UID == pod.UID {
@@ -143,6 +144,7 @@ func FindDependencyPods(
 			}
 		}
 	}
+	klog.V(2).InfoS("FindDependencyPods result", "pod", klog.KObj(pod), "group", groupValue, "depCount", len(depPods), "nodesScanned", len(nodes))
 	return depPods
 }
 
@@ -169,15 +171,19 @@ func ShouldAllowEviction(
 	// pods without the label are always allowed (opt-in)
 	groupValue, exists := pod.Labels[labelKey]
 	if !exists || groupValue == "" {
+		klog.V(2).InfoS("ShouldAllowEviction: pod has no network-group label, allowing", "pod", klog.KObj(pod))
 		return true
 	}
+
+	klog.V(1).InfoS("ShouldAllowEviction: evaluating pod", "pod", klog.KObj(pod), "group", groupValue, "candidateNodes", len(candidateNodes))
 
 	// find all dependency pods with same group label
 	depPods := FindDependencyPods(pod, labelKey, getPodsAssignedToNode, allNodes)
 	if len(depPods) == 0 {
-		// no dependencies, nothing to worry about
+		klog.V(1).InfoS("ShouldAllowEviction: no dependency pods found, allowing", "pod", klog.KObj(pod), "group", groupValue)
 		return true
 	}
+	klog.V(2).InfoS("ShouldAllowEviction: found dependency pods", "pod", klog.KObj(pod), "depCount", len(depPods))
 
 	// compute cost at current placement
 	currentNode, ok := nodesMap[pod.Spec.NodeName]

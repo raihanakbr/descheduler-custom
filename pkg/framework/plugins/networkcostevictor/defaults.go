@@ -36,8 +36,4 @@ func SetDefaults_NetworkCostEvictorArgs(obj runtime.Object) {
 	if args.NetworkGroupLabelKey == "" {
 		args.NetworkGroupLabelKey = networkcost.DefaultNetworkGroupLabelKey
 	}
-	if args.TopologyCosts == nil {
-		defaultConfig := networkcost.DefaultTopologyCostConfig()
-		args.TopologyCosts = &defaultConfig
-	}
 }
