@@ -34,9 +34,11 @@ import (
 	"sigs.k8s.io/descheduler/pkg/descheduler/evictions"
 	"sigs.k8s.io/descheduler/pkg/descheduler/metricscollector"
 	podutil "sigs.k8s.io/descheduler/pkg/descheduler/pod"
-	"sigs.k8s.io/descheduler/pkg/framework/pluginregistry"
+	"sigs.k8s.io/descheduler/pkg/framework/plugins/networkcostevictor"
 	frameworktypes "sigs.k8s.io/descheduler/pkg/framework/types"
 	"sigs.k8s.io/descheduler/pkg/tracing"
+
+	"sigs.k8s.io/descheduler/pkg/framework/pluginregistry"
 )
 
 // evictorImpl implements the Evictor interface so plugins
@@ -284,6 +286,12 @@ func NewProfile(ctx context.Context, config api.DeschedulerProfile, reg pluginre
 		prometheusClient: hOpts.prometheusClient,
 	}
 
+	// Cross-plugin consistency check: ensure NetworkCostEvictor and
+	// NodeUtilization plugins use the same cost mode when both are active.
+	if err := validateNetworkCostConsistency(config.PluginConfigs); err != nil {
+		return nil, err
+	}
+
 	pluginNames := append(config.Plugins.Deschedule.Enabled, config.Plugins.Balance.Enabled...)
 	pluginNames = append(pluginNames, config.Plugins.Filter.Enabled...)
 	pluginNames = append(pluginNames, config.Plugins.PreEvictionFilter.Enabled...)
@@ -386,4 +394,42 @@ func (d profileImpl) RunBalancePlugins(ctx context.Context, nodes []*v1.Node) *f
 	return &frameworktypes.Status{
 		Err: fmt.Errorf("%v", aggrErr.Error()),
 	}
+}
+
+// validateNetworkCostConsistency ensures that when both NetworkCostEvictor
+// and a NodeUtilization plugin with networkAware are active in the same profile,
+// they use the same cost mode (both topology or both latency).
+//
+// Each plugin is self-contained and works independently when the other is absent.
+// This validation only fires when BOTH layers are active simultaneously.
+func validateNetworkCostConsistency(pluginConfigs []api.PluginConfig) error {
+	var nceMode string // "latency" or "topology" or "" (not present)
+	var nuMode string  // "latency" or "topology" or "" (not present)
+
+	for _, pc := range pluginConfigs {
+		switch pc.Name {
+		case "NetworkCostEvictor":
+			if args, ok := pc.Args.(*networkcostevictor.NetworkCostEvictorArgs); ok {
+				if args.LatencyMetrics != nil {
+					nceMode = "latency"
+				} else {
+					nceMode = "topology"
+				}
+			}
+		// Phase 5 will add LowNodeUtilization and HighNodeUtilization cases here
+		// when the NetworkAware config is implemented.
+		}
+	}
+
+	// Only enforce consistency when BOTH layers are active
+	if nceMode != "" && nuMode != "" && nceMode != nuMode {
+		return fmt.Errorf(
+			"network cost mode mismatch: NetworkCostEvictor uses %s mode "+
+				"but NodeUtilization uses %s mode; "+
+				"both layers must use the same cost mode",
+			nceMode, nuMode,
+		)
+	}
+
+	return nil
 }
