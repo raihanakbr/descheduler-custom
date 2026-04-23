@@ -30,5 +30,19 @@ func ValidateNetworkCostEvictorArgs(obj runtime.Object) error {
 		return fmt.Errorf("networkGroupLabelKey must not be empty")
 	}
 
+	if args.MinBetterCandidatesPercent < 1 || args.MinBetterCandidatesPercent > 100 {
+		return fmt.Errorf("minBetterCandidatesPercent must be between 1 and 100, got %d",
+			args.MinBetterCandidatesPercent)
+	}
+
+	if args.LatencyMetrics != nil {
+		if args.LatencyMetrics.Prometheus == nil {
+			return fmt.Errorf("latencyMetrics.prometheus must be specified when latencyMetrics is set")
+		}
+		if args.LatencyMetrics.Prometheus.Query == "" {
+			return fmt.Errorf("latencyMetrics.prometheus.query must not be empty")
+		}
+	}
+
 	return nil
 }

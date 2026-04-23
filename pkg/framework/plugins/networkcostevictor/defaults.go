@@ -36,4 +36,10 @@ func SetDefaults_NetworkCostEvictorArgs(obj runtime.Object) {
 	if args.NetworkGroupLabelKey == "" {
 		args.NetworkGroupLabelKey = networkcost.DefaultNetworkGroupLabelKey
 	}
+	if args.MinBetterCandidatesPercent == 0 {
+		args.MinBetterCandidatesPercent = networkcost.DefaultMinBetterCandidatesPercent
+	}
+	if args.LatencyMetrics != nil {
+		networkcost.SetDefaultsLatencyMetrics(args.LatencyMetrics)
+	}
 }

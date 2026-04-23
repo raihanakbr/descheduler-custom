@@ -41,9 +41,10 @@ const PluginName = "NetworkCostEvictor"
 // net across all strategies, checking whether evicting a pod would worsen
 // its network communication cost with dependency pods.
 type NetworkCostEvictor struct {
-	logger klog.Logger
-	handle frameworktypes.Handle
-	args   *NetworkCostEvictorArgs
+	logger       klog.Logger
+	handle       frameworktypes.Handle
+	args         *NetworkCostEvictorArgs
+	costProvider networkcost.CostProvider
 }
 
 var _ frameworktypes.EvictorPlugin = &NetworkCostEvictor{}
@@ -56,10 +57,19 @@ func New(ctx context.Context, args runtime.Object, handle frameworktypes.Handle)
 	}
 	logger := klog.FromContext(ctx).WithValues("plugin", PluginName)
 
+	// Build the CostProvider based on config
+	provider, err := networkcost.BuildCostProvider(
+		ctx, networkCostArgs.LatencyMetrics, handle.PrometheusClient(),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build cost provider: %w", err)
+	}
+
 	return &NetworkCostEvictor{
-		logger: logger,
-		handle: handle,
-		args:   networkCostArgs,
+		logger:       logger,
+		handle:       handle,
+		args:         networkCostArgs,
+		costProvider: provider,
 	}, nil
 }
 
@@ -81,7 +91,7 @@ func (n *NetworkCostEvictor) Filter(pod *v1.Pod) bool {
 //  3. Finds all dependency pods with the same network-group label value.
 //  4. Computes the current communication cost and compares it against
 //     each candidate node's cost.
-//  5. Allows eviction only if at least one candidate offers lower cost.
+//  5. Allows eviction only if minBetterCandidatesPercent% of candidates are better.
 func (n *NetworkCostEvictor) PreEvictionFilter(pod *v1.Pod) bool {
 	n.logger.V(1).Info("NetworkCostEvictor PreEvictionFilter called", "pod", klog.KObj(pod), "node", pod.Spec.NodeName)
 
@@ -92,9 +102,6 @@ func (n *NetworkCostEvictor) PreEvictionFilter(pod *v1.Pod) bool {
 		return true
 	}
 	n.logger.V(2).Info("Pod has network-group label", "pod", klog.KObj(pod), "group", groupValue)
-
-	// resolve topology cost config
-	costConfig := networkcost.DefaultTopologyCostConfig()
 
 	// list all ready nodes as candidates
 	nodes, err := nodeutil.ReadyNodes(
@@ -121,6 +128,8 @@ func (n *NetworkCostEvictor) PreEvictionFilter(pod *v1.Pod) bool {
 		n.handle.GetPodsAssignedToNodeFunc(),
 		nodes,
 		nodesMap,
-		costConfig,
+		n.costProvider,
+		n.args.MinBetterCandidatesPercent,
 	)
 }
+

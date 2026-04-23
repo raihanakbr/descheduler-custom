@@ -18,6 +18,7 @@ package networkcostevictor
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/descheduler/pkg/descheduler/networkcost"
 )
 
 // +k8s:deepcopy-gen=true
@@ -32,4 +33,17 @@ type NetworkCostEvictorArgs struct {
 	// are considered to communicate frequently.
 	// Default: "network-group"
 	NetworkGroupLabelKey string `json:"networkGroupLabelKey,omitempty"`
+
+	// LatencyMetrics configures real-time latency collection from Prometheus
+	// (via Goldpinger). When set, the plugin uses measured node-to-node latency
+	// instead of hardcoded topology costs.
+	// When nil, hardcoded topology costs (1/5/10) are used.
+	LatencyMetrics *networkcost.LatencyMetricsConfig `json:"latencyMetrics,omitempty"`
+
+	// MinBetterCandidatesPercent is the minimum percentage of candidate nodes
+	// that must offer lower network cost than the current node before eviction
+	// is allowed. Higher values increase the probability that the scheduler
+	// places the pod on a better node, but may block more evictions.
+	// Default: 50, Range: 1-100
+	MinBetterCandidatesPercent int `json:"minBetterCandidatesPercent,omitempty"`
 }
