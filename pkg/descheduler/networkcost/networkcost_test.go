@@ -59,14 +59,15 @@ func makePod(name, namespace, nodeName, networkGroup string) *v1.Pod {
 	}
 }
 
-func TestTopologyCost(t *testing.T) {
+func TestTopologyCostProvider(t *testing.T) {
+	provider := &TopologyCostProvider{}
 	config := DefaultTopologyCostConfig()
 
 	tests := []struct {
 		name     string
 		nodeA    *v1.Node
 		nodeB    *v1.Node
-		expected int
+		expected float64
 	}{
 		{
 			name:     "same node",
@@ -108,76 +109,57 @@ func TestTopologyCost(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cost := TopologyCost(tt.nodeA, tt.nodeB, config)
+			cost := provider.Cost(tt.nodeA, tt.nodeB)
 			if cost != tt.expected {
-				t.Errorf("TopologyCost() = %d, want %d", cost, tt.expected)
+				t.Errorf("TopologyCostProvider.Cost() = %v, want %v", cost, tt.expected)
 			}
 		})
 	}
 }
 
-func TestComputePlacementCost(t *testing.T) {
-	config := DefaultTopologyCostConfig()
-
-	nodeA := makeNode("node-a", "us-east-1", "us-east-1a")
-	nodeB := makeNode("node-b", "us-east-1", "us-east-1b")
-	nodeC := makeNode("node-c", "eu-west-1", "eu-west-1a")
-
-	nodesMap := map[string]*v1.Node{
-		"node-a": nodeA,
-		"node-b": nodeB,
-		"node-c": nodeC,
+func TestLatencyCostProvider(t *testing.T) {
+	matrix := LatencyMatrix{
+		"node-a": {"node-b": 0.002, "node-c": 0.008},
+		"node-b": {"node-a": 0.002, "node-c": 0.010},
 	}
-
-	depPods := []*v1.Pod{
-		makePod("dep-1", "default", "node-a", "group-1"),
-		makePod("dep-2", "default", "node-b", "group-1"),
+	provider := &LatencyCostProvider{
+		Matrix:   matrix,
+		Fallback: &TopologyCostProvider{},
 	}
 
 	tests := []struct {
-		name          string
-		candidateNode *v1.Node
-		expected      int
+		name     string
+		nodeA    *v1.Node
+		nodeB    *v1.Node
+		expected float64
 	}{
 		{
-			name:          "candidate in same zone as dep-1, same region as dep-2",
-			candidateNode: nodeA,
-			// cost to dep-1 on node-a: 0 (same node), cost to dep-2 on node-b: 5 (same region)
-			expected: 0 + config.SameRegion,
+			name:     "same node",
+			nodeA:    makeNode("node-a", "us-east-1", "us-east-1a"),
+			nodeB:    makeNode("node-a", "us-east-1", "us-east-1a"),
+			expected: 0,
 		},
 		{
-			name:          "candidate in different region from both",
-			candidateNode: nodeC,
-			// cost to dep-1 on node-a: 10, cost to dep-2 on node-b: 10
-			expected: config.CrossRegion + config.CrossRegion,
+			name:     "pair in matrix",
+			nodeA:    makeNode("node-a", "us-east-1", "us-east-1a"),
+			nodeB:    makeNode("node-b", "us-east-1", "us-east-1b"),
+			expected: 0.002,
+		},
+		{
+			name:     "pair not in matrix, fallback to topology",
+			nodeA:    makeNode("node-c", "eu-west-1", "eu-west-1a"),
+			nodeB:    makeNode("node-d", "us-east-1", "us-east-1a"),
+			expected: DefaultTopologyCostConfig().CrossRegion,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cost := ComputePlacementCost(tt.candidateNode, depPods, nodesMap, config)
+			cost := provider.Cost(tt.nodeA, tt.nodeB)
 			if cost != tt.expected {
-				t.Errorf("ComputePlacementCost() = %d, want %d", cost, tt.expected)
+				t.Errorf("LatencyCostProvider.Cost() = %v, want %v", cost, tt.expected)
 			}
 		})
-	}
-}
-
-func TestComputePlacementCostMissingNode(t *testing.T) {
-	config := DefaultTopologyCostConfig()
-	nodeA := makeNode("node-a", "us-east-1", "us-east-1a")
-	nodesMap := map[string]*v1.Node{
-		"node-a": nodeA,
-	}
-
-	// dep pod on a node that is NOT in our map
-	depPods := []*v1.Pod{
-		makePod("dep-1", "default", "node-unknown", "group-1"),
-	}
-
-	cost := ComputePlacementCost(nodeA, depPods, nodesMap, config)
-	if cost != config.CrossRegion {
-		t.Errorf("Expected CrossRegion cost for unknown node, got %d", cost)
 	}
 }
 
@@ -191,7 +173,6 @@ func TestFindDependencyPods(t *testing.T) {
 	pod4 := makePod("pod-4", "default", "node-b", "group-2")
 	pod5 := makePod("pod-5", "default", "node-b", "")
 
-	// mock GetPodsAssignedToNodeFunc
 	getPodsAssigned := podutil.GetPodsAssignedToNodeFunc(func(nodeName string, filterFunc podutil.FilterFunc) ([]*v1.Pod, error) {
 		podsByNode := map[string][]*v1.Pod{
 			"node-a": {pod1, pod2},
@@ -220,7 +201,7 @@ func TestFindDependencyPods(t *testing.T) {
 		{
 			name:          "pod with group-1 finds 2 deps (excludes self)",
 			pod:           pod1,
-			expectedCount: 2, // pod2 and pod3 (not pod1 itself)
+			expectedCount: 2,
 		},
 		{
 			name:          "pod with group-2 finds 0 deps (only one in group)",
@@ -245,39 +226,22 @@ func TestFindDependencyPods(t *testing.T) {
 }
 
 func TestShouldAllowEviction(t *testing.T) {
-	config := DefaultTopologyCostConfig()
+	provider := &TopologyCostProvider{}
 
-	// Nodes:
-	// node-a: us-east-1 / us-east-1a
-	// node-b: us-east-1 / us-east-1b
-	// node-c: eu-west-1 / eu-west-1a
 	nodeA := makeNode("node-a", "us-east-1", "us-east-1a")
 	nodeB := makeNode("node-b", "us-east-1", "us-east-1b")
 	nodeC := makeNode("node-c", "eu-west-1", "eu-west-1a")
 
 	nodesMap := map[string]*v1.Node{
-		"node-a": nodeA,
-		"node-b": nodeB,
-		"node-c": nodeC,
+		"node-a": nodeA, "node-b": nodeB, "node-c": nodeC,
 	}
-
 	allNodes := []*v1.Node{nodeA, nodeB, nodeC}
 
-	// Pods:
-	// pod-1 (group-1) on node-c (eu-west-1)
-	// dep-1 (group-1) on node-a (us-east-1a)
-	// dep-2 (group-1) on node-b (us-east-1b)
 	pod1 := makePod("pod-1", "default", "node-c", "group-1")
 	dep1 := makePod("dep-1", "default", "node-a", "group-1")
 	dep2 := makePod("dep-2", "default", "node-b", "group-1")
-
-	// pod-alone (group-alone) on node-a, no other pods in same group
 	podAlone := makePod("pod-alone", "default", "node-a", "group-alone")
-
-	// pod-no-label: no network-group label
 	podNoLabel := makePod("pod-no-label", "default", "node-a", "")
-
-	// pod-optimal (group-opt) on node-a, deps all in same zone
 	podOptimal := makePod("pod-optimal", "default", "node-a", "group-opt")
 	depOpt1 := makePod("dep-opt-1", "default", "node-a", "group-opt")
 
@@ -301,44 +265,51 @@ func TestShouldAllowEviction(t *testing.T) {
 	})
 
 	tests := []struct {
-		name           string
-		pod            *v1.Pod
-		candidateNodes []*v1.Node
-		expected       bool
+		name             string
+		pod              *v1.Pod
+		candidateNodes   []*v1.Node
+		minBetterPercent int
+		expected         bool
 	}{
 		{
-			name:           "pod without network-group label → allow",
-			pod:            podNoLabel,
-			candidateNodes: []*v1.Node{nodeB, nodeC},
-			expected:       true,
+			name:             "pod without network-group label → allow",
+			pod:              podNoLabel,
+			candidateNodes:   []*v1.Node{nodeB, nodeC},
+			minBetterPercent: DefaultMinBetterCandidatesPercent,
+			expected:         true,
 		},
 		{
-			name:           "pod with no dependency pods → allow",
-			pod:            podAlone,
-			candidateNodes: []*v1.Node{nodeB, nodeC},
-			expected:       true,
+			name:             "pod with no dependency pods → allow",
+			pod:              podAlone,
+			candidateNodes:   []*v1.Node{nodeB, nodeC},
+			minBetterPercent: DefaultMinBetterCandidatesPercent,
+			expected:         true,
 		},
 		{
-			name: "pod in eu-west, deps in us-east → candidate in us-east has lower cost → allow",
+			name: "pod in eu-west, deps in us-east → both candidates better → allow",
 			pod:  pod1,
-			// current cost: pod1 on node-c, dep1 on node-a = 10, dep2 on node-b = 10 → total 20
-			// candidate node-a: dep1 on node-a = 0, dep2 on node-b = 5 → total 5 < 20
-			candidateNodes: []*v1.Node{nodeA, nodeB},
-			expected:       true,
+			// current cost: 20 (cross-region to both deps)
+			// node-a: 0+5=5 < 20 ✓, node-b: 5+0=5 < 20 ✓
+			// 2/2 better (100%) >= 50% → allow
+			candidateNodes:   []*v1.Node{nodeA, nodeB},
+			minBetterPercent: DefaultMinBetterCandidatesPercent,
+			expected:         true,
 		},
 		{
 			name: "pod already optimal, only worse candidates → block",
 			pod:  podOptimal,
-			// current cost: podOptimal on node-a, depOpt1 on node-a = 0 → total 0
-			// candidate node-c: depOpt1 on node-a = 10 → total 10 > 0
-			candidateNodes: []*v1.Node{nodeC},
-			expected:       false,
+			// current cost: 0 (same node as dep)
+			// node-c: 10, NOT < 0 → 0/1 better → block
+			candidateNodes:   []*v1.Node{nodeC},
+			minBetterPercent: DefaultMinBetterCandidatesPercent,
+			expected:         false,
 		},
 		{
-			name:           "no candidate nodes → block",
-			pod:            pod1,
-			candidateNodes: []*v1.Node{},
-			expected:       false,
+			name:             "no candidate nodes → block",
+			pod:              pod1,
+			candidateNodes:   []*v1.Node{},
+			minBetterPercent: DefaultMinBetterCandidatesPercent,
+			expected:         false,
 		},
 	}
 
@@ -346,7 +317,96 @@ func TestShouldAllowEviction(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := ShouldAllowEviction(
 				tt.pod, DefaultNetworkGroupLabelKey, tt.candidateNodes,
-				getPodsAssigned, allNodes, nodesMap, config,
+				getPodsAssigned, allNodes, nodesMap, provider,
+				tt.minBetterPercent,
+			)
+			if result != tt.expected {
+				t.Errorf("ShouldAllowEviction() = %v, want %v", result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestMinBetterCandidatesPercent(t *testing.T) {
+	provider := &TopologyCostProvider{}
+
+	nodeA := makeNode("node-a", "us-east-1", "us-east-1a")
+	nodeB := makeNode("node-b", "us-east-1", "us-east-1b")
+	nodeC := makeNode("node-c", "eu-west-1", "eu-west-1a")
+	nodeD := makeNode("node-d", "eu-west-1", "eu-west-1b")
+	nodeE := makeNode("node-e", "ap-south-1", "ap-south-1a")
+
+	pod := makePod("pod-1", "default", "node-c", "group-1")
+	dep1 := makePod("dep-1", "default", "node-a", "group-1")
+
+	nodesMap := map[string]*v1.Node{
+		"node-a": nodeA, "node-b": nodeB, "node-c": nodeC,
+		"node-d": nodeD, "node-e": nodeE,
+	}
+	allNodes := []*v1.Node{nodeA, nodeB, nodeC, nodeD, nodeE}
+
+	getPodsAssigned := podutil.GetPodsAssignedToNodeFunc(func(nodeName string, filterFunc podutil.FilterFunc) ([]*v1.Pod, error) {
+		podsByNode := map[string][]*v1.Pod{
+			"node-a": {dep1},
+			"node-b": {},
+			"node-c": {pod},
+			"node-d": {},
+			"node-e": {},
+		}
+		return podsByNode[nodeName], nil
+	})
+
+	// Current cost: pod on node-c, dep1 on node-a → CrossRegion = 10
+	// node-a: dep1 same node = 0  → BETTER (0 <= 10)
+	// node-b: dep1 same region = 5 → BETTER (5 <= 10)
+	// node-d: dep1 cross region = 10 → EQUAL (10 <= 10, counts with <=)
+	// node-e: dep1 cross region = 10 → EQUAL (10 <= 10, counts with <=)
+	// 4 out of 4 candidates satisfy <= (100%)
+
+	tests := []struct {
+		name             string
+		candidates       []*v1.Node
+		minBetterPercent int
+		expected         bool
+	}{
+		{
+			name:             "50% threshold, 4/4 satisfy <= → allow",
+			candidates:       []*v1.Node{nodeA, nodeB, nodeD, nodeE},
+			minBetterPercent: 50,
+			expected:         true,
+		},
+		{
+			name:             "75% threshold, 4/4 satisfy <= → allow",
+			candidates:       []*v1.Node{nodeA, nodeB, nodeD, nodeE},
+			minBetterPercent: 75,
+			expected:         true,
+		},
+		{
+			name:             "25% threshold, 4/4 satisfy <= → allow",
+			candidates:       []*v1.Node{nodeA, nodeB, nodeD, nodeE},
+			minBetterPercent: 25,
+			expected:         true,
+		},
+		{
+			name:             "small cluster: 1 candidate better, 50% → allow (floor of 1)",
+			candidates:       []*v1.Node{nodeA},
+			minBetterPercent: 50,
+			expected:         true,
+		},
+		{
+			name:             "equal cost counts with <=, 2/2 satisfy → allow",
+			candidates:       []*v1.Node{nodeD, nodeE},
+			minBetterPercent: 50,
+			expected:         true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := ShouldAllowEviction(
+				pod, DefaultNetworkGroupLabelKey, tt.candidates,
+				getPodsAssigned, allNodes, nodesMap, provider,
+				tt.minBetterPercent,
 			)
 			if result != tt.expected {
 				t.Errorf("ShouldAllowEviction() = %v, want %v", result, tt.expected)
