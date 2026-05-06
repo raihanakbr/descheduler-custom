@@ -127,18 +127,23 @@ func TestResourceDefragmentation(t *testing.T) {
 		},
 		{
 			// TOPSIS must distinguish the CPU-heavy parasite from the innocent pod and
-			// evict only the one causing fragmentation (higher C1 and C3 scores).
+			// evict only the one causing fragmentation (higher C1 and C3 scores). The
+			// non-origin target is memory-heavy, so simulating the CPU-heavy pod there
+			// improves the projected real-usage/request score instead of just moving
+			// fragmentation from one node to another.
 			description: "fragmented node with CPU-heavy pod: TOPSIS selects the right pod to evict",
-			args:        &ResourceDefragmentationArgs{ImbalanceThreshold: 0.3, MaxEvictions: 5},
+			args:        &ResourceDefragmentationArgs{ImbalanceThreshold: 0.5, MaxEvictions: 5},
 			nodes: []*v1.Node{
 				buildTestNode("node-sick", withNodeCapacity("2000m", "4Gi")),
-				buildTestNode("node-healthy", withNodeCapacity("2000m", "4Gi")), // has room to receive pods
+				buildTestNode("node-healthy", withNodeCapacity("4000m", "8Gi")), // has room to receive pods
 			},
 			pods: []*v1.Pod{
 				// CPU-heavy pod: rCPU contribution is large, rMem is tiny → high C1
 				buildTestPodForNode("pod-cpu-parasite", "node-sick", withPodRequests("1600m", "200Mi")),
 				// Innocent pod: balanced usage → should NOT be evicted
 				buildTestPodForNode("pod-innocent", "node-sick", withPodRequests("200m", "1Gi")),
+				// Target-side complementary load lets the feasibility guard project an improvement.
+				buildTestPodForNode("pod-target-mem-heavy", "node-healthy", withPodRequests("200m", "4Gi")),
 			},
 			expectedEvictedPodCount: 1,
 			expectedEvictedPodName:  "pod-cpu-parasite",
@@ -226,17 +231,21 @@ func TestResourceDefragmentationUsesMetricsServerUsage(t *testing.T) {
 	nodeA := buildTestNode("node-a", withNodeCapacity("2000m", "4Gi"))
 	nodeB := buildTestNode("node-b", withNodeCapacity("4000m", "8Gi"))
 	pod := buildTestPodForNode("pod-real-cpu-heavy", "node-a", withPodRequests("1000m", "2Gi"))
+	podB := buildTestPodForNode("pod-target-mem-heavy", "node-b", withPodRequests("500m", "2Gi"))
 
-	fakeClient := fake.NewSimpleClientset(nodeA, nodeB, pod)
+	fakeClient := fake.NewSimpleClientset(nodeA, nodeB, pod, podB)
 	metricsClient := fakemetricsclient.NewSimpleClientset()
 	if err := metricsClient.Tracker().Create(testNodesGVR, test.BuildNodeMetrics("node-a", 1800, 200*1024*1024), ""); err != nil {
 		t.Fatalf("failed creating node-a metrics: %v", err)
 	}
-	if err := metricsClient.Tracker().Create(testNodesGVR, test.BuildNodeMetrics("node-b", 0, 0), ""); err != nil {
+	if err := metricsClient.Tracker().Create(testNodesGVR, test.BuildNodeMetrics("node-b", 200, 6*1024*1024*1024), ""); err != nil {
 		t.Fatalf("failed creating node-b metrics: %v", err)
 	}
 	if err := metricsClient.Tracker().Create(testPodsGVR, test.BuildPodMetrics("pod-real-cpu-heavy", 1800, 200*1024*1024), "default"); err != nil {
 		t.Fatalf("failed creating pod metrics: %v", err)
+	}
+	if err := metricsClient.Tracker().Create(testPodsGVR, test.BuildPodMetrics("pod-target-mem-heavy", 200, 6*1024*1024*1024), "default"); err != nil {
+		t.Fatalf("failed creating pod-b metrics: %v", err)
 	}
 
 	sharedInformerFactory := informers.NewSharedInformerFactory(fakeClient, 0)

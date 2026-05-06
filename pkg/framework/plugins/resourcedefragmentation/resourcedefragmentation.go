@@ -356,7 +356,6 @@ func (r *ResourceDefragmentation) evaluateFeasibleTargets(ctx context.Context, c
 	}
 	originBefore := math.Abs(r.computeRII(originState.AllocatableCPU, originState.AllocatableMem, originState.UsedCPU, originState.UsedMem))
 	originAfter := math.Abs(r.computeRII(originState.AllocatableCPU, originState.AllocatableMem, originState.UsedCPU-podUsedCpu, originState.UsedMem-podUsedMem))
-	originImprovement := originBefore - originAfter
 
 	for nodeName, state := range nodeStates {
 		if nodeName == currentNodeName {
