@@ -23,6 +23,7 @@ import (
 	"sort"
 
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/klog/v2"
@@ -49,6 +50,8 @@ type NodeResourceState struct {
 	AllocatableMem int64
 	RequestedCPU   int64
 	RequestedMem   int64
+	UsedCPU        int64
+	UsedMem        int64
 }
 
 type fragmentedNode struct {
@@ -127,20 +130,39 @@ func (r *ResourceDefragmentation) Balance(ctx context.Context, nodes []*v1.Node)
 			continue
 		}
 
+		usedCpu, usedMem := reqCpu, reqMem
+		usageSource := "requests"
+		if r.handle.MetricsCollector() != nil {
+			if !r.handle.MetricsCollector().HasSynced() {
+				if err := r.handle.MetricsCollector().Collect(ctx); err != nil {
+					logger.Error(err, "Unable to collect metrics-server node usage, falling back to requests", "node", node.Name)
+				}
+			}
+			if nodeUsage, err := r.handle.MetricsCollector().NodeUsage(node); err == nil {
+				usedCpu = nodeUsage[v1.ResourceCPU].MilliValue()
+				usedMem = nodeUsage[v1.ResourceMemory].Value()
+				usageSource = "metrics-server"
+			} else {
+				logger.Error(err, "Unable to read metrics-server node usage, falling back to requests", "node", node.Name)
+			}
+		}
+
 		nodeStates[node.Name] = &NodeResourceState{
 			AllocatableCPU: allocCpu,
 			AllocatableMem: allocMem,
 			RequestedCPU:   reqCpu,
 			RequestedMem:   reqMem,
+			UsedCPU:        usedCpu,
+			UsedMem:        usedMem,
 		}
 
-		imbalanceIndex := r.computeRII(allocCpu, allocMem, reqCpu, reqMem)
-		logger.V(2).Info("Node imbalance index", "node", node.Name, "imbalanceIndex", imbalanceIndex)
+		imbalanceIndex := r.computeRII(allocCpu, allocMem, usedCpu, usedMem)
+		logger.V(2).Info("Node imbalance index", "node", node.Name, "imbalanceIndex", imbalanceIndex, "usageSource", usageSource)
 
 		if math.Abs(imbalanceIndex) > r.args.ImbalanceThreshold {
-			logger.V(1).Info("Node is considered fragmented", "node", node.Name, "imbalanceIndex", imbalanceIndex)
+			logger.V(1).Info("Node is considered fragmented", "node", node.Name, "imbalanceIndex", imbalanceIndex, "usageSource", usageSource)
 
-			fsi := r.computeFSI(allocCpu, allocMem, reqCpu, reqMem)
+			fsi := r.computeFSI(allocCpu, allocMem, usedCpu, usedMem)
 			fn := fragmentedNode{
 				node:           node,
 				pods:           pods,
@@ -163,9 +185,17 @@ func (r *ResourceDefragmentation) Balance(ctx context.Context, nodes []*v1.Node)
 		fn := fragmentedNodes[idx]
 		logger.V(1).Info("Attempting eviction on fragmented node", "node", fn.node.Name, "imbalanceIndex", fn.imbalanceIndex, "iteration", iteration+1)
 
-		pod := r.topsis(fn.node, fn.pods, nodeStates)
+		pod := r.topsis(ctx, fn.node, fn.pods, nodeStates)
 		if pod == nil {
-			logger.V(1).Info("TOPSIS returned no candidate, skipping node", "node", fn.node.Name)
+			logger.V(1).Info("TOPSIS returned no candidate, skipping node", "node", fn.node.Name, "skippedReason", "no-feasible-target-or-no-candidate")
+			idx++
+			continue
+		}
+
+		decision := r.evaluateFeasibleTargets(ctx, pod, fn.node.Name, nodeStates)
+		logger.V(1).Info("Resource defragmentation eviction decision", "pod", klog.KObj(pod), "originNode", fn.node.Name, "feasibleTargets", decision.targetNames, "bestProjectedScoreImprovement", decision.bestImprovement, "evict", decision.canEvict)
+		if !decision.canEvict {
+			logger.V(1).Info("Skipping candidate before eviction", "pod", klog.KObj(pod), "originNode", fn.node.Name, "skippedReason", decision.reason, "feasibleTargets", decision.targetNames)
 			idx++
 			continue
 		}
@@ -190,12 +220,20 @@ func (r *ResourceDefragmentation) Balance(ctx context.Context, nodes []*v1.Node)
 		}
 
 		// Eviction succeeded — update our caches and re-evaluate this node.
+		// TODO(thesis): add a post-reschedule observation hook for moved/returned/pending/latency.
 		evictedCpu, evictedMem := getPodRequests(pod)
+		evictedUsedCpu, evictedUsedMem, _, usageErr := r.getPodUsage(ctx, pod)
+		if usageErr != nil {
+			logger.Error(usageErr, "Unable to read pod usage after eviction; falling back to requests for cache update", "pod", klog.KObj(pod))
+			evictedUsedCpu, evictedUsedMem = evictedCpu, evictedMem
+		}
 
 		// Update the global node state map dynamically
 		if state, exists := nodeStates[fn.node.Name]; exists {
 			state.RequestedCPU -= evictedCpu
 			state.RequestedMem -= evictedMem
+			state.UsedCPU -= evictedUsedCpu
+			state.UsedMem -= evictedUsedMem
 		}
 
 		// Explicitly exclude the evicted pod from the current node's pod list
@@ -209,7 +247,7 @@ func (r *ResourceDefragmentation) Balance(ctx context.Context, nodes []*v1.Node)
 
 		// Recalculate node imbalance based on updated cache
 		currentState := nodeStates[fn.node.Name]
-		newImbalance := r.computeRII(currentState.AllocatableCPU, currentState.AllocatableMem, currentState.RequestedCPU, currentState.RequestedMem)
+		newImbalance := r.computeRII(currentState.AllocatableCPU, currentState.AllocatableMem, currentState.UsedCPU, currentState.UsedMem)
 
 		if math.Abs(newImbalance) <= r.args.ImbalanceThreshold {
 			logger.V(1).Info("Node no longer fragmented, removing from list", "node", fn.node.Name)
@@ -237,6 +275,24 @@ func getPodRequests(pod *v1.Pod) (cpu int64, mem int64) {
 	return cpu, mem
 }
 
+func (r *ResourceDefragmentation) getPodUsage(ctx context.Context, pod *v1.Pod) (cpu int64, mem int64, source string, err error) {
+	if r.handle.MetricsCollector() == nil {
+		cpu, mem = getPodRequests(pod)
+		return cpu, mem, "requests", nil
+	}
+
+	podMetrics, err := r.handle.MetricsCollector().MetricsClient().MetricsV1beta1().PodMetricses(pod.Namespace).Get(ctx, pod.Name, metav1.GetOptions{})
+	if err != nil {
+		return 0, 0, "metrics-server", err
+	}
+
+	for _, container := range podMetrics.Containers {
+		cpu += container.Usage.Cpu().MilliValue()
+		mem += container.Usage.Memory().Value()
+	}
+	return cpu, mem, "metrics-server", nil
+}
+
 // computeRII calculates the Resource Imbalance Index for a node purely mathematically
 func (r *ResourceDefragmentation) computeRII(allocCpu, allocMem, reqCpu, reqMem int64) float64 {
 	rCPU := float64(reqCpu) / float64(allocCpu)
@@ -256,8 +312,12 @@ func (r *ResourceDefragmentation) computePriorityIndex(node *fragmentedNode) flo
 	return wp*math.Abs(node.imbalanceIndex) + (1-wp)*(1/(node.freeSpaceIndex+1e-10))
 }
 
-func (r *ResourceDefragmentation) computeC1(nodeRII float64, candidatePod *v1.Pod, allocCpu, allocMem int64) float64 {
-	podCpu, podMem := getPodRequests(candidatePod)
+func (r *ResourceDefragmentation) computeC1(ctx context.Context, nodeRII float64, candidatePod *v1.Pod, allocCpu, allocMem int64) float64 {
+	podCpu, podMem, _, err := r.getPodUsage(ctx, candidatePod)
+	if err != nil {
+		r.logger.Error(err, "Unable to read pod usage for C1; falling back to requests", "pod", klog.KObj(candidatePod))
+		podCpu, podMem = getPodRequests(candidatePod)
+	}
 
 	podCpuRatio := float64(podCpu) / float64(allocCpu)
 	podMemRatio := float64(podMem) / float64(allocMem)
@@ -268,11 +328,35 @@ func (r *ResourceDefragmentation) computeC1(nodeRII float64, candidatePod *v1.Po
 	return nodeRII * podRII * maxResourceShare
 }
 
-// computeC2 checks migration targets without needing to list target pods
-func (r *ResourceDefragmentation) computeC2(candidatePod *v1.Pod, currentNodeName string, nodeStates map[string]*NodeResourceState) float64 {
-	maxImprovement := -1.0
-	canFitElsewhere := false
+type targetFeasibilityDecision struct {
+	canEvict        bool
+	reason          string
+	targetNames     []string
+	bestImprovement float64
+}
+
+// evaluateFeasibleTargets is the pre-eviction safety guard for the default scheduler:
+// a target must be non-origin, fit by Kubernetes resource requests, and improve the
+// real-usage-aware projected imbalance score. We do not mutate affinity/nodeName;
+// this only prevents evictions that would likely become Pending under request-based scheduling.
+func (r *ResourceDefragmentation) evaluateFeasibleTargets(ctx context.Context, candidatePod *v1.Pod, currentNodeName string, nodeStates map[string]*NodeResourceState) targetFeasibilityDecision {
+	decision := targetFeasibilityDecision{reason: "no-non-origin-request-feasible-target", bestImprovement: -1.0}
 	podCpu, podMem := getPodRequests(candidatePod)
+	podUsedCpu, podUsedMem, usageSource, err := r.getPodUsage(ctx, candidatePod)
+	if err != nil {
+		r.logger.Error(err, "Unable to read pod usage for feasibility guard; falling back to requests", "pod", klog.KObj(candidatePod))
+		podUsedCpu, podUsedMem = podCpu, podMem
+		usageSource = "requests-fallback"
+	}
+
+	originState, ok := nodeStates[currentNodeName]
+	if !ok {
+		decision.reason = "missing-origin-state"
+		return decision
+	}
+	originBefore := math.Abs(r.computeRII(originState.AllocatableCPU, originState.AllocatableMem, originState.UsedCPU, originState.UsedMem))
+	originAfter := math.Abs(r.computeRII(originState.AllocatableCPU, originState.AllocatableMem, originState.UsedCPU-podUsedCpu, originState.UsedMem-podUsedMem))
+	originImprovement := originBefore - originAfter
 
 	for nodeName, state := range nodeStates {
 		if nodeName == currentNodeName {
@@ -282,37 +366,52 @@ func (r *ResourceDefragmentation) computeC2(candidatePod *v1.Pod, currentNodeNam
 		freeCpu := state.AllocatableCPU - state.RequestedCPU
 		freeMem := state.AllocatableMem - state.RequestedMem
 
-		if freeCpu >= podCpu && freeMem >= podMem {
-			canFitElsewhere = true
+		if freeCpu < podCpu || freeMem < podMem {
+			continue
+		}
 
-			// RII Before Pod Simulation
-			RIIBefore := r.computeRII(state.AllocatableCPU, state.AllocatableMem, state.RequestedCPU, state.RequestedMem)
-
-			// RII After Pod Simulation
-			RIIAfter := r.computeRII(state.AllocatableCPU, state.AllocatableMem, state.RequestedCPU+podCpu, state.RequestedMem+podMem)
-
-			improvement := math.Abs(RIIBefore) - math.Abs(RIIAfter)
-			if improvement > maxImprovement {
-				maxImprovement = improvement
-			}
+		decision.targetNames = append(decision.targetNames, nodeName)
+		targetBefore := math.Abs(r.computeRII(state.AllocatableCPU, state.AllocatableMem, state.UsedCPU, state.UsedMem))
+		targetAfter := math.Abs(r.computeRII(state.AllocatableCPU, state.AllocatableMem, state.UsedCPU+podUsedCpu, state.UsedMem+podUsedMem))
+		improvement := (originBefore + targetBefore) - (originAfter + targetAfter)
+		if improvement > decision.bestImprovement {
+			decision.bestImprovement = improvement
 		}
 	}
 
-	if !canFitElsewhere {
-		return -999.9
+	if len(decision.targetNames) == 0 {
+		return decision
 	}
-
-	return maxImprovement
+	decision.reason = "no-positive-projected-score-improvement"
+	if decision.bestImprovement > 0 {
+		decision.canEvict = true
+		decision.reason = "request-feasible-and-score-improves"
+	}
+	r.logger.V(2).Info("Evaluated feasible targets", "pod", klog.KObj(candidatePod), "originNode", currentNodeName, "usageSource", usageSource, "feasibleTargets", decision.targetNames, "bestProjectedScoreImprovement", decision.bestImprovement, "decision", decision.reason)
+	return decision
 }
 
-func (r *ResourceDefragmentation) computeC3(candidatePod *v1.Pod, currentState *NodeResourceState) float64 {
+// computeC2 scores the best feasible migration target.
+func (r *ResourceDefragmentation) computeC2(ctx context.Context, candidatePod *v1.Pod, currentNodeName string, nodeStates map[string]*NodeResourceState) float64 {
+	decision := r.evaluateFeasibleTargets(ctx, candidatePod, currentNodeName, nodeStates)
+	if !decision.canEvict {
+		return -999.9
+	}
+	return decision.bestImprovement
+}
+
+func (r *ResourceDefragmentation) computeC3(ctx context.Context, candidatePod *v1.Pod, currentState *NodeResourceState) float64 {
 	allocCpu := float64(currentState.AllocatableCPU)
 	allocMem := float64(currentState.AllocatableMem)
 
-	c := float64(currentState.AllocatableCPU-currentState.RequestedCPU) / allocCpu
-	m := float64(currentState.AllocatableMem-currentState.RequestedMem) / allocMem
+	c := float64(currentState.AllocatableCPU-currentState.UsedCPU) / allocCpu
+	m := float64(currentState.AllocatableMem-currentState.UsedMem) / allocMem
 
-	podCpu, podMem := getPodRequests(candidatePod)
+	podCpu, podMem, _, err := r.getPodUsage(ctx, candidatePod)
+	if err != nil {
+		r.logger.Error(err, "Unable to read pod usage for C3; falling back to requests", "pod", klog.KObj(candidatePod))
+		podCpu, podMem = getPodRequests(candidatePod)
+	}
 	p_c := float64(podCpu) / allocCpu
 	p_m := float64(podMem) / allocMem
 
@@ -326,7 +425,7 @@ func (r *ResourceDefragmentation) computeC4(candidatePod *v1.Pod) float64 {
 	return 0
 }
 
-func (r *ResourceDefragmentation) topsis(node *v1.Node, pods []*v1.Pod, nodeStates map[string]*NodeResourceState) *v1.Pod {
+func (r *ResourceDefragmentation) topsis(ctx context.Context, node *v1.Node, pods []*v1.Pod, nodeStates map[string]*NodeResourceState) *v1.Pod {
 	if len(pods) == 0 {
 		return nil
 	}
@@ -338,16 +437,17 @@ func (r *ResourceDefragmentation) topsis(node *v1.Node, pods []*v1.Pod, nodeStat
 	nCriteria := len(weights)
 
 	currentState := nodeStates[node.Name]
-	currentNodeRII := r.computeRII(currentState.AllocatableCPU, currentState.AllocatableMem, currentState.RequestedCPU, currentState.RequestedMem)
+	currentNodeRII := r.computeRII(currentState.AllocatableCPU, currentState.AllocatableMem, currentState.UsedCPU, currentState.UsedMem)
 
 	matrix := make([][]float64, nPods)
 	for i, pod := range pods {
 		matrix[i] = []float64{
-			r.computeC1(currentNodeRII, pod, currentState.AllocatableCPU, currentState.AllocatableMem),
-			r.computeC2(pod, node.Name, nodeStates),
-			r.computeC3(pod, currentState),
+			r.computeC1(ctx, currentNodeRII, pod, currentState.AllocatableCPU, currentState.AllocatableMem),
+			r.computeC2(ctx, pod, node.Name, nodeStates),
+			r.computeC3(ctx, pod, currentState),
 			r.computeC4(pod),
 		}
+		r.logger.V(2).Info("Resource defragmentation candidate score inputs", "pod", klog.KObj(pod), "originNode", node.Name, "c1", matrix[i][0], "c2", matrix[i][1], "c3", matrix[i][2], "c4", matrix[i][3])
 	}
 
 	// Step 1: Normalize the decision matrix (vector normalization)

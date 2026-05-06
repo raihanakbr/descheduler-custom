@@ -23,14 +23,25 @@ import (
 	v1 "k8s.io/api/core/v1"
 	policyv1 "k8s.io/api/policy/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes/fake"
 	k8stesting "k8s.io/client-go/testing"
+	fakemetricsclient "k8s.io/metrics/pkg/client/clientset/versioned/fake"
+
+	"sigs.k8s.io/descheduler/pkg/descheduler/metricscollector"
 
 	"sigs.k8s.io/descheduler/pkg/framework/plugins/defaultevictor"
 	frameworktesting "sigs.k8s.io/descheduler/pkg/framework/testing"
 	frameworktypes "sigs.k8s.io/descheduler/pkg/framework/types"
 	"sigs.k8s.io/descheduler/test"
+)
+
+var (
+	testNodesGVR = schema.GroupVersionResource{Group: "metrics.k8s.io", Version: "v1beta1", Resource: "nodes"}
+	testPodsGVR  = schema.GroupVersionResource{Group: "metrics.k8s.io", Version: "v1beta1", Resource: "pods"}
 )
 
 // withNodeCapacity overrides only the CPU and Memory allocatable on a node,
@@ -77,10 +88,10 @@ func buildTestPodForNode(name, nodeName string, apply ...func(*v1.Pod)) *v1.Pod 
 
 func TestResourceDefragmentation(t *testing.T) {
 	testCases := []struct {
-		description            string
-		args                   *ResourceDefragmentationArgs
-		pods                   []*v1.Pod
-		nodes                  []*v1.Node
+		description             string
+		args                    *ResourceDefragmentationArgs
+		pods                    []*v1.Pod
+		nodes                   []*v1.Node
 		expectedEvictedPodCount uint
 		expectedEvictedPodName  string // non-empty: assert the exact pod evicted by TOPSIS
 	}{
@@ -120,7 +131,7 @@ func TestResourceDefragmentation(t *testing.T) {
 			description: "fragmented node with CPU-heavy pod: TOPSIS selects the right pod to evict",
 			args:        &ResourceDefragmentationArgs{ImbalanceThreshold: 0.3, MaxEvictions: 5},
 			nodes: []*v1.Node{
-				buildTestNode("node-sick",    withNodeCapacity("2000m", "4Gi")),
+				buildTestNode("node-sick", withNodeCapacity("2000m", "4Gi")),
 				buildTestNode("node-healthy", withNodeCapacity("2000m", "4Gi")), // has room to receive pods
 			},
 			pods: []*v1.Pod{
@@ -205,5 +216,56 @@ func TestResourceDefragmentation(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestResourceDefragmentationUsesMetricsServerUsage(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	nodeA := buildTestNode("node-a", withNodeCapacity("2000m", "4Gi"))
+	nodeB := buildTestNode("node-b", withNodeCapacity("4000m", "8Gi"))
+	pod := buildTestPodForNode("pod-real-cpu-heavy", "node-a", withPodRequests("1000m", "2Gi"))
+
+	fakeClient := fake.NewSimpleClientset(nodeA, nodeB, pod)
+	metricsClient := fakemetricsclient.NewSimpleClientset()
+	if err := metricsClient.Tracker().Create(testNodesGVR, test.BuildNodeMetrics("node-a", 1800, 200*1024*1024), ""); err != nil {
+		t.Fatalf("failed creating node-a metrics: %v", err)
+	}
+	if err := metricsClient.Tracker().Create(testNodesGVR, test.BuildNodeMetrics("node-b", 0, 0), ""); err != nil {
+		t.Fatalf("failed creating node-b metrics: %v", err)
+	}
+	if err := metricsClient.Tracker().Create(testPodsGVR, test.BuildPodMetrics("pod-real-cpu-heavy", 1800, 200*1024*1024), "default"); err != nil {
+		t.Fatalf("failed creating pod metrics: %v", err)
+	}
+
+	sharedInformerFactory := informers.NewSharedInformerFactory(fakeClient, 0)
+	// Create the node informer before Start so the factory actually starts and syncs it.
+	sharedInformerFactory.Core().V1().Nodes().Informer()
+	sharedInformerFactory.Start(ctx.Done())
+	sharedInformerFactory.WaitForCacheSync(ctx.Done())
+	collector := metricscollector.NewMetricsCollector(sharedInformerFactory.Core().V1().Nodes().Lister(), metricsClient, labels.Everything())
+	if err := collector.Collect(ctx); err != nil {
+		t.Fatalf("failed collecting metrics: %v", err)
+	}
+
+	handle, podEvictor, err := frameworktesting.InitFrameworkHandle(ctx, fakeClient, nil, defaultevictor.DefaultEvictorArgs{NodeFit: true}, nil)
+	if err != nil {
+		t.Fatalf("Unable to initialize a framework handle: %v", err)
+	}
+	handle.MetricsCollectorImpl = collector
+
+	plugin, err := New(ctx, &ResourceDefragmentationArgs{ImbalanceThreshold: 0.3, MaxEvictions: 1}, handle)
+	if err != nil {
+		t.Fatalf("Unable to initialize the plugin: %v", err)
+	}
+
+	status := plugin.(frameworktypes.BalancePlugin).Balance(ctx, []*v1.Node{nodeA, nodeB})
+	if status != nil && status.Err != nil {
+		t.Fatalf("Balance failed: %v", status.Err)
+	}
+
+	if podEvictor.TotalEvicted() != 1 {
+		t.Fatalf("expected real-usage metrics to drive 1 eviction, got %d", podEvictor.TotalEvicted())
 	}
 }
