@@ -30,6 +30,35 @@ Descheduler, based on its policy, finds pods that can be moved and evicts them. 
 note, in current implementation, descheduler does not schedule replacement of evicted pods
 but relies on the default scheduler for that.
 
+
+## Thesis extension: real-usage-aware resource defragmentation
+
+This fork includes an experimental `ResourceDefragmentation` plugin used for the thesis work on Kubernetes resource-fragmentation repair. The Phase 1 approach keeps the default Kubernetes scheduler unchanged and makes the descheduler safer and more usage-aware.
+
+### Approach
+
+The implementation follows **Option A: real-usage-aware descheduler + default Kubernetes scheduler**.
+
+- The descheduler reads actual node and pod CPU/memory usage from Kubernetes Metrics Server through the existing `MetricsCollector`.
+- If runtime metrics are unavailable, the plugin falls back to Kubernetes resource requests so existing request-based behavior remains usable.
+- Fragmentation detection and TOPSIS candidate scoring use the real-usage snapshot when available.
+- Before eviction, the plugin performs a target-aware feasibility guard:
+  - the pod's current/origin node is excluded as a useful target;
+  - at least one non-origin node must be feasible using Kubernetes resource requests;
+  - the projected real-usage-aware imbalance score must improve after moving the candidate pod to that feasible target.
+- The plugin does not mutate pod affinity, `nodeName`, scheduling constraints, or otherwise force placement. After eviction, the default Kubernetes scheduler still decides the replacement node.
+
+This design intentionally separates two concerns: real usage is used to decide whether an eviction is useful, while request-based feasibility is still respected because the default scheduler admits pods based on declared requests and other standard constraints.
+
+### Paper used
+
+The real-usage-aware direction is based primarily on:
+
+- Angelo Marchese and Orazio Tomarchio, **"Enhancing the Kubernetes Platform with a Load-Aware Orchestration Strategy"**, *SN Computer Science*, 2025. DOI: https://doi.org/10.1007/s42979-025-03712-z
+- Attached local copy: [`docs/references/marchese-tomarchio-2025-load-aware-orchestration.pdf`](docs/references/marchese-tomarchio-2025-load-aware-orchestration.pdf)
+
+The paper motivates replacing static request-only scheduling/descheduling signals with runtime telemetry for CPU, memory, network, and disk usage. This Phase 1 implementation applies that idea narrowly to the existing CPU/memory ResourceDefragmentation descheduler while preserving Kubernetes' default request-based scheduler as the placement authority.
+
 ## ⚠️  Documentation Versions by Release
 
 If you are using a published release of Descheduler (such as
