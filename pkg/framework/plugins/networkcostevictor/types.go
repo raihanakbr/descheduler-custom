@@ -46,4 +46,13 @@ type NetworkCostEvictorArgs struct {
 	// places the pod on a better node, but may block more evictions.
 	// Default: 50, Range: 1-100
 	MinBetterCandidatesPercent int `json:"minBetterCandidatesPercent,omitempty"`
+
+	// ExcludeSameOwner controls whether pods owned by the same controller
+	// (e.g. replicas of the same Deployment) are excluded from dependency
+	// pod discovery. Set to true for typical microservice patterns where
+	// replicas don't communicate with each other. Set to false for
+	// distributed systems (e.g. Cassandra, Redis Cluster) where replicas
+	// do communicate via gossip/replication.
+	// Default: true
+	ExcludeSameOwner *bool `json:"excludeSameOwner,omitempty"`
 }

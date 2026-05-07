@@ -42,4 +42,8 @@ func SetDefaults_NetworkCostEvictorArgs(obj runtime.Object) {
 	if args.LatencyMetrics != nil {
 		networkcost.SetDefaultsLatencyMetrics(args.LatencyMetrics)
 	}
+	if args.ExcludeSameOwner == nil {
+		defaultTrue := true
+		args.ExcludeSameOwner = &defaultTrue
+	}
 }

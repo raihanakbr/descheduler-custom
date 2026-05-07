@@ -35,6 +35,7 @@ import (
 	"sigs.k8s.io/descheduler/pkg/descheduler/metricscollector"
 	podutil "sigs.k8s.io/descheduler/pkg/descheduler/pod"
 	"sigs.k8s.io/descheduler/pkg/framework/plugins/networkcostevictor"
+	"sigs.k8s.io/descheduler/pkg/framework/plugins/nodeutilization"
 	frameworktypes "sigs.k8s.io/descheduler/pkg/framework/types"
 	"sigs.k8s.io/descheduler/pkg/tracing"
 
@@ -396,40 +397,144 @@ func (d profileImpl) RunBalancePlugins(ctx context.Context, nodes []*v1.Node) *f
 	}
 }
 
+// networkCostConfig is an internal helper that normalizes the network cost
+// configuration from both NetworkCostEvictor and NodeUtilization plugins
+// into a uniform shape for cross-plugin consistency validation.
+type networkCostConfig struct {
+	mode                       string // "latency" or "topology"
+	networkGroupLabelKey       string
+	excludeSameOwner           bool
+	query                      string
+	sourceNodeLabel            string
+	targetNodeLabel            string
+}
+
 // validateNetworkCostConsistency ensures that when both NetworkCostEvictor
 // and a NodeUtilization plugin with networkAware are active in the same profile,
-// they use the same cost mode (both topology or both latency).
+// they use identical network cost configurations.
 //
 // Each plugin is self-contained and works independently when the other is absent.
 // This validation only fires when BOTH layers are active simultaneously.
 func validateNetworkCostConsistency(pluginConfigs []api.PluginConfig) error {
-	var nceMode string // "latency" or "topology" or "" (not present)
-	var nuMode string  // "latency" or "topology" or "" (not present)
+	var nce *networkCostConfig // Layer 1
+	var nu *networkCostConfig  // Layer 2
 
 	for _, pc := range pluginConfigs {
 		switch pc.Name {
 		case "NetworkCostEvictor":
 			if args, ok := pc.Args.(*networkcostevictor.NetworkCostEvictorArgs); ok {
+				cfg := &networkCostConfig{
+					networkGroupLabelKey: args.NetworkGroupLabelKey,
+					excludeSameOwner:     args.ExcludeSameOwner != nil && *args.ExcludeSameOwner,
+				}
 				if args.LatencyMetrics != nil {
-					nceMode = "latency"
+					cfg.mode = "latency"
+					if args.LatencyMetrics.Prometheus != nil {
+						cfg.query = args.LatencyMetrics.Prometheus.Query
+						cfg.sourceNodeLabel = args.LatencyMetrics.Prometheus.SourceNodeLabel
+						cfg.targetNodeLabel = args.LatencyMetrics.Prometheus.TargetNodeLabel
+					}
 				} else {
-					nceMode = "topology"
+					cfg.mode = "topology"
+				}
+				nce = cfg
+			}
+		case "LowNodeUtilization":
+			if args, ok := pc.Args.(*nodeutilization.LowNodeUtilizationArgs); ok {
+				if args.NetworkAware != nil {
+					nu = extractNetworkAwareConfig(args.NetworkAware)
 				}
 			}
-		// Phase 5 will add LowNodeUtilization and HighNodeUtilization cases here
-		// when the NetworkAware config is implemented.
+		case "HighNodeUtilization":
+			if args, ok := pc.Args.(*nodeutilization.HighNodeUtilizationArgs); ok {
+				if args.NetworkAware != nil {
+					nu = extractNetworkAwareConfig(args.NetworkAware)
+				}
+			}
 		}
 	}
 
 	// Only enforce consistency when BOTH layers are active
-	if nceMode != "" && nuMode != "" && nceMode != nuMode {
-		return fmt.Errorf(
-			"network cost mode mismatch: NetworkCostEvictor uses %s mode "+
-				"but NodeUtilization uses %s mode; "+
-				"both layers must use the same cost mode",
-			nceMode, nuMode,
-		)
+	if nce == nil || nu == nil {
+		return nil
+	}
+
+	var errs []string
+
+	if nce.mode != nu.mode {
+		errs = append(errs, fmt.Sprintf(
+			"mode mismatch: NetworkCostEvictor uses %s but NodeUtilization uses %s",
+			nce.mode, nu.mode))
+	}
+
+	if nce.networkGroupLabelKey != nu.networkGroupLabelKey {
+		errs = append(errs, fmt.Sprintf(
+			"networkGroupLabelKey mismatch: NetworkCostEvictor uses %q but NodeUtilization uses %q",
+			nce.networkGroupLabelKey, nu.networkGroupLabelKey))
+	}
+
+	if nce.excludeSameOwner != nu.excludeSameOwner {
+		errs = append(errs, fmt.Sprintf(
+			"excludeSameOwner mismatch: NetworkCostEvictor uses %v but NodeUtilization uses %v",
+			nce.excludeSameOwner, nu.excludeSameOwner))
+	}
+
+	// Only check latency-specific fields when both are in latency mode
+	if nce.mode == "latency" && nu.mode == "latency" {
+		if nce.query != nu.query {
+			errs = append(errs, fmt.Sprintf(
+				"latencyMetrics.prometheus.query mismatch: NetworkCostEvictor uses %q but NodeUtilization uses %q",
+				nce.query, nu.query))
+		}
+		if nce.sourceNodeLabel != nu.sourceNodeLabel {
+			errs = append(errs, fmt.Sprintf(
+				"latencyMetrics.prometheus.sourceNodeLabel mismatch: NetworkCostEvictor uses %q but NodeUtilization uses %q",
+				nce.sourceNodeLabel, nu.sourceNodeLabel))
+		}
+		if nce.targetNodeLabel != nu.targetNodeLabel {
+			errs = append(errs, fmt.Sprintf(
+				"latencyMetrics.prometheus.targetNodeLabel mismatch: NetworkCostEvictor uses %q but NodeUtilization uses %q",
+				nce.targetNodeLabel, nu.targetNodeLabel))
+		}
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("network cost config inconsistency between NetworkCostEvictor and NodeUtilization: %s",
+			fmt.Sprintf("[%s]", joinStrings(errs, "; ")))
 	}
 
 	return nil
 }
+
+// extractNetworkAwareConfig converts a NodeUtilization NetworkAwareConfig
+// into the normalized networkCostConfig for comparison.
+func extractNetworkAwareConfig(na *nodeutilization.NetworkAwareConfig) *networkCostConfig {
+	cfg := &networkCostConfig{
+		networkGroupLabelKey: na.NetworkGroupLabelKey,
+		excludeSameOwner:     na.ExcludeSameOwner != nil && *na.ExcludeSameOwner,
+	}
+	if na.LatencyBase {
+		cfg.mode = "latency"
+		if na.LatencyMetrics != nil && na.LatencyMetrics.Prometheus != nil {
+			cfg.query = na.LatencyMetrics.Prometheus.Query
+			cfg.sourceNodeLabel = na.LatencyMetrics.Prometheus.SourceNodeLabel
+			cfg.targetNodeLabel = na.LatencyMetrics.Prometheus.TargetNodeLabel
+		}
+	} else if na.TopologyBase {
+		cfg.mode = "topology"
+	}
+	return cfg
+}
+
+// joinStrings joins a slice of strings with a separator.
+func joinStrings(items []string, sep string) string {
+	result := ""
+	for i, item := range items {
+		if i > 0 {
+			result += sep
+		}
+		result += item
+	}
+	return result
+}
+

@@ -16,6 +16,7 @@ package nodeutilization
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/descheduler/pkg/api"
+	"sigs.k8s.io/descheduler/pkg/descheduler/networkcost"
 )
 
 // EvictionMode describe a mode of eviction. See the list below for the
@@ -50,11 +51,11 @@ type LowNodeUtilizationArgs struct {
 	// evictionLimits limits the number of evictions per domain. E.g. node, namespace, total.
 	EvictionLimits *api.EvictionLimits `json:"evictionLimits,omitempty"`
 
-	// NetworkCostAware enables network-cost-aware eviction filtering.
-	// When true, pods are only evicted if at least one destination node
-	// offers a lower network cost to the pod's dependency group.
-	// Default: false
-	NetworkCostAware bool `json:"networkCostAware,omitempty"`
+	// NetworkAware configures network-cost-aware eviction filtering.
+	// When set, pods are only evicted if enough destination nodes offer
+	// lower network cost to the pod's dependency group.
+	// Mutually exclusive: set either LatencyBase or TopologyBase, not both.
+	NetworkAware *NetworkAwareConfig `json:"networkAware,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true
@@ -78,11 +79,47 @@ type HighNodeUtilizationArgs struct {
 	// but then filtered out before eviction
 	EvictableNamespaces *api.Namespaces `json:"evictableNamespaces,omitempty"`
 
-	// NetworkCostAware enables network-cost-aware eviction filtering.
-	// When true, pods are only evicted if at least one destination node
-	// offers a lower network cost to the pod's dependency group.
-	// Default: false
-	NetworkCostAware bool `json:"networkCostAware,omitempty"`
+	// NetworkAware configures network-cost-aware eviction filtering.
+	// When set, pods are only evicted if enough destination nodes offer
+	// lower network cost to the pod's dependency group.
+	// Mutually exclusive: set either LatencyBase or TopologyBase, not both.
+	NetworkAware *NetworkAwareConfig `json:"networkAware,omitempty"`
+}
+
+// NetworkAwareConfig configures how network-cost-aware eviction filtering works.
+// Exactly one of LatencyBase or TopologyBase must be true.
+// +k8s:deepcopy-gen=true
+type NetworkAwareConfig struct {
+	// NetworkGroupLabelKey is the label key used to identify pods that belong
+	// to the same communication group. Must match NetworkCostEvictor's
+	// networkGroupLabelKey when both plugins are active.
+	// Default: "network-group"
+	NetworkGroupLabelKey string `json:"networkGroupLabelKey,omitempty"`
+
+	// LatencyBase uses real-time Prometheus latency measurements for cost.
+	// Requires LatencyMetrics to be configured.
+	LatencyBase bool `json:"latencyBase,omitempty"`
+
+	// TopologyBase uses hardcoded topology-based costs (zone/region labels).
+	TopologyBase bool `json:"topologyBase,omitempty"`
+
+	// LatencyMetrics configures Prometheus latency collection.
+	// Required when LatencyBase is true.
+	LatencyMetrics *networkcost.LatencyMetricsConfig `json:"latencyMetrics,omitempty"`
+
+	// MinBetterCandidatesPercent is the minimum percentage of candidate nodes
+	// that must offer lower network cost before eviction is allowed.
+	// Default: 50, Range: 1-100
+	MinBetterCandidatesPercent int `json:"minBetterCandidatesPercent,omitempty"`
+
+	// ExcludeSameOwner controls whether pods owned by the same controller
+	// (e.g. replicas of the same Deployment) are excluded from dependency
+	// pod discovery. Set to true for typical microservice patterns where
+	// replicas don't communicate with each other. Set to false for
+	// distributed systems (e.g. Cassandra, Redis Cluster) where replicas
+	// do communicate via gossip/replication.
+	// Default: true
+	ExcludeSameOwner *bool `json:"excludeSameOwner,omitempty"`
 }
 
 // MetricsUtilization allow to consume actual resource utilization from metrics

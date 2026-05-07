@@ -31,7 +31,10 @@ func ValidateHighNodeUtilizationArgs(obj runtime.Object) error {
 		return err
 	}
 	// make sure we know about the eviction modes defined by the user.
-	return validateEvictionModes(args.EvictionModes)
+	if err := validateEvictionModes(args.EvictionModes); err != nil {
+		return err
+	}
+	return validateNetworkAware(args.NetworkAware)
 }
 
 // validateEvictionModes checks if the eviction modes are valid/known
@@ -73,7 +76,7 @@ func ValidateLowNodeUtilizationArgs(obj runtime.Object) error {
 			return fmt.Errorf("prometheus query is required when metrics source is set to %q", api.PrometheusMetrics)
 		}
 	}
-	return nil
+	return validateNetworkAware(args.NetworkAware)
 }
 
 func validateLowNodeUtilizationThresholds(thresholds, targetThresholds api.ResourceThresholds, useDeviationThresholds bool) error {
@@ -109,5 +112,42 @@ func validateThresholds(thresholds api.ResourceThresholds) error {
 			return fmt.Errorf("%v threshold not in [%v, %v] range", name, MinResourcePercentage, MaxResourcePercentage)
 		}
 	}
+	return nil
+}
+
+// validateNetworkAware validates the NetworkAwareConfig.
+func validateNetworkAware(cfg *NetworkAwareConfig) error {
+	if cfg == nil {
+		return nil
+	}
+
+	// exactly one mode must be set
+	if cfg.LatencyBase && cfg.TopologyBase {
+		return fmt.Errorf("networkAware: latencyBase and topologyBase are mutually exclusive")
+	}
+	if !cfg.LatencyBase && !cfg.TopologyBase {
+		return fmt.Errorf("networkAware: exactly one of latencyBase or topologyBase must be true")
+	}
+
+	// latency mode requires LatencyMetrics
+	if cfg.LatencyBase {
+		if cfg.LatencyMetrics == nil || cfg.LatencyMetrics.Prometheus == nil {
+			return fmt.Errorf("networkAware: latencyMetrics.prometheus is required when latencyBase is true")
+		}
+		if cfg.LatencyMetrics.Prometheus.Query == "" {
+			return fmt.Errorf("networkAware: latencyMetrics.prometheus.query must not be empty")
+		}
+	}
+
+	// topology mode should not have latency config
+	if cfg.TopologyBase && cfg.LatencyMetrics != nil {
+		return fmt.Errorf("networkAware: latencyMetrics must not be set when topologyBase is true")
+	}
+
+	if cfg.MinBetterCandidatesPercent < 1 || cfg.MinBetterCandidatesPercent > 100 {
+		return fmt.Errorf("networkAware: minBetterCandidatesPercent must be between 1 and 100, got %d",
+			cfg.MinBetterCandidatesPercent)
+	}
+
 	return nil
 }

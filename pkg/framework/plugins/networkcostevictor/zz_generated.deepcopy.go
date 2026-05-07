@@ -35,6 +35,11 @@ func (in *NetworkCostEvictorArgs) DeepCopyInto(out *NetworkCostEvictorArgs) {
 		*out = new(networkcost.LatencyMetricsConfig)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.ExcludeSameOwner != nil {
+		in, out := &in.ExcludeSameOwner, &out.ExcludeSameOwner
+		*out = new(bool)
+		**out = **in
+	}
 	return
 }
 

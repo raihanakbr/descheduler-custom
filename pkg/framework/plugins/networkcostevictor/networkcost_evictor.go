@@ -130,6 +130,7 @@ func (n *NetworkCostEvictor) PreEvictionFilter(pod *v1.Pod) bool {
 		nodesMap,
 		n.costProvider,
 		n.args.MinBetterCandidatesPercent,
+		n.args.ExcludeSameOwner != nil && *n.args.ExcludeSameOwner,
 	)
 }
 

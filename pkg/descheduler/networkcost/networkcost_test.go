@@ -59,6 +59,19 @@ func makePod(name, namespace, nodeName, networkGroup string) *v1.Pod {
 	}
 }
 
+// makePodWithOwner creates a pod with an ownerReference, simulating a Deployment replica.
+func makePodWithOwner(name, namespace, nodeName, networkGroup, ownerUID string) *v1.Pod {
+	p := makePod(name, namespace, nodeName, networkGroup)
+	p.OwnerReferences = []metav1.OwnerReference{
+		{
+			UID:  types.UID(ownerUID),
+			Name: "rs-" + ownerUID,
+			Kind: "ReplicaSet",
+		},
+	}
+	return p
+}
+
 func TestTopologyCostProvider(t *testing.T) {
 	provider := &TopologyCostProvider{}
 	config := DefaultTopologyCostConfig()
@@ -217,7 +230,7 @@ func TestFindDependencyPods(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			deps := FindDependencyPods(tt.pod, DefaultNetworkGroupLabelKey, getPodsAssigned, nodes)
+			deps := FindDependencyPods(tt.pod, DefaultNetworkGroupLabelKey, getPodsAssigned, nodes, false)
 			if len(deps) != tt.expectedCount {
 				t.Errorf("FindDependencyPods() returned %d pods, want %d", len(deps), tt.expectedCount)
 			}
@@ -318,7 +331,7 @@ func TestShouldAllowEviction(t *testing.T) {
 			result := ShouldAllowEviction(
 				tt.pod, DefaultNetworkGroupLabelKey, tt.candidateNodes,
 				getPodsAssigned, allNodes, nodesMap, provider,
-				tt.minBetterPercent,
+				tt.minBetterPercent, false,
 			)
 			if result != tt.expected {
 				t.Errorf("ShouldAllowEviction() = %v, want %v", result, tt.expected)
@@ -406,11 +419,68 @@ func TestMinBetterCandidatesPercent(t *testing.T) {
 			result := ShouldAllowEviction(
 				pod, DefaultNetworkGroupLabelKey, tt.candidates,
 				getPodsAssigned, allNodes, nodesMap, provider,
-				tt.minBetterPercent,
+				tt.minBetterPercent, false,
 			)
 			if result != tt.expected {
 				t.Errorf("ShouldAllowEviction() = %v, want %v", result, tt.expected)
 			}
 		})
 	}
+}
+
+func TestExcludeSameOwner(t *testing.T) {
+	nodeA := makeNode("node-a", "us-east-1", "us-east-1a")
+	nodeB := makeNode("node-b", "us-east-1", "us-east-1b")
+
+	// payment deployment replicas (same ownerRef)
+	payment1 := makePodWithOwner("payment-1", "default", "node-a", "checkout", "payment-rs")
+	payment2 := makePodWithOwner("payment-2", "default", "node-a", "checkout", "payment-rs")
+	// transaction deployment (different ownerRef)
+	tx1 := makePodWithOwner("tx-1", "default", "node-b", "checkout", "tx-rs")
+
+	getPodsAssigned := podutil.GetPodsAssignedToNodeFunc(func(nodeName string, filterFunc podutil.FilterFunc) ([]*v1.Pod, error) {
+		podsByNode := map[string][]*v1.Pod{
+			"node-a": {payment1, payment2},
+			"node-b": {tx1},
+		}
+		return podsByNode[nodeName], nil
+	})
+
+	nodes := []*v1.Node{nodeA, nodeB}
+
+	t.Run("excludeSameOwner=true: payment-1 only sees tx-1 as dep", func(t *testing.T) {
+		deps := FindDependencyPods(payment1, DefaultNetworkGroupLabelKey, getPodsAssigned, nodes, true)
+		if len(deps) != 1 {
+			t.Fatalf("expected 1 dep, got %d", len(deps))
+		}
+		if deps[0].Name != "tx-1" {
+			t.Errorf("expected dep to be tx-1, got %s", deps[0].Name)
+		}
+	})
+
+	t.Run("excludeSameOwner=false: payment-1 sees payment-2 and tx-1", func(t *testing.T) {
+		deps := FindDependencyPods(payment1, DefaultNetworkGroupLabelKey, getPodsAssigned, nodes, false)
+		if len(deps) != 2 {
+			t.Fatalf("expected 2 deps, got %d", len(deps))
+		}
+	})
+
+	t.Run("pods without ownerRef are never excluded", func(t *testing.T) {
+		// bare pod (no ownerRef) in same group
+		barePod := makePod("bare-1", "default", "node-b", "checkout")
+		getPodsWithBare := podutil.GetPodsAssignedToNodeFunc(func(nodeName string, filterFunc podutil.FilterFunc) ([]*v1.Pod, error) {
+			podsByNode := map[string][]*v1.Pod{
+				"node-a": {payment1},
+				"node-b": {barePod},
+			}
+			return podsByNode[nodeName], nil
+		})
+		deps := FindDependencyPods(payment1, DefaultNetworkGroupLabelKey, getPodsWithBare, nodes, true)
+		if len(deps) != 1 {
+			t.Fatalf("expected 1 dep (bare pod), got %d", len(deps))
+		}
+		if deps[0].Name != "bare-1" {
+			t.Errorf("expected dep to be bare-1, got %s", deps[0].Name)
+		}
+	})
 }

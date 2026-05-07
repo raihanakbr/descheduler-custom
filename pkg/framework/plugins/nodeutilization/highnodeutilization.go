@@ -259,7 +259,7 @@ func (h *HighNodeUtilization) Balance(ctx context.Context, nodes []*v1.Node) *fr
 	sortNodesByUsage(lowNodes, true)
 
 	var networkCostFilter func(*v1.Pod) bool
-	if h.args.NetworkCostAware {
+	if h.args.NetworkAware != nil {
 		destNodes := make([]*v1.Node, 0, len(schedulableNodes))
 		nodesMap := make(map[string]*v1.Node, len(nodes))
 		for _, node := range nodes {
@@ -269,17 +269,27 @@ func (h *HighNodeUtilization) Balance(ctx context.Context, nodes []*v1.Node) *fr
 			destNodes = append(destNodes, ni.node)
 		}
 
-		costConfig := networkcost.DefaultTopologyCostConfig()
+		costProvider, err := networkcost.BuildCostProvider(
+			ctx, h.args.NetworkAware.LatencyMetrics, h.handle.PrometheusClient(),
+		)
+		if err != nil {
+			klog.ErrorS(err, "failed to build cost provider for network-aware filtering, falling back to topology")
+			costProvider = &networkcost.TopologyCostProvider{}
+		}
+
+		minBetterPercent := h.args.NetworkAware.MinBetterCandidatesPercent
 
 		networkCostFilter = func(pod *v1.Pod) bool {
 			return networkcost.ShouldAllowEviction(
 				pod,
-				networkcost.DefaultNetworkGroupLabelKey,
+				h.args.NetworkAware.NetworkGroupLabelKey,
 				destNodes,
 				h.handle.GetPodsAssignedToNodeFunc(),
 				nodes,
 				nodesMap,
-				costConfig,
+				costProvider,
+				minBetterPercent,
+				h.args.NetworkAware.ExcludeSameOwner != nil && *h.args.NetworkAware.ExcludeSameOwner,
 			)
 		}
 	}

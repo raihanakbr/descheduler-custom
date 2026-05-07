@@ -39,8 +39,7 @@ func computePlacementCost(
 	for _, depPod := range depPods {
 		depNode, ok := nodesMap[depPod.Spec.NodeName]
 		if !ok {
-			// dependency pod's node not found in our map, assume worst cost
-			totalCost += 1.0
+			// dependency pod's node not found in nodesMap, skip.
 			continue
 		}
 		totalCost += provider.Cost(candidateNode, depNode)
@@ -51,11 +50,17 @@ func computePlacementCost(
 // FindDependencyPods finds all pods that share the same network-group label
 // value as the given pod. It searches across all provided nodes. The source
 // pod itself is excluded from the result.
+//
+// When excludeSameOwner is true, pods that share the same controller
+// (ownerReference) as the source pod are also excluded. This is the typical
+// microservice pattern where replicas of the same Deployment don't
+// communicate with each other.
 func FindDependencyPods(
 	pod *v1.Pod,
 	labelKey string,
 	getPodsAssignedToNode podutil.GetPodsAssignedToNodeFunc,
 	nodes []*v1.Node,
+	excludeSameOwner bool,
 ) []*v1.Pod {
 	groupValue, exists := pod.Labels[labelKey]
 	if !exists || groupValue == "" {
@@ -75,13 +80,33 @@ func FindDependencyPods(
 			if p.UID == pod.UID {
 				continue
 			}
-			if p.Labels[labelKey] == groupValue {
-				depPods = append(depPods, p)
+			if p.Labels[labelKey] != groupValue {
+				continue
+			}
+			// skip replicas of the same controller (e.g. same Deployment)
+			if excludeSameOwner && hasSameOwner(pod, p) {
+				klog.V(4).InfoS("Skipping same-owner pod", "pod", klog.KObj(pod), "dep", klog.KObj(p))
+				continue
+			}
+			depPods = append(depPods, p)
+		}
+	}
+	klog.V(2).InfoS("FindDependencyPods result", "pod", klog.KObj(pod), "group", groupValue, "depCount", len(depPods), "nodesScanned", len(nodes), "excludeSameOwner", excludeSameOwner)
+	return depPods
+}
+
+// hasSameOwner returns true if two pods share at least one ownerReference UID.
+// This typically means they are replicas of the same Deployment (via the same
+// ReplicaSet) or the same StatefulSet.
+func hasSameOwner(a, b *v1.Pod) bool {
+	for _, ownerA := range a.OwnerReferences {
+		for _, ownerB := range b.OwnerReferences {
+			if ownerA.UID == ownerB.UID {
+				return true
 			}
 		}
 	}
-	klog.V(2).InfoS("FindDependencyPods result", "pod", klog.KObj(pod), "group", groupValue, "depCount", len(depPods), "nodesScanned", len(nodes))
-	return depPods
+	return false
 }
 
 // ShouldAllowEviction determines whether a pod should be allowed to be
@@ -107,6 +132,7 @@ func ShouldAllowEviction(
 	nodesMap map[string]*v1.Node,
 	provider CostProvider,
 	minBetterPercent int,
+	excludeSameOwner bool,
 ) bool {
 	// pods without the label are always allowed (opt-in)
 	groupValue, exists := pod.Labels[labelKey]
@@ -118,7 +144,7 @@ func ShouldAllowEviction(
 	klog.V(1).InfoS("ShouldAllowEviction: evaluating pod", "pod", klog.KObj(pod), "group", groupValue, "candidateNodes", len(candidateNodes))
 
 	// find all dependency pods with same group label
-	depPods := FindDependencyPods(pod, labelKey, getPodsAssignedToNode, allNodes)
+	depPods := FindDependencyPods(pod, labelKey, getPodsAssignedToNode, allNodes, excludeSameOwner)
 	if len(depPods) == 0 {
 		klog.V(1).InfoS("ShouldAllowEviction: no dependency pods found, allowing", "pod", klog.KObj(pod), "group", groupValue)
 		return true
