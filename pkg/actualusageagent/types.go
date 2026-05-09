@@ -5,6 +5,8 @@ import "time"
 const (
 	MetricsSourceKubernetesMetrics = "metrics-server"
 	RemediationModeReport          = "report"
+	SmoothingMethodEWMA            = "ewma"
+	DefaultEWMABeta                = 0.9
 )
 
 type Config struct {
@@ -17,6 +19,7 @@ type Config struct {
 	Namespace               string
 	IncludeControlPlane     bool
 	RemediationMode         string
+	EWMABeta                float64
 }
 
 type Snapshot struct {
@@ -26,6 +29,8 @@ type Snapshot struct {
 	NodeCount              int            `json:"nodeCount"`
 	PodCount               int            `json:"podCount"`
 	FragmentedNodeCount    int            `json:"fragmentedNodeCount"`
+	SmoothingMethod        string         `json:"smoothingMethod"`
+	EWMABeta               float64        `json:"ewmaBeta"`
 	Nodes                  []NodeSnapshot `json:"nodes"`
 	Pods                   []PodSnapshot  `json:"pods"`
 	RemediationMode        string         `json:"remediationMode"`
@@ -34,15 +39,17 @@ type Snapshot struct {
 }
 
 type NodeSnapshot struct {
-	Name          string  `json:"name"`
-	CPUUsedMilli  int64   `json:"cpuUsedMilli"`
-	MemoryUsedB   int64   `json:"memoryUsedBytes"`
-	CPUCapacityM  int64   `json:"cpuCapacityMilli"`
-	MemoryCapB    int64   `json:"memoryCapacityBytes"`
-	CPUUsageRatio float64 `json:"cpuUsageRatio"`
-	MemUsageRatio float64 `json:"memoryUsageRatio"`
-	RII           float64 `json:"rii"`
-	Fragmented    bool    `json:"fragmented"`
+	Name            string  `json:"name"`
+	RawCPUUsedMilli int64   `json:"rawCpuUsedMilli"`
+	RawMemoryUsedB  int64   `json:"rawMemoryUsedBytes"`
+	CPUUsedMilli    int64   `json:"cpuUsedMilli"`
+	MemoryUsedB     int64   `json:"memoryUsedBytes"`
+	CPUCapacityM    int64   `json:"cpuCapacityMilli"`
+	MemoryCapB      int64   `json:"memoryCapacityBytes"`
+	CPUUsageRatio   float64 `json:"cpuUsageRatio"`
+	MemUsageRatio   float64 `json:"memoryUsageRatio"`
+	RII             float64 `json:"rii"`
+	Fragmented      bool    `json:"fragmented"`
 }
 
 type PodSnapshot struct {

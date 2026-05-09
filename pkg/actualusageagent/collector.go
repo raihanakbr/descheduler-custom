@@ -3,6 +3,7 @@ package actualusageagent
 import (
 	"context"
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 	"time"
@@ -15,13 +16,19 @@ import (
 )
 
 type Collector struct {
-	kube    kubernetes.Interface
-	metrics metricsclientset.Interface
-	config  Config
+	kube          kubernetes.Interface
+	metrics       metricsclientset.Interface
+	config        Config
+	smoothedNodes map[string]smoothedNodeUsage
+}
+
+type smoothedNodeUsage struct {
+	CPUUsedMilli int64
+	MemoryUsedB  int64
 }
 
 func NewCollector(kube kubernetes.Interface, metrics metricsclientset.Interface, config Config) *Collector {
-	return &Collector{kube: kube, metrics: metrics, config: config}
+	return &Collector{kube: kube, metrics: metrics, config: config, smoothedNodes: map[string]smoothedNodeUsage{}}
 }
 
 func (c *Collector) Collect(ctx context.Context) (Snapshot, error) {
@@ -46,19 +53,26 @@ func (c *Collector) Collect(ctx context.Context) (Snapshot, error) {
 		podNodeByKey[pod.Namespace+"/"+pod.Name] = pod.Spec.NodeName
 	}
 
-	return buildSnapshot(nodes.Items, nodeMetrics.Items, podMetrics.Items, podNodeByKey, c.config), nil
+	return buildSnapshot(nodes.Items, nodeMetrics.Items, podMetrics.Items, podNodeByKey, c.smoothedNodes, c.config), nil
 }
 
-func buildSnapshot(nodes []v1.Node, nodeMetrics []metricsv1beta1.NodeMetrics, podMetrics []metricsv1beta1.PodMetrics, podNodeByKey map[string]string, config Config) Snapshot {
+func buildSnapshot(nodes []v1.Node, nodeMetrics []metricsv1beta1.NodeMetrics, podMetrics []metricsv1beta1.PodMetrics, podNodeByKey map[string]string, smoothedNodes map[string]smoothedNodeUsage, config Config) Snapshot {
 	nodeMetricsByName := map[string]v1.ResourceList{}
 	for _, m := range nodeMetrics {
 		nodeMetricsByName[m.Name] = m.Usage
 	}
 
+	if smoothedNodes == nil {
+		smoothedNodes = map[string]smoothedNodeUsage{}
+	}
+	beta := ewmaBeta(config)
+
 	snapshot := Snapshot{
 		Timestamp:       time.Now().UTC(),
 		MetricsSource:   MetricsSourceKubernetesMetrics,
 		Threshold:       config.NodeFragmentationThresh,
+		SmoothingMethod: SmoothingMethodEWMA,
+		EWMABeta:        beta,
 		RemediationMode: config.RemediationMode,
 	}
 
@@ -72,23 +86,28 @@ func buildSnapshot(nodes []v1.Node, nodeMetrics []metricsv1beta1.NodeMetrics, po
 		}
 		cpuCapacity := node.Status.Allocatable.Cpu().MilliValue()
 		memoryCapacity := node.Status.Allocatable.Memory().Value()
-		cpuUsed := usage.Cpu().MilliValue()
-		memoryUsed := usage.Memory().Value()
+		rawCPUUsed := usage.Cpu().MilliValue()
+		rawMemoryUsed := usage.Memory().Value()
+		smoothed := updateSmoothedNodeUsage(smoothedNodes, node.Name, rawCPUUsed, rawMemoryUsed, beta)
+		cpuUsed := smoothed.CPUUsedMilli
+		memoryUsed := smoothed.MemoryUsedB
 		rii := ComputeRII(cpuUsed, memoryUsed, cpuCapacity, memoryCapacity)
 		fragmented := IsFragmented(rii, config.NodeFragmentationThresh)
 		if fragmented {
 			snapshot.FragmentedNodeCount++
 		}
 		snapshot.Nodes = append(snapshot.Nodes, NodeSnapshot{
-			Name:          node.Name,
-			CPUUsedMilli:  cpuUsed,
-			MemoryUsedB:   memoryUsed,
-			CPUCapacityM:  cpuCapacity,
-			MemoryCapB:    memoryCapacity,
-			CPUUsageRatio: ratio(cpuUsed, cpuCapacity),
-			MemUsageRatio: ratio(memoryUsed, memoryCapacity),
-			RII:           rii,
-			Fragmented:    fragmented,
+			Name:            node.Name,
+			RawCPUUsedMilli: rawCPUUsed,
+			RawMemoryUsedB:  rawMemoryUsed,
+			CPUUsedMilli:    cpuUsed,
+			MemoryUsedB:     memoryUsed,
+			CPUCapacityM:    cpuCapacity,
+			MemoryCapB:      memoryCapacity,
+			CPUUsageRatio:   ratio(cpuUsed, cpuCapacity),
+			MemUsageRatio:   ratio(memoryUsed, memoryCapacity),
+			RII:             rii,
+			Fragmented:      fragmented,
 		})
 	}
 
@@ -137,4 +156,30 @@ func ratio(used, capacity int64) float64 {
 		return 0
 	}
 	return float64(used) / float64(capacity)
+}
+
+func ewmaBeta(config Config) float64 {
+	if config.EWMABeta <= 0 || config.EWMABeta >= 1 {
+		return DefaultEWMABeta
+	}
+	return config.EWMABeta
+}
+
+func updateSmoothedNodeUsage(nodes map[string]smoothedNodeUsage, name string, rawCPUUsedMilli, rawMemoryUsedB int64, beta float64) smoothedNodeUsage {
+	prev, ok := nodes[name]
+	if !ok {
+		current := smoothedNodeUsage{CPUUsedMilli: rawCPUUsedMilli, MemoryUsedB: rawMemoryUsedB}
+		nodes[name] = current
+		return current
+	}
+	current := smoothedNodeUsage{
+		CPUUsedMilli: weightedAverage(prev.CPUUsedMilli, rawCPUUsedMilli, beta),
+		MemoryUsedB:  weightedAverage(prev.MemoryUsedB, rawMemoryUsedB, beta),
+	}
+	nodes[name] = current
+	return current
+}
+
+func weightedAverage(prevValue, value int64, beta float64) int64 {
+	return int64(math.Round(beta*float64(prevValue) + (1-beta)*float64(value)))
 }

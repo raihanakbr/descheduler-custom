@@ -25,6 +25,7 @@ func NewCommand() *cobra.Command {
 		Namespace:               metav1.NamespaceAll,
 		IncludeControlPlane:     false,
 		RemediationMode:         RemediationModeReport,
+		EWMABeta:                DefaultEWMABeta,
 	}
 
 	cmd := &cobra.Command{
@@ -36,6 +37,9 @@ func NewCommand() *cobra.Command {
 			}
 			if cfg.RemediationMode != RemediationModeReport {
 				return fmt.Errorf("unsupported remediation mode %q; currently supported: %s", cfg.RemediationMode, RemediationModeReport)
+			}
+			if cfg.EWMABeta <= 0 || cfg.EWMABeta >= 1 {
+				return fmt.Errorf("--ewma-beta must be > 0 and < 1")
 			}
 			restConfig, err := buildRESTConfig(cfg.Kubeconfig)
 			if err != nil {
@@ -63,6 +67,7 @@ func NewCommand() *cobra.Command {
 	cmd.Flags().StringVar(&cfg.Namespace, "namespace", cfg.Namespace, "namespace to collect pod metrics from; empty means all namespaces")
 	cmd.Flags().BoolVar(&cfg.IncludeControlPlane, "include-control-plane", cfg.IncludeControlPlane, "include control-plane/master nodes in RII output")
 	cmd.Flags().StringVar(&cfg.RemediationMode, "remediation-mode", cfg.RemediationMode, "remediation behavior; currently report only")
+	cmd.Flags().Float64Var(&cfg.EWMABeta, "ewma-beta", cfg.EWMABeta, "EWMA beta for smoothing node CPU/memory usage before RII calculation")
 	return cmd
 }
 

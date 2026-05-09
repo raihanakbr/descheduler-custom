@@ -1,6 +1,6 @@
 # Actual Usage Agent
 
-The actual usage agent is a thesis-oriented monitoring component for the `ResourceDefragmentation` work. It follows the monitoring-agent idea from Marchese and Tomarchio's load-aware Kubernetes orchestration work: observe runtime infrastructure/application metrics, keep history, and feed scheduling/descheduling decisions. It observes Kubernetes runtime metrics over time, computes per-node Resource Imbalance Index (RII), records evidence files, and reports when remediation by the PR1 descheduler plugin is recommended.
+The actual usage agent is a thesis-oriented monitoring component for the `ResourceDefragmentation` work. It follows the monitoring-agent idea from Marchese and Tomarchio's load-aware Kubernetes orchestration work: observe runtime infrastructure/application metrics, keep history, and feed scheduling/descheduling decisions. It observes Kubernetes runtime metrics over time, smooths node CPU/memory usage with EWMA, computes per-node Resource Imbalance Index (RII), records evidence files, and reports when remediation by the PR1 descheduler plugin is recommended.
 
 ## Relation to PR1
 
@@ -29,7 +29,13 @@ Prometheus is left as future work because the repository already has metrics-ser
 
 ## RII calculation
 
-For each observed node:
+For each observed node, raw metrics-server node usage is first smoothed with EWMA using the same default beta as the PR1 descheduler `MetricsCollector` (`--ewma-beta=0.9`):
+
+```text
+smoothed_value = beta * previous_smoothed_value + (1 - beta) * current_raw_value
+```
+
+The first observation initializes the smoothed value from the raw value. RII is then computed from the smoothed node usage:
 
 ```text
 cpu_usage_ratio = actual_cpu_used_millicores / node_allocatable_cpu_millicores
@@ -59,7 +65,8 @@ One JSON object per collection tick. Fields include:
 - `nodeCount`
 - `podCount`
 - `fragmentedNodeCount`
-- `nodes[]` with CPU/memory actual usage, capacity, ratios, RII, and fragmented status
+- `smoothingMethod` and `ewmaBeta`
+- `nodes[]` with raw CPU/memory usage, EWMA-smoothed CPU/memory usage, capacity, ratios, RII, and fragmented status
 - `pods[]` with actual CPU/memory usage and node placement
 - `remediationRecommended`
 - `recommendation`
@@ -69,7 +76,7 @@ One JSON object per collection tick. Fields include:
 Append-only CSV row per node per collection tick:
 
 ```text
-timestamp,node,metrics_source,cpu_used_milli,memory_used_bytes,cpu_capacity_milli,memory_capacity_bytes,cpu_usage_ratio,memory_usage_ratio,rii,fragmented
+timestamp,node,metrics_source,smoothing_method,ewma_beta,raw_cpu_used_milli,raw_memory_used_bytes,cpu_used_milli,memory_used_bytes,cpu_capacity_milli,memory_capacity_bytes,cpu_usage_ratio,memory_usage_ratio,rii,fragmented
 ```
 
 This CSV is intended for thesis plots/tables showing RII over time.
