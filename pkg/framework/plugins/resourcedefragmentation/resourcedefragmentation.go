@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"math"
 	"sort"
+	"strconv"
+	"time"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,9 +38,13 @@ import (
 const PluginName = "ResourceDefragmentation"
 
 const (
-	UsageModeRequests   = "requests"
-	UsageModeActualRaw  = "actual-raw"
-	UsageModeActualEWMA = "actual-ewma"
+	UsageModeRequests       = "requests"
+	UsageModeActualRaw      = "actual-raw"
+	UsageModeActualEWMA     = "actual-ewma"
+	UsageModePublishedEWMA  = "published-ewma"
+	publishedCPUAnnotation  = "descheduler.thesis/actual-cpu-milli"
+	publishedMemAnnotation  = "descheduler.thesis/actual-memory-bytes"
+	publishedTimeAnnotation = "descheduler.thesis/timestamp"
 )
 
 // ResourceDefragmentation evicts pods to defragment resource usage across nodes.
@@ -259,7 +265,7 @@ func (r *ResourceDefragmentation) Balance(ctx context.Context, nodes []*v1.Node)
 
 func (r *ResourceDefragmentation) usageMode() string {
 	switch r.args.UsageMode {
-	case UsageModeRequests, UsageModeActualRaw, UsageModeActualEWMA:
+	case UsageModeRequests, UsageModeActualRaw, UsageModeActualEWMA, UsageModePublishedEWMA:
 		return r.args.UsageMode
 	default:
 		if r.handle.MetricsCollector() != nil {
@@ -284,6 +290,13 @@ func (r *ResourceDefragmentation) getNodeUsage(ctx context.Context, node *v1.Nod
 			return reqCpu, reqMem, UsageModeRequests
 		}
 		return nodeMetrics.Usage.Cpu().MilliValue(), nodeMetrics.Usage.Memory().Value(), UsageModeActualRaw
+	case UsageModePublishedEWMA:
+		cpu, mem, err := r.publishedNodeUsage(node)
+		if err != nil {
+			r.logger.Error(err, "Unable to read published node usage, falling back to requests", "node", node.Name)
+			return reqCpu, reqMem, UsageModeRequests
+		}
+		return cpu, mem, UsageModePublishedEWMA
 	case UsageModeActualEWMA:
 		if r.handle.MetricsCollector() == nil {
 			r.logger.V(1).Info("Metrics collector is unavailable, falling back to requests", "node", node.Name, "usageMode", UsageModeActualEWMA)
@@ -302,6 +315,35 @@ func (r *ResourceDefragmentation) getNodeUsage(ctx context.Context, node *v1.Nod
 		}
 	}
 	return reqCpu, reqMem, UsageModeRequests
+}
+
+func (r *ResourceDefragmentation) publishedNodeUsage(node *v1.Node) (cpu int64, mem int64, err error) {
+	annotations := node.GetAnnotations()
+	if annotations == nil {
+		return 0, 0, fmt.Errorf("node has no published usage annotations")
+	}
+	if maxAge := r.args.PublishedUsageMaxAgeSeconds; maxAge > 0 {
+		timestamp := annotations[publishedTimeAnnotation]
+		if timestamp == "" {
+			return 0, 0, fmt.Errorf("published usage timestamp annotation %q is missing", publishedTimeAnnotation)
+		}
+		publishedAt, parseErr := time.Parse(time.RFC3339, timestamp)
+		if parseErr != nil {
+			return 0, 0, fmt.Errorf("parse published usage timestamp: %w", parseErr)
+		}
+		if time.Since(publishedAt) > time.Duration(maxAge)*time.Second {
+			return 0, 0, fmt.Errorf("published usage is stale: age %s exceeds %ds", time.Since(publishedAt).Round(time.Second), maxAge)
+		}
+	}
+	cpu, err = strconv.ParseInt(annotations[publishedCPUAnnotation], 10, 64)
+	if err != nil {
+		return 0, 0, fmt.Errorf("parse %s: %w", publishedCPUAnnotation, err)
+	}
+	mem, err = strconv.ParseInt(annotations[publishedMemAnnotation], 10, 64)
+	if err != nil {
+		return 0, 0, fmt.Errorf("parse %s: %w", publishedMemAnnotation, err)
+	}
+	return cpu, mem, nil
 }
 
 // getPodRequests is a helper to sum a pod's requested resources

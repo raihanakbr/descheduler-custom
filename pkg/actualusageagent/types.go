@@ -7,6 +7,7 @@ const (
 	RemediationModeReport          = "report"
 	SmoothingMethodEWMA            = "ewma"
 	DefaultEWMABeta                = 0.9
+	timeFormatRFC3339              = "2006-01-02T15:04:05Z07:00"
 )
 
 type Config struct {
@@ -20,6 +21,7 @@ type Config struct {
 	IncludeControlPlane     bool
 	RemediationMode         string
 	EWMABeta                float64
+	PublishTarget           string
 }
 
 type Snapshot struct {

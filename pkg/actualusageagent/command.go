@@ -26,6 +26,7 @@ func NewCommand() *cobra.Command {
 		IncludeControlPlane:     false,
 		RemediationMode:         RemediationModeReport,
 		EWMABeta:                DefaultEWMABeta,
+		PublishTarget:           PublishTargetNone,
 	}
 
 	cmd := &cobra.Command{
@@ -68,14 +69,15 @@ func NewCommand() *cobra.Command {
 	cmd.Flags().BoolVar(&cfg.IncludeControlPlane, "include-control-plane", cfg.IncludeControlPlane, "include control-plane/master nodes in RII output")
 	cmd.Flags().StringVar(&cfg.RemediationMode, "remediation-mode", cfg.RemediationMode, "remediation behavior; currently report only")
 	cmd.Flags().Float64Var(&cfg.EWMABeta, "ewma-beta", cfg.EWMABeta, "EWMA beta for smoothing node CPU/memory usage before RII calculation")
+	cmd.Flags().StringVar(&cfg.PublishTarget, "publish-target", cfg.PublishTarget, "where to publish latest usage state: none or node-annotations")
 	return cmd
 }
 
 func run(ctx context.Context, collector *Collector, cfg Config) error {
 	if cfg.RunOnce {
-		return collectAndWrite(ctx, collector, cfg)
+		return collectWriteAndPublish(ctx, collector, cfg)
 	}
-	if err := collectAndWrite(ctx, collector, cfg); err != nil {
+	if err := collectWriteAndPublish(ctx, collector, cfg); err != nil {
 		return err
 	}
 	ticker := time.NewTicker(cfg.Interval)
@@ -85,19 +87,22 @@ func run(ctx context.Context, collector *Collector, cfg Config) error {
 		case <-ctx.Done():
 			return ctx.Err()
 		case <-ticker.C:
-			if err := collectAndWrite(ctx, collector, cfg); err != nil {
+			if err := collectWriteAndPublish(ctx, collector, cfg); err != nil {
 				return err
 			}
 		}
 	}
 }
 
-func collectAndWrite(ctx context.Context, collector *Collector, cfg Config) error {
+func collectWriteAndPublish(ctx context.Context, collector *Collector, cfg Config) error {
 	snapshot, err := collector.Collect(ctx)
 	if err != nil {
 		return err
 	}
-	return WriteSnapshot(cfg.OutputDir, snapshot)
+	if err := WriteSnapshot(cfg.OutputDir, snapshot); err != nil {
+		return err
+	}
+	return PublishSnapshot(ctx, collector.kube, cfg.PublishTarget, snapshot)
 }
 
 func buildRESTConfig(kubeconfig string) (*rest.Config, error) {

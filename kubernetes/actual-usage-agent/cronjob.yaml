@@ -30,6 +30,7 @@ spec:
                 - --fragmentation-threshold=0.20
                 - --namespace=
                 - --remediation-mode=report
+            - --publish-target=node-annotations
               volumeMounts:
                 - name: output
                   mountPath: /var/log/actual-usage-agent

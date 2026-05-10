@@ -113,3 +113,21 @@ go run ./cmd/actual-usage-agent \
 Current remediation mode is `report`. When fragmented nodes are detected, the agent records a recommendation to run the descheduler `ResourceDefragmentation` policy. It does not evict pods directly and does not mutate cluster objects.
 
 This is deliberate for PR2 clean separation: the monitoring agent produces evidence/history, while PR1 remains the remediation implementation.
+
+
+## Publishing EWMA state for loose descheduling
+
+For the E5 experiment group, run the agent as a long-running Deployment and publish its latest EWMA node usage to node annotations:
+
+```bash
+actual-usage-agent --publish-target=node-annotations --interval=30s
+```
+
+The descheduler can then run as a CronJob with `ResourceDefragmentation` configured as `usageMode: published-ewma`. The consumer reads:
+
+- `descheduler.thesis/actual-cpu-milli`
+- `descheduler.thesis/actual-memory-bytes`
+- `descheduler.thesis/timestamp`
+- supporting metadata such as raw usage, RII, smoothing method, EWMA beta, and metrics source
+
+Set `publishedUsageMaxAgeSeconds` in the descheduler plugin args to reject stale agent state. This keeps EWMA state in the long-running monitoring agent instead of resetting on every descheduler CronJob execution.
