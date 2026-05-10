@@ -1,0 +1,16 @@
+apiVersion: descheduler/v1alpha2
+kind: DeschedulerPolicy
+metricsProviders:
+  - source: KubernetesMetrics
+profiles:
+  - name: default
+    pluginConfig:
+      - name: ResourceDefragmentation
+        args:
+          imbalanceThreshold: 0.20
+          maxEvictions: 5
+          usageMode: actual-raw
+    plugins:
+      balance:
+        enabled:
+          - ResourceDefragmentation

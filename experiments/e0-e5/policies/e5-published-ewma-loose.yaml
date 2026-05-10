@@ -1,0 +1,15 @@
+apiVersion: descheduler/v1alpha2
+kind: DeschedulerPolicy
+profiles:
+  - name: default
+    pluginConfig:
+      - name: ResourceDefragmentation
+        args:
+          imbalanceThreshold: 0.20
+          maxEvictions: 5
+          usageMode: published-ewma
+          publishedUsageMaxAgeSeconds: 180
+    plugins:
+      balance:
+        enabled:
+          - ResourceDefragmentation
