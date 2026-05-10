@@ -17,3 +17,10 @@ It is intentionally Kubernetes-only: it does not create or destroy cloud resourc
 Each group uses staged ramps: `low`, `medium`, `high-safe`.
 Every stage deploys CPU, memory, mixed, and bursty burners plus probe pods to measure schedulability.
 The runner captures pods deployed/evicted, probe scheduled/pending/latency, node/pod metrics, events, and policy output.
+
+## Optional E4 ablations
+
+- E4a: `actual-ewma-persisted` lets a descheduler CronJob calculate EWMA from raw metrics and persist the previous smoothed value in node annotations. This tests tight CronJob + persisted state without a separate monitoring agent.
+- E4b: `actual-ewma` under a long-running descheduler Deployment keeps EWMA in process memory. This tests tight Deployment + in-memory state.
+
+Both are optional ablations after E0-E5 are stable.

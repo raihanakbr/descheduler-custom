@@ -31,9 +31,9 @@ func ValidateResourceDefragmentationArgs(obj runtime.Object) error {
 		allErrs = append(allErrs, fmt.Errorf("only one of Include/Exclude namespaces can be set"))
 	}
 	switch args.UsageMode {
-	case "", UsageModeRequests, UsageModeActualRaw, UsageModeActualEWMA, UsageModePublishedEWMA:
+	case "", UsageModeRequests, UsageModeActualRaw, UsageModeActualEWMA, UsageModeActualEWMAPersisted, UsageModePublishedEWMA:
 	default:
-		allErrs = append(allErrs, fmt.Errorf("unsupported usageMode %q, must be one of %q, %q, %q, %q", args.UsageMode, UsageModeRequests, UsageModeActualRaw, UsageModeActualEWMA, UsageModePublishedEWMA))
+		allErrs = append(allErrs, fmt.Errorf("unsupported usageMode %q, must be one of %q, %q, %q, %q, %q", args.UsageMode, UsageModeRequests, UsageModeActualRaw, UsageModeActualEWMA, UsageModeActualEWMAPersisted, UsageModePublishedEWMA))
 	}
 	return utilerrors.NewAggregate(allErrs)
 }

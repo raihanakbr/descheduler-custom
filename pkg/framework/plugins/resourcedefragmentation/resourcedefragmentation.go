@@ -38,13 +38,14 @@ import (
 const PluginName = "ResourceDefragmentation"
 
 const (
-	UsageModeRequests       = "requests"
-	UsageModeActualRaw      = "actual-raw"
-	UsageModeActualEWMA     = "actual-ewma"
-	UsageModePublishedEWMA  = "published-ewma"
-	publishedCPUAnnotation  = "descheduler.thesis/actual-cpu-milli"
-	publishedMemAnnotation  = "descheduler.thesis/actual-memory-bytes"
-	publishedTimeAnnotation = "descheduler.thesis/timestamp"
+	UsageModeRequests            = "requests"
+	UsageModeActualRaw           = "actual-raw"
+	UsageModeActualEWMA          = "actual-ewma"
+	UsageModeActualEWMAPersisted = "actual-ewma-persisted"
+	UsageModePublishedEWMA       = "published-ewma"
+	publishedCPUAnnotation       = "descheduler.thesis/actual-cpu-milli"
+	publishedMemAnnotation       = "descheduler.thesis/actual-memory-bytes"
+	publishedTimeAnnotation      = "descheduler.thesis/timestamp"
 )
 
 // ResourceDefragmentation evicts pods to defragment resource usage across nodes.
@@ -265,7 +266,7 @@ func (r *ResourceDefragmentation) Balance(ctx context.Context, nodes []*v1.Node)
 
 func (r *ResourceDefragmentation) usageMode() string {
 	switch r.args.UsageMode {
-	case UsageModeRequests, UsageModeActualRaw, UsageModeActualEWMA, UsageModePublishedEWMA:
+	case UsageModeRequests, UsageModeActualRaw, UsageModeActualEWMA, UsageModeActualEWMAPersisted, UsageModePublishedEWMA:
 		return r.args.UsageMode
 	default:
 		if r.handle.MetricsCollector() != nil {
@@ -290,6 +291,13 @@ func (r *ResourceDefragmentation) getNodeUsage(ctx context.Context, node *v1.Nod
 			return reqCpu, reqMem, UsageModeRequests
 		}
 		return nodeMetrics.Usage.Cpu().MilliValue(), nodeMetrics.Usage.Memory().Value(), UsageModeActualRaw
+	case UsageModeActualEWMAPersisted:
+		cpu, mem, err := r.persistedEWMANodeUsage(ctx, node)
+		if err != nil {
+			r.logger.Error(err, "Unable to calculate persisted EWMA node usage, falling back to requests", "node", node.Name)
+			return reqCpu, reqMem, UsageModeRequests
+		}
+		return cpu, mem, UsageModeActualEWMAPersisted
 	case UsageModePublishedEWMA:
 		cpu, mem, err := r.publishedNodeUsage(node)
 		if err != nil {
@@ -315,6 +323,42 @@ func (r *ResourceDefragmentation) getNodeUsage(ctx context.Context, node *v1.Nod
 		}
 	}
 	return reqCpu, reqMem, UsageModeRequests
+}
+
+func (r *ResourceDefragmentation) persistedEWMANodeUsage(ctx context.Context, node *v1.Node) (cpu int64, mem int64, err error) {
+	if r.handle.MetricsCollector() == nil {
+		return 0, 0, fmt.Errorf("metrics collector is unavailable")
+	}
+	nodeMetrics, err := r.handle.MetricsCollector().MetricsClient().MetricsV1beta1().NodeMetricses().Get(ctx, node.Name, metav1.GetOptions{})
+	if err != nil {
+		return 0, 0, err
+	}
+	rawCPU := nodeMetrics.Usage.Cpu().MilliValue()
+	rawMem := nodeMetrics.Usage.Memory().Value()
+	beta := r.args.EWMABeta
+	if beta <= 0 || beta >= 1 {
+		beta = 0.9
+	}
+	annotations := node.GetAnnotations()
+	prevCPU, cpuErr := strconv.ParseInt(annotations[publishedCPUAnnotation], 10, 64)
+	prevMem, memErr := strconv.ParseInt(annotations[publishedMemAnnotation], 10, 64)
+	if cpuErr == nil && memErr == nil {
+		cpu = int64(math.Round(beta*float64(prevCPU) + (1-beta)*float64(rawCPU)))
+		mem = int64(math.Round(beta*float64(prevMem) + (1-beta)*float64(rawMem)))
+	} else {
+		cpu, mem = rawCPU, rawMem
+	}
+	copy := node.DeepCopy()
+	if copy.Annotations == nil {
+		copy.Annotations = map[string]string{}
+	}
+	copy.Annotations[publishedCPUAnnotation] = strconv.FormatInt(cpu, 10)
+	copy.Annotations[publishedMemAnnotation] = strconv.FormatInt(mem, 10)
+	copy.Annotations[publishedTimeAnnotation] = time.Now().UTC().Format(time.RFC3339)
+	if _, err := r.handle.ClientSet().CoreV1().Nodes().Update(ctx, copy, metav1.UpdateOptions{}); err != nil {
+		return 0, 0, err
+	}
+	return cpu, mem, nil
 }
 
 func (r *ResourceDefragmentation) publishedNodeUsage(node *v1.Node) (cpu int64, mem int64, err error) {

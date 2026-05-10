@@ -36,6 +36,10 @@ type ResourceDefragmentationArgs struct {
 	// Empty keeps legacy auto behavior: requests without a metrics collector, actual-ewma with one.
 	UsageMode string `json:"usageMode,omitempty"`
 
+	// EWMABeta controls persisted EWMA smoothing for usageMode actual-ewma-persisted.
+	// Empty/invalid values default to 0.9.
+	EWMABeta float64 `json:"ewmaBeta,omitempty"`
+
 	// PublishedUsageMaxAgeSeconds rejects loose-agent published usage older than this value.
 	// Zero disables stale-state rejection.
 	PublishedUsageMaxAgeSeconds int64 `json:"publishedUsageMaxAgeSeconds,omitempty"`
