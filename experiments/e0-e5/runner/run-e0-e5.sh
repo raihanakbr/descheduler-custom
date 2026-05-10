@@ -149,7 +149,7 @@ case "$GROUP" in
   E1) POLICY="$(dirname "$0")/../policies/e1-low-node-utilization.yaml" ;;
   E2) POLICY="$(dirname "$0")/../policies/e2-request-rii-topsis.yaml" ;;
   E3) POLICY="$(dirname "$0")/../policies/e3-actual-raw-rii-topsis.yaml" ;;
-  E4) POLICY="$(dirname "$0")/../policies/e4-actual-ewma-tight.yaml" ;;
+  E4) POLICY="$(dirname "$0")/../policies/e4-actual-ewma-tight-persisted.yaml" ;;
   E5) POLICY="$(dirname "$0")/../policies/e5-published-ewma-loose.yaml" ;;
   *) echo "GROUP must be E0..E5" >&2; exit 2 ;;
 esac
