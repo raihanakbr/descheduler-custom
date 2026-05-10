@@ -31,5 +31,10 @@ type ResourceDefragmentationArgs struct {
 
 	ImbalanceThreshold float64 `json:"imbalanceThreshold,omitempty"`
 
+	// UsageMode controls which resource signal ResourceDefragmentation uses for RII/TOPSIS.
+	// Supported values: requests, actual-raw, actual-ewma.
+	// Empty keeps legacy auto behavior: requests without a metrics collector, actual-ewma with one.
+	UsageMode string `json:"usageMode,omitempty"`
+
 	MaxEvictions int `json:"maxEvictions,omitempty"`
 }

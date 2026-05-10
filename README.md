@@ -39,9 +39,13 @@ This fork includes an experimental `ResourceDefragmentation` plugin used for the
 
 The implementation follows **Option A: real-usage-aware descheduler + default Kubernetes scheduler**.
 
-- The descheduler reads actual node and pod CPU/memory usage from Kubernetes Metrics Server through the existing `MetricsCollector`.
-- If runtime metrics are unavailable, the plugin falls back to Kubernetes resource requests so existing request-based behavior remains usable.
-- Fragmentation detection and TOPSIS candidate scoring use the real-usage snapshot when available.
+- The `ResourceDefragmentation` plugin now has a `usageMode` switch for experiment groups:
+  - `requests`: request-based RII+TOPSIS baseline.
+  - `actual-raw`: raw Metrics Server CPU/memory snapshot without smoothing.
+  - `actual-ewma`: Metrics Server CPU/memory with the existing in-process EWMA collector.
+- Empty `usageMode` keeps legacy auto behavior: request-based without a metrics collector, `actual-ewma` when metrics are enabled.
+- If runtime metrics are unavailable, actual modes fall back to Kubernetes resource requests so existing request-based behavior remains usable.
+- Fragmentation detection and TOPSIS candidate scoring use the selected request/real-usage signal.
 - Before eviction, the plugin performs a target-aware feasibility guard:
   - the pod's current/origin node is excluded as a useful target;
   - at least one non-origin node must be feasible using Kubernetes resource requests;

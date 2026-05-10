@@ -35,6 +35,12 @@ import (
 
 const PluginName = "ResourceDefragmentation"
 
+const (
+	UsageModeRequests   = "requests"
+	UsageModeActualRaw  = "actual-raw"
+	UsageModeActualEWMA = "actual-ewma"
+)
+
 // ResourceDefragmentation evicts pods to defragment resource usage across nodes.
 type ResourceDefragmentation struct {
 	logger    klog.Logger
@@ -130,22 +136,7 @@ func (r *ResourceDefragmentation) Balance(ctx context.Context, nodes []*v1.Node)
 			continue
 		}
 
-		usedCpu, usedMem := reqCpu, reqMem
-		usageSource := "requests"
-		if r.handle.MetricsCollector() != nil {
-			if !r.handle.MetricsCollector().HasSynced() {
-				if err := r.handle.MetricsCollector().Collect(ctx); err != nil {
-					logger.Error(err, "Unable to collect metrics-server node usage, falling back to requests", "node", node.Name)
-				}
-			}
-			if nodeUsage, err := r.handle.MetricsCollector().NodeUsage(node); err == nil {
-				usedCpu = nodeUsage[v1.ResourceCPU].MilliValue()
-				usedMem = nodeUsage[v1.ResourceMemory].Value()
-				usageSource = "metrics-server"
-			} else {
-				logger.Error(err, "Unable to read metrics-server node usage, falling back to requests", "node", node.Name)
-			}
-		}
+		usedCpu, usedMem, usageSource := r.getNodeUsage(ctx, node, reqCpu, reqMem)
 
 		nodeStates[node.Name] = &NodeResourceState{
 			AllocatableCPU: allocCpu,
@@ -266,6 +257,53 @@ func (r *ResourceDefragmentation) Balance(ctx context.Context, nodes []*v1.Node)
 	return nil
 }
 
+func (r *ResourceDefragmentation) usageMode() string {
+	switch r.args.UsageMode {
+	case UsageModeRequests, UsageModeActualRaw, UsageModeActualEWMA:
+		return r.args.UsageMode
+	default:
+		if r.handle.MetricsCollector() != nil {
+			return UsageModeActualEWMA
+		}
+		return UsageModeRequests
+	}
+}
+
+func (r *ResourceDefragmentation) getNodeUsage(ctx context.Context, node *v1.Node, reqCpu, reqMem int64) (cpu int64, mem int64, source string) {
+	switch r.usageMode() {
+	case UsageModeRequests:
+		return reqCpu, reqMem, UsageModeRequests
+	case UsageModeActualRaw:
+		if r.handle.MetricsCollector() == nil {
+			r.logger.V(1).Info("Metrics collector is unavailable, falling back to requests", "node", node.Name, "usageMode", UsageModeActualRaw)
+			return reqCpu, reqMem, UsageModeRequests
+		}
+		nodeMetrics, err := r.handle.MetricsCollector().MetricsClient().MetricsV1beta1().NodeMetricses().Get(ctx, node.Name, metav1.GetOptions{})
+		if err != nil {
+			r.logger.Error(err, "Unable to read raw metrics-server node usage, falling back to requests", "node", node.Name)
+			return reqCpu, reqMem, UsageModeRequests
+		}
+		return nodeMetrics.Usage.Cpu().MilliValue(), nodeMetrics.Usage.Memory().Value(), UsageModeActualRaw
+	case UsageModeActualEWMA:
+		if r.handle.MetricsCollector() == nil {
+			r.logger.V(1).Info("Metrics collector is unavailable, falling back to requests", "node", node.Name, "usageMode", UsageModeActualEWMA)
+			return reqCpu, reqMem, UsageModeRequests
+		}
+		if !r.handle.MetricsCollector().HasSynced() {
+			if err := r.handle.MetricsCollector().Collect(ctx); err != nil {
+				r.logger.Error(err, "Unable to collect metrics-server node usage, falling back to requests", "node", node.Name)
+				return reqCpu, reqMem, UsageModeRequests
+			}
+		}
+		if nodeUsage, err := r.handle.MetricsCollector().NodeUsage(node); err == nil {
+			return nodeUsage[v1.ResourceCPU].MilliValue(), nodeUsage[v1.ResourceMemory].Value(), UsageModeActualEWMA
+		} else {
+			r.logger.Error(err, "Unable to read metrics-server node usage, falling back to requests", "node", node.Name)
+		}
+	}
+	return reqCpu, reqMem, UsageModeRequests
+}
+
 // getPodRequests is a helper to sum a pod's requested resources
 func getPodRequests(pod *v1.Pod) (cpu int64, mem int64) {
 	for _, c := range pod.Spec.Containers {
@@ -276,9 +314,9 @@ func getPodRequests(pod *v1.Pod) (cpu int64, mem int64) {
 }
 
 func (r *ResourceDefragmentation) getPodUsage(ctx context.Context, pod *v1.Pod) (cpu int64, mem int64, source string, err error) {
-	if r.handle.MetricsCollector() == nil {
+	if r.usageMode() == UsageModeRequests || r.handle.MetricsCollector() == nil {
 		cpu, mem = getPodRequests(pod)
-		return cpu, mem, "requests", nil
+		return cpu, mem, UsageModeRequests, nil
 	}
 
 	podMetrics, err := r.handle.MetricsCollector().MetricsClient().MetricsV1beta1().PodMetricses(pod.Namespace).Get(ctx, pod.Name, metav1.GetOptions{})
@@ -290,7 +328,7 @@ func (r *ResourceDefragmentation) getPodUsage(ctx context.Context, pod *v1.Pod) 
 		cpu += container.Usage.Cpu().MilliValue()
 		mem += container.Usage.Memory().Value()
 	}
-	return cpu, mem, "metrics-server", nil
+	return cpu, mem, r.usageMode(), nil
 }
 
 // computeRII calculates the Resource Imbalance Index for a node purely mathematically
