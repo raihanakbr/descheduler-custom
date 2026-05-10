@@ -20,4 +20,4 @@ The runner captures pods deployed/evicted, probe scheduled/pending/latency, node
 
 ## E4 note
 
-E4 intentionally uses persisted EWMA state because a CronJob-only in-memory EWMA would lose history after each run. The weak CronJob/in-memory variant is not a final experiment group. E4b remains an optional ablation for a long-running descheduler Deployment that keeps EWMA in process memory.
+E4 intentionally uses persisted EWMA state because a CronJob-only in-memory EWMA would lose history after each run. The weak CronJob/in-memory variant is not a final experiment group. A long-running descheduler Deployment with in-memory EWMA can be tested separately as optional E4b.
