@@ -9,6 +9,8 @@ AGENT_IMAGE="${AGENT_IMAGE:-busybox:1.36}"
 DESCHEDULER_BIN_HOST_PATH="${DESCHEDULER_BIN_HOST_PATH:-/root/descheduler}"
 AGENT_BIN_HOST_PATH="${AGENT_BIN_HOST_PATH:-/root/actual-usage-agent}"
 DESCHEDULER_NODE_NAME="${DESCHEDULER_NODE_NAME:-}"
+AGENT_NODE_NAME="${AGENT_NODE_NAME:-}"
+STAGES="${STAGES:-low medium high-safe}"
 KUBECTL="${KUBECTL:-kubectl}"
 
 mkdir -p "$RESULT_DIR"
@@ -115,7 +117,7 @@ spec:
         spec:
 ${node_name_yaml}
           restartPolicy: Never
-          serviceAccountName: descheduler
+          serviceAccountName: descheduler-sa
           tolerations:
           - operator: Exists
           containers:
@@ -158,6 +160,10 @@ start_agent_for_e5(){
   [[ "$GROUP" == "E5" ]] || return 0
   log "Starting E5 actual-usage-agent publisher"
   $KUBECTL -n kube-system delete deploy e0-e5-actual-usage-agent --ignore-not-found
+  local agent_node_name_yaml=""
+  if [[ -n "$AGENT_NODE_NAME" ]]; then
+    agent_node_name_yaml="      nodeName: ${AGENT_NODE_NAME}"
+  fi
   cat <<YAML | $KUBECTL apply -f -
 apiVersion: apps/v1
 kind: Deployment
@@ -170,6 +176,7 @@ spec:
   template:
     metadata: {labels: {app: e0-e5-actual-usage-agent}}
     spec:
+${agent_node_name_yaml}
       serviceAccountName: actual-usage-agent
       containers:
       - name: agent
@@ -203,7 +210,7 @@ log "Starting group=$GROUP namespace=$NAMESPACE result_dir=$RESULT_DIR"
 $KUBECTL create namespace "$NAMESPACE" --dry-run=client -o yaml | $KUBECTL apply -f -
 start_agent_for_e5
 capture initial
-for stage in low medium high-safe; do
+for stage in $STAGES; do
   read -r c m x b < <(stage_replicas "$stage")
   log "Applying stage=$stage cpu=$c memory=$m mixed=$x bursty=$b"
   write_workload "$stage" "$c" "$m" "$x" "$b"
