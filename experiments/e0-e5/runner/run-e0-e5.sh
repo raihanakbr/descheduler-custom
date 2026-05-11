@@ -112,8 +112,14 @@ spec:
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
+    metadata:
+      labels:
+        e0-e5-runner: descheduler
     spec:
       template:
+        metadata:
+          labels:
+            e0-e5-runner: descheduler
         spec:
 ${node_name_yaml}
           restartPolicy: Never
@@ -142,7 +148,7 @@ ${node_name_yaml}
 YAML
   local job=""
   for _ in $(seq 1 90); do
-    job="$($KUBECTL -n kube-system get jobs -l batch.kubernetes.io/cronjob-name=e0-e5-descheduler --sort-by=.metadata.creationTimestamp -o jsonpath='{.items[-1:].metadata.name}' 2>/dev/null || true)"
+    job="$($KUBECTL -n kube-system get jobs -l e0-e5-runner=descheduler --sort-by=.metadata.creationTimestamp -o jsonpath='{.items[-1:].metadata.name}' 2>/dev/null || true)"
     [[ -n "$job" ]] && break
     sleep 2
   done
