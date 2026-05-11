@@ -88,34 +88,52 @@ run_descheduler_once(){
   local policy="$1"
   if [[ -z "$policy" ]]; then return 0; fi
   cp "$policy" "$RESULT_DIR/policy.yaml"
-  log "Running descheduler once with policy $(basename "$policy")"
+  log "Running descheduler through CronJob with policy $(basename "$policy")"
   $KUBECTL -n kube-system create configmap e0-e5-descheduler-policy --from-file=policy.yaml="$RESULT_DIR/policy.yaml" --dry-run=client -o yaml | $KUBECTL apply -f -
-  $KUBECTL -n kube-system delete job e0-e5-descheduler --ignore-not-found
+  $KUBECTL -n kube-system delete cronjob e0-e5-descheduler --ignore-not-found
   cat <<YAML | $KUBECTL apply -f -
 apiVersion: batch/v1
-kind: Job
+kind: CronJob
 metadata:
   name: e0-e5-descheduler
   namespace: kube-system
 spec:
-  template:
+  schedule: "* * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
     spec:
-      restartPolicy: Never
-      serviceAccountName: descheduler
-      containers:
-      - name: descheduler
-        image: ${DESCHEDULER_IMAGE}
-        args: ["--policy-config-file=/policy-dir/policy.yaml", "--v=4"]
-        volumeMounts:
-        - name: policy
-          mountPath: /policy-dir
-      volumes:
-      - name: policy
-        configMap:
-          name: e0-e5-descheduler-policy
+      template:
+        spec:
+          restartPolicy: Never
+          serviceAccountName: descheduler
+          containers:
+          - name: descheduler
+            image: ${DESCHEDULER_IMAGE}
+            args: ["--policy-config-file=/policy-dir/policy.yaml", "--v=4"]
+            volumeMounts:
+            - name: policy
+              mountPath: /policy-dir
+          volumes:
+          - name: policy
+            configMap:
+              name: e0-e5-descheduler-policy
 YAML
-  $KUBECTL -n kube-system wait --for=condition=complete job/e0-e5-descheduler --timeout=180s || true
-  $KUBECTL -n kube-system logs job/e0-e5-descheduler > "$RESULT_DIR/descheduler-${GROUP}.log" 2>&1 || true
+  local job=""
+  for _ in $(seq 1 90); do
+    job="$($KUBECTL -n kube-system get jobs -l batch.kubernetes.io/cronjob-name=e0-e5-descheduler --sort-by=.metadata.creationTimestamp -o jsonpath='{.items[-1:].metadata.name}' 2>/dev/null || true)"
+    [[ -n "$job" ]] && break
+    sleep 2
+  done
+  if [[ -z "$job" ]]; then
+    log "ERROR: CronJob did not create a Job within timeout"
+    return 1
+  fi
+  log "Waiting for CronJob-created Job $job"
+  $KUBECTL -n kube-system wait --for=condition=complete "job/${job}" --timeout=240s || true
+  $KUBECTL -n kube-system logs "job/${job}" > "$RESULT_DIR/descheduler-${GROUP}.log" 2>&1 || true
+  $KUBECTL -n kube-system patch cronjob e0-e5-descheduler -p '{"spec":{"suspend":true}}' >/dev/null 2>&1 || true
 }
 
 start_agent_for_e5(){
