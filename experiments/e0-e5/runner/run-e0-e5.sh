@@ -4,8 +4,11 @@ set -euo pipefail
 GROUP="${GROUP:-E0}"
 NAMESPACE="${NAMESPACE:-e0-e5-${GROUP,,}}"
 RESULT_DIR="${RESULT_DIR:-$(pwd)/e0-e5-results/${GROUP}-$(date -u +%Y%m%dT%H%M%SZ)}"
-DESCHEDULER_IMAGE="${DESCHEDULER_IMAGE:-descheduler:local}"
-AGENT_IMAGE="${AGENT_IMAGE:-$DESCHEDULER_IMAGE}"
+DESCHEDULER_IMAGE="${DESCHEDULER_IMAGE:-busybox:1.36}"
+AGENT_IMAGE="${AGENT_IMAGE:-busybox:1.36}"
+DESCHEDULER_BIN_HOST_PATH="${DESCHEDULER_BIN_HOST_PATH:-/root/descheduler}"
+AGENT_BIN_HOST_PATH="${AGENT_BIN_HOST_PATH:-/root/actual-usage-agent}"
+DESCHEDULER_NODE_NAME="${DESCHEDULER_NODE_NAME:-}"
 KUBECTL="${KUBECTL:-kubectl}"
 
 mkdir -p "$RESULT_DIR"
@@ -91,6 +94,10 @@ run_descheduler_once(){
   log "Running descheduler through CronJob with policy $(basename "$policy")"
   $KUBECTL -n kube-system create configmap e0-e5-descheduler-policy --from-file=policy.yaml="$RESULT_DIR/policy.yaml" --dry-run=client -o yaml | $KUBECTL apply -f -
   $KUBECTL -n kube-system delete cronjob e0-e5-descheduler --ignore-not-found
+  local node_name_yaml=""
+  if [[ -n "$DESCHEDULER_NODE_NAME" ]]; then
+    node_name_yaml="          nodeName: ${DESCHEDULER_NODE_NAME}"
+  fi
   cat <<YAML | $KUBECTL apply -f -
 apiVersion: batch/v1
 kind: CronJob
@@ -106,19 +113,30 @@ spec:
     spec:
       template:
         spec:
+${node_name_yaml}
           restartPolicy: Never
           serviceAccountName: descheduler
+          tolerations:
+          - operator: Exists
           containers:
           - name: descheduler
             image: ${DESCHEDULER_IMAGE}
+            command: ["/host/descheduler"]
             args: ["--policy-config-file=/policy-dir/policy.yaml", "--v=4"]
             volumeMounts:
             - name: policy
               mountPath: /policy-dir
+            - name: descheduler-bin
+              mountPath: /host/descheduler
+              readOnly: true
           volumes:
           - name: policy
             configMap:
               name: e0-e5-descheduler-policy
+          - name: descheduler-bin
+            hostPath:
+              path: ${DESCHEDULER_BIN_HOST_PATH}
+              type: File
 YAML
   local job=""
   for _ in $(seq 1 90); do
@@ -156,8 +174,17 @@ spec:
       containers:
       - name: agent
         image: ${AGENT_IMAGE}
-        command: ["/bin/actual-usage-agent"]
+        command: ["/host/actual-usage-agent"]
         args: ["--interval=30s", "--namespace=", "--publish-target=node-annotations", "--output-dir=/tmp/actual-usage-agent"]
+        volumeMounts:
+        - name: agent-bin
+          mountPath: /host/actual-usage-agent
+          readOnly: true
+      volumes:
+      - name: agent-bin
+        hostPath:
+          path: ${AGENT_BIN_HOST_PATH}
+          type: File
 YAML
   sleep 75
 }
