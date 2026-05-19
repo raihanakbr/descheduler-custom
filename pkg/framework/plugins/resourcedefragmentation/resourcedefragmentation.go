@@ -109,6 +109,11 @@ func (r *ResourceDefragmentation) Balance(ctx context.Context, nodes []*v1.Node)
 
 	// Step 1: Build the cluster resource state cache once
 	for _, node := range nodes {
+		if isControlPlaneNode(node) {
+			logger.V(2).Info("Skipping control-plane node from defragmentation evaluation", "node", node.Name)
+			continue
+		}
+
 		pods, err := podutil.ListPodsOnANode(node.Name, r.handle.GetPodsAssignedToNodeFunc(), r.podFilter)
 		if err != nil {
 			logger.Error(err, "Error listing pods on node", "node", node.Name)
@@ -395,8 +400,27 @@ func (r *ResourceDefragmentation) evaluateFeasibleTargets(ctx context.Context, c
 	return decision
 }
 
+func isControlPlaneNode(node *v1.Node) bool {
+	if node == nil {
+		return false
+	}
+	if _, ok := node.Labels["node-role.kubernetes.io/control-plane"]; ok {
+		return true
+	}
+	if _, ok := node.Labels["node-role.kubernetes.io/master"]; ok {
+		return true
+	}
+	for _, taint := range node.Spec.Taints {
+		switch taint.Key {
+		case "node-role.kubernetes.io/control-plane", "node-role.kubernetes.io/master":
+			return true
+		}
+	}
+	return false
+}
+
 func isPodSchedulableOnNode(pod *v1.Pod, node *v1.Node) bool {
-	if node == nil || node.Spec.Unschedulable {
+	if node == nil || node.Spec.Unschedulable || isControlPlaneNode(node) {
 		return false
 	}
 
