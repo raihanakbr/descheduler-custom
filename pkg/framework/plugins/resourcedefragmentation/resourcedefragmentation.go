@@ -46,6 +46,7 @@ type ResourceDefragmentation struct {
 var _ frameworktypes.BalancePlugin = &ResourceDefragmentation{}
 
 type NodeResourceState struct {
+	Node           *v1.Node
 	AllocatableCPU int64
 	AllocatableMem int64
 	RequestedCPU   int64
@@ -148,6 +149,7 @@ func (r *ResourceDefragmentation) Balance(ctx context.Context, nodes []*v1.Node)
 		}
 
 		nodeStates[node.Name] = &NodeResourceState{
+			Node:           node,
 			AllocatableCPU: allocCpu,
 			AllocatableMem: allocMem,
 			RequestedCPU:   reqCpu,
@@ -361,6 +363,9 @@ func (r *ResourceDefragmentation) evaluateFeasibleTargets(ctx context.Context, c
 		if nodeName == currentNodeName {
 			continue
 		}
+		if !isPodSchedulableOnNode(candidatePod, state.Node) {
+			continue
+		}
 
 		freeCpu := state.AllocatableCPU - state.RequestedCPU
 		freeMem := state.AllocatableMem - state.RequestedMem
@@ -388,6 +393,43 @@ func (r *ResourceDefragmentation) evaluateFeasibleTargets(ctx context.Context, c
 	}
 	r.logger.V(2).Info("Evaluated feasible targets", "pod", klog.KObj(candidatePod), "originNode", currentNodeName, "usageSource", usageSource, "feasibleTargets", decision.targetNames, "bestProjectedScoreImprovement", decision.bestImprovement, "decision", decision.reason)
 	return decision
+}
+
+func isPodSchedulableOnNode(pod *v1.Pod, node *v1.Node) bool {
+	if node == nil || node.Spec.Unschedulable {
+		return false
+	}
+
+	for _, taint := range node.Spec.Taints {
+		if taint.Effect != v1.TaintEffectNoSchedule && taint.Effect != v1.TaintEffectNoExecute {
+			continue
+		}
+		if !podToleratesTaint(pod, taint) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func podToleratesTaint(pod *v1.Pod, taint v1.Taint) bool {
+	for _, toleration := range pod.Spec.Tolerations {
+		if toleration.Effect != "" && toleration.Effect != taint.Effect {
+			continue
+		}
+		if toleration.Key != taint.Key {
+			continue
+		}
+		switch toleration.Operator {
+		case v1.TolerationOpExists:
+			return true
+		case v1.TolerationOpEqual, "":
+			if toleration.Value == taint.Value {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // computeC2 scores the best feasible migration target.
