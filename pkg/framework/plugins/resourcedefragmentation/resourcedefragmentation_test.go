@@ -69,6 +69,21 @@ func withPodRequests(cpu, memory string) func(*v1.Pod) {
 	}
 }
 
+func withNodeTaint(key string, effect v1.TaintEffect) func(*v1.Node) {
+	return func(n *v1.Node) {
+		n.Spec.Taints = append(n.Spec.Taints, v1.Taint{Key: key, Effect: effect})
+	}
+}
+
+func withNodeLabel(key, value string) func(*v1.Node) {
+	return func(n *v1.Node) {
+		if n.Labels == nil {
+			n.Labels = map[string]string{}
+		}
+		n.Labels[key] = value
+	}
+}
+
 func buildTestNode(nodeName string, apply ...func(*v1.Node)) *v1.Node {
 	node := test.BuildTestNode(nodeName, 2000, 4294967296, 10, nil)
 	for _, fn := range apply {
@@ -124,6 +139,40 @@ func TestResourceDefragmentation(t *testing.T) {
 			},
 			expectedEvictedPodCount: 1,
 			expectedEvictedPodName:  "pod-only-one",
+		},
+
+		{
+			description: "tainted target node is not treated as a feasible eviction target",
+			args:        &ResourceDefragmentationArgs{ImbalanceThreshold: 0.3, MaxEvictions: 5},
+			nodes: []*v1.Node{
+				buildTestNode("node-fragmented", withNodeCapacity("2000m", "4Gi")),
+				// This node has enough free resources, but a regular workload pod cannot land here.
+				buildTestNode("node-control-plane", withNodeCapacity("4000m", "8Gi"), withNodeTaint("node-role.kubernetes.io/control-plane", v1.TaintEffectNoSchedule)),
+			},
+			pods: []*v1.Pod{
+				buildTestPodForNode("pod-only-one", "node-fragmented", withPodRequests("1800m", "200Mi")),
+			},
+			expectedEvictedPodCount: 0,
+		},
+		{
+			description: "control-plane node and pods are fully excluded from source and target consideration",
+			args:        &ResourceDefragmentationArgs{ImbalanceThreshold: 0.3, MaxEvictions: 5},
+			nodes: []*v1.Node{
+				buildTestNode(
+					"node-control-plane",
+					withNodeCapacity("2000m", "4Gi"),
+					withNodeLabel("node-role.kubernetes.io/control-plane", ""),
+					withNodeTaint("node-role.kubernetes.io/control-plane", v1.TaintEffectNoSchedule),
+				),
+				buildTestNode("node-worker", withNodeCapacity("4000m", "8Gi")),
+			},
+			pods: []*v1.Pod{
+				// If control-plane were not excluded, this pod would be a strong eviction candidate.
+				buildTestPodForNode("cp-pod-cpu-heavy", "node-control-plane", withPodRequests("1800m", "200Mi")),
+				// Keep worker mostly idle so no worker-side fragmentation triggers eviction.
+				buildTestPodForNode("worker-idle", "node-worker", withPodRequests("100m", "100Mi")),
+			},
+			expectedEvictedPodCount: 0,
 		},
 		{
 			// TOPSIS must distinguish the CPU-heavy parasite from the innocent pod and
