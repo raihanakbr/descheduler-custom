@@ -1,0 +1,195 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: e3-load
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workload-hot
+  namespace: e3-load
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: workload-hot
+  template:
+    metadata:
+      labels:
+        app: workload-hot
+        profile: hot
+    spec:
+      containers:
+      - name: workload
+        image: workload-http:local
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 700m
+            memory: 512Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workload-warm
+  namespace: e3-load
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: workload-warm
+  template:
+    metadata:
+      labels:
+        app: workload-warm
+        profile: warm
+    spec:
+      containers:
+      - name: workload
+        image: workload-http:local
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+        resources:
+          requests:
+            cpu: 250m
+            memory: 256Mi
+          limits:
+            cpu: 800m
+            memory: 768Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workload-mem
+  namespace: e3-load
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: workload-mem
+  template:
+    metadata:
+      labels:
+        app: workload-mem
+        profile: mem
+    spec:
+      containers:
+      - name: workload
+        image: workload-http:local
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+        env:
+        - name: MAX_MEM_MB
+          value: "384"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 384Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workload-idle-overrequest
+  namespace: e3-load
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: workload-idle-overrequest
+  template:
+    metadata:
+      labels:
+        app: workload-idle-overrequest
+        profile: idle-overrequest
+    spec:
+      containers:
+      - name: workload
+        image: workload-http:local
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+        resources:
+          requests:
+            cpu: 700m
+            memory: 768Mi
+          limits:
+            cpu: 900m
+            memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: workload-hot
+  namespace: e3-load
+spec:
+  selector:
+    app: workload-hot
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: workload-warm
+  namespace: e3-load
+spec:
+  selector:
+    app: workload-warm
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: workload-mem
+  namespace: e3-load
+spec:
+  selector:
+    app: workload-mem
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: workload-idle-overrequest
+  namespace: e3-load
+spec:
+  selector:
+    app: workload-idle-overrequest
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
