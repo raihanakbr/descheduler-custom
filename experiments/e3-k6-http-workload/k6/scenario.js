@@ -50,24 +50,24 @@ function pickTarget(rand, progress) {
   if (progress < 0.35) {
     return weighted(rand, [
       ['hot', 40, '/hot/work?cpu_ms=120&mem_mb=8&hold_ms=0'],
-      ['warm', 35, '/warm/work?cpu_ms=70&mem_mb=32&hold_ms=150'],
-      ['mem', 20, '/mem/work?cpu_ms=20&mem_mb=96&hold_ms=800'],
-      ['idle', 5, '/idle/work?cpu_ms=10&mem_mb=8&hold_ms=0'],
+      ['warm', 35, '/warm/work?cpu_ms=70&mem_mb=24&hold_ms=150'],
+      ['mem', 20, '/mem/work?cpu_ms=20&mem_mb=80&hold_ms=800'],
+      ['idle', 5, '/idle/work?cpu_ms=10&mem_mb=4&hold_ms=0'],
     ]);
   }
   if (progress < 0.80) {
     return weighted(rand, [
       ['hot', 55, '/hot/work?cpu_ms=180&mem_mb=12&hold_ms=0'],
-      ['warm', 30, '/warm/work?cpu_ms=100&mem_mb=48&hold_ms=250'],
-      ['mem', 14, '/mem/work?cpu_ms=30&mem_mb=128&hold_ms=1000'],
-      ['idle', 1, '/idle/work?cpu_ms=10&mem_mb=8&hold_ms=0'],
+      ['warm', 30, '/warm/work?cpu_ms=100&mem_mb=32&hold_ms=250'],
+      ['mem', 14, '/mem/work?cpu_ms=30&mem_mb=100&hold_ms=1000'],
+      ['idle', 1, '/idle/work?cpu_ms=10&mem_mb=4&hold_ms=0'],
     ]);
   }
   return weighted(rand, [
     ['hot', 45, '/hot/work?cpu_ms=100&mem_mb=8&hold_ms=0'],
-    ['warm', 35, '/warm/work?cpu_ms=60&mem_mb=32&hold_ms=150'],
-    ['mem', 15, '/mem/work?cpu_ms=20&mem_mb=64&hold_ms=500'],
-    ['idle', 5, '/idle/work?cpu_ms=10&mem_mb=8&hold_ms=0'],
+    ['warm', 35, '/warm/work?cpu_ms=60&mem_mb=24&hold_ms=150'],
+    ['mem', 15, '/mem/work?cpu_ms=20&mem_mb=48&hold_ms=500'],
+    ['idle', 5, '/idle/work?cpu_ms=10&mem_mb=4&hold_ms=0'],
   ]);
 }
 

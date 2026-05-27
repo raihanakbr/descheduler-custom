@@ -29,13 +29,16 @@ spec:
           httpGet:
             path: /healthz
             port: 8080
+        env:
+        - name: MAX_MEM_MB
+          value: "128"
         resources:
           requests:
             cpu: 100m
-            memory: 128Mi
+            memory: 64Mi
           limits:
             cpu: 700m
-            memory: 512Mi
+            memory: 256Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -63,13 +66,16 @@ spec:
           httpGet:
             path: /healthz
             port: 8080
+        env:
+        - name: MAX_MEM_MB
+          value: "128"
         resources:
           requests:
             cpu: 250m
-            memory: 256Mi
+            memory: 128Mi
           limits:
             cpu: 800m
-            memory: 768Mi
+            memory: 384Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -99,14 +105,14 @@ spec:
             port: 8080
         env:
         - name: MAX_MEM_MB
-          value: "384"
+          value: "128"
         resources:
           requests:
             cpu: 100m
-            memory: 384Mi
+            memory: 64Mi
           limits:
             cpu: 500m
-            memory: 1Gi
+            memory: 256Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -134,13 +140,16 @@ spec:
           httpGet:
             path: /healthz
             port: 8080
+        env:
+        - name: MAX_MEM_MB
+          value: "128"
         resources:
           requests:
             cpu: 700m
-            memory: 768Mi
+            memory: 512Mi
           limits:
             cpu: 900m
-            memory: 1Gi
+            memory: 512Mi
 ---
 apiVersion: v1
 kind: Service

@@ -14,7 +14,7 @@ import (
 
 const (
 	defaultMaxCPUMs    = 2000
-	defaultMaxMemMB    = 512
+	defaultMaxMemMB    = 128
 	defaultMaxHoldMs   = 5000
 	defaultMaxInflight = 64
 )
