@@ -2,7 +2,20 @@ import http from 'k6/http';
 import exec from 'k6/execution';
 import { check, sleep } from 'k6';
 
-const baseUrl = (__ENV.BASE_URL || 'http://127.0.0.1').replace(/\/$/, '');
+// Simulate load-balancer behavior: round-robin across worker NodePort endpoints.
+// Set WORKER_IPS as comma-separated list of worker public/private IPs.
+// e.g. WORKER_IPS=10.0.1.11,10.0.1.12,10.0.1.13
+const workerIPs = (__ENV.WORKER_IPS || '127.0.0.1').split(',').map(ip => ip.trim()).filter(Boolean);
+const nodePort = __ENV.NODEPORT || '30080';
+
+// Round-robin counter per VU (simulates L4 load balancer sticky-less rotation)
+let rrIndex = 0;
+
+function nextBaseUrl() {
+  const ip = workerIPs[rrIndex % workerIPs.length];
+  rrIndex++;
+  return `http://${ip}:${nodePort}`;
+}
 
 function intEnv(name, fallback) {
   const value = Number.parseInt(__ENV[name] || '', 10);
@@ -31,11 +44,13 @@ export const options = {
 };
 
 export default function () {
+  const baseUrl = nextBaseUrl();
   const target = pickTarget(Math.random(), exec.scenario.progress);
   const response = http.get(`${baseUrl}${target.path}`, {
     tags: {
       profile: target.profile,
       phase: phaseName(exec.scenario.progress),
+      worker: baseUrl,
     },
     timeout: '10s',
   });
