@@ -51,24 +51,35 @@ type LatencyMetricsConfig struct {
 type LatencyPrometheusConfig struct {
 	// Query is a PromQL expression returning node-to-node latency.
 	// The query must produce a vector where each sample has labels
-	// identified by SourceNodeLabel and TargetNodeLabel.
-	// Example: avg_over_time(goldpinger_peers_response_time_s_sum[5m]) / avg_over_time(goldpinger_peers_response_time_s_count[5m])
+	// identified by SourceNodeLabel and TargetNodeLabel whose values
+	// are Kubernetes node names (not IPs).
+	//
+	// Goldpinger v3 exports 'goldpinger_instance' (source node name) and
+	// 'host_ip' (target node IP, NOT name). To get the target node name,
+	// join with kube_pod_info from kube-state-metrics:
+	//
+	//   (avg_over_time(goldpinger_peers_response_time_s_sum[5m])
+	//   / avg_over_time(goldpinger_peers_response_time_s_count[5m]))
+	//   * on(pod) group_left(node) kube_pod_info{namespace="monitoring"}
 	Query string `json:"query"`
 
-	// SourceNodeLabel is the Prometheus label identifying the source node.
-	// Default: "goldpinger_host_name"
+	// SourceNodeLabel is the Prometheus label identifying the source node name.
+	// For Goldpinger v3 with kube_pod_info join: "goldpinger_instance"
 	SourceNodeLabel string `json:"sourceNodeLabel,omitempty"`
 
-	// TargetNodeLabel is the Prometheus label identifying the target node.
-	// Default: "goldpinger_peer_name"
+	// TargetNodeLabel is the Prometheus label identifying the target node name.
+	// For Goldpinger v3 with kube_pod_info join: "node"
 	TargetNodeLabel string `json:"targetNodeLabel,omitempty"`
 }
 
 const (
 	// DefaultSourceNodeLabel is the default Prometheus label for the source node.
-	DefaultSourceNodeLabel = "goldpinger_host_name"
+	// Matches Goldpinger v3's 'goldpinger_instance' label (= Kubernetes node name).
+	DefaultSourceNodeLabel = "goldpinger_instance"
 	// DefaultTargetNodeLabel is the default Prometheus label for the target node.
-	DefaultTargetNodeLabel = "goldpinger_peer_name"
+	// Requires a PromQL join with kube_pod_info to produce the 'node' label,
+	// since Goldpinger v3 only exposes 'host_ip' for the target (not the node name).
+	DefaultTargetNodeLabel = "node"
 )
 
 // SetDefaultsLatencyMetrics applies default label names to a LatencyMetricsConfig.
