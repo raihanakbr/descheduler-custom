@@ -38,7 +38,7 @@ spec:
           value: "176"
         resources:
           requests:
-            cpu: 100m
+            cpu: 400m
             memory: 64Mi
           limits:
             cpu: 700m
@@ -120,7 +120,7 @@ spec:
           value: "176"
         resources:
           requests:
-            cpu: 100m
+            cpu: 150m
             memory: 64Mi
           limits:
             cpu: 500m
