@@ -132,7 +132,7 @@ metadata:
   name: workload-idle-overrequest
   namespace: e3-load
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: workload-idle-overrequest
@@ -161,10 +161,10 @@ spec:
           value: "432"
         resources:
           requests:
-            cpu: 700m
-            memory: 512Mi
+            cpu: 400m
+            memory: 384Mi
           limits:
-            cpu: 900m
+            cpu: 700m
             memory: 512Mi
 ---
 apiVersion: v1
@@ -218,3 +218,47 @@ spec:
   - name: http
     port: 80
     targetPort: 8080
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: workload-hot-pdb
+  namespace: e3-load
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: workload-hot
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: workload-warm-pdb
+  namespace: e3-load
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: workload-warm
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: workload-mem-pdb
+  namespace: e3-load
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: workload-mem
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: workload-idle-overrequest-pdb
+  namespace: e3-load
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: workload-idle-overrequest
