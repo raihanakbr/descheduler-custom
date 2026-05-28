@@ -121,27 +121,23 @@ func validateNetworkAware(cfg *NetworkAwareConfig) error {
 		return nil
 	}
 
-	// exactly one mode must be set
-	if cfg.LatencyBase && cfg.TopologyBase {
-		return fmt.Errorf("networkAware: latencyBase and topologyBase are mutually exclusive")
-	}
-	if !cfg.LatencyBase && !cfg.TopologyBase {
-		return fmt.Errorf("networkAware: exactly one of latencyBase or topologyBase must be true")
-	}
-
-	// latency mode requires LatencyMetrics
-	if cfg.LatencyBase {
+	// strategy must be one of "latency" or "topology"
+	switch cfg.Strategy {
+	case "latency":
+		// latency mode requires LatencyMetrics
 		if cfg.LatencyMetrics == nil || cfg.LatencyMetrics.Prometheus == nil {
-			return fmt.Errorf("networkAware: latencyMetrics.prometheus is required when latencyBase is true")
+			return fmt.Errorf("networkAware: latencyMetrics.prometheus is required when strategy is \"latency\"")
 		}
 		if cfg.LatencyMetrics.Prometheus.Query == "" {
 			return fmt.Errorf("networkAware: latencyMetrics.prometheus.query must not be empty")
 		}
-	}
-
-	// topology mode should not have latency config
-	if cfg.TopologyBase && cfg.LatencyMetrics != nil {
-		return fmt.Errorf("networkAware: latencyMetrics must not be set when topologyBase is true")
+	case "topology":
+		// topology mode should not have latency config
+		if cfg.LatencyMetrics != nil {
+			return fmt.Errorf("networkAware: latencyMetrics must not be set when strategy is \"topology\"")
+		}
+	default:
+		return fmt.Errorf("networkAware: strategy must be \"latency\" or \"topology\", got %q", cfg.Strategy)
 	}
 
 	if cfg.MinBetterCandidatesPercent < 1 || cfg.MinBetterCandidatesPercent > 100 {

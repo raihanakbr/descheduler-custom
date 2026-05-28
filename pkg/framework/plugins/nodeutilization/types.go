@@ -54,7 +54,7 @@ type LowNodeUtilizationArgs struct {
 	// NetworkAware configures network-cost-aware eviction filtering.
 	// When set, pods are only evicted if enough destination nodes offer
 	// lower network cost to the pod's dependency group.
-	// Mutually exclusive: set either LatencyBase or TopologyBase, not both.
+	// Strategy must be set to either "latency" or "topology".
 	NetworkAware *NetworkAwareConfig `json:"networkAware,omitempty"`
 }
 
@@ -82,12 +82,12 @@ type HighNodeUtilizationArgs struct {
 	// NetworkAware configures network-cost-aware eviction filtering.
 	// When set, pods are only evicted if enough destination nodes offer
 	// lower network cost to the pod's dependency group.
-	// Mutually exclusive: set either LatencyBase or TopologyBase, not both.
+	// Strategy must be set to either "latency" or "topology".
 	NetworkAware *NetworkAwareConfig `json:"networkAware,omitempty"`
 }
 
 // NetworkAwareConfig configures how network-cost-aware eviction filtering works.
-// Exactly one of LatencyBase or TopologyBase must be true.
+// Strategy must be set to either "latency" or "topology".
 // +k8s:deepcopy-gen=true
 type NetworkAwareConfig struct {
 	// NetworkGroupLabelKey is the label key used to identify pods that belong
@@ -96,15 +96,15 @@ type NetworkAwareConfig struct {
 	// Default: "network-group"
 	NetworkGroupLabelKey string `json:"networkGroupLabelKey,omitempty"`
 
-	// LatencyBase uses real-time Prometheus latency measurements for cost.
-	// Requires LatencyMetrics to be configured.
-	LatencyBase bool `json:"latencyBase,omitempty"`
-
-	// TopologyBase uses hardcoded topology-based costs (zone/region labels).
-	TopologyBase bool `json:"topologyBase,omitempty"`
+	// Strategy selects the cost model for network-aware eviction.
+	// Must be one of:
+	//   - "latency":  uses real-time Prometheus latency measurements.
+	//                 Requires LatencyMetrics to be configured.
+	//   - "topology": uses hardcoded topology-based costs (zone/region labels).
+	Strategy string `json:"strategy"`
 
 	// LatencyMetrics configures Prometheus latency collection.
-	// Required when LatencyBase is true.
+	// Required when Strategy is "latency".
 	LatencyMetrics *networkcost.LatencyMetricsConfig `json:"latencyMetrics,omitempty"`
 
 	// MinBetterCandidatesPercent is the minimum percentage of candidate nodes

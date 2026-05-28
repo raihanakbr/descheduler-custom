@@ -512,16 +512,14 @@ func extractNetworkAwareConfig(na *nodeutilization.NetworkAwareConfig) *networkC
 	cfg := &networkCostConfig{
 		networkGroupLabelKey: na.NetworkGroupLabelKey,
 		excludeSameOwner:     na.ExcludeSameOwner != nil && *na.ExcludeSameOwner,
+		mode:                 na.Strategy,
 	}
-	if na.LatencyBase {
-		cfg.mode = "latency"
+	if na.Strategy == "latency" {
 		if na.LatencyMetrics != nil && na.LatencyMetrics.Prometheus != nil {
 			cfg.query = na.LatencyMetrics.Prometheus.Query
 			cfg.sourceNodeLabel = na.LatencyMetrics.Prometheus.SourceNodeLabel
 			cfg.targetNodeLabel = na.LatencyMetrics.Prometheus.TargetNodeLabel
 		}
-	} else if na.TopologyBase {
-		cfg.mode = "topology"
 	}
 	return cfg
 }
