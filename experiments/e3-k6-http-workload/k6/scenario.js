@@ -30,11 +30,11 @@ export const options = {
       preAllocatedVUs: intEnv('PRE_ALLOCATED_VUS', 50),
       maxVUs: intEnv('MAX_VUS', 100),
       stages: [
-        { duration: __ENV.WARMUP_DURATION || '2m', target: intEnv('WARMUP_RPS', 5) },
-        { duration: __ENV.LOW_DURATION || '3m', target: intEnv('LOW_RPS', 10) },
-        { duration: __ENV.MEDIUM_DURATION || '5m', target: intEnv('MEDIUM_RPS', 25) },
-        { duration: __ENV.BURST_DURATION || '3m', target: intEnv('BURST_RPS', 30) },
-        { duration: __ENV.COOLDOWN_DURATION || '2m', target: intEnv('COOLDOWN_RPS', 5) },
+        { duration: __ENV.WARMUP_DURATION || '1m', target: intEnv('WARMUP_RPS', 5) },
+        { duration: __ENV.LOW_DURATION || '1m', target: intEnv('LOW_RPS', 10) },
+        { duration: __ENV.MEDIUM_DURATION || '3m', target: intEnv('MEDIUM_RPS', 25) },
+        { duration: __ENV.BURST_DURATION || '2m', target: intEnv('BURST_RPS', 30) },
+        { duration: __ENV.COOLDOWN_DURATION || '1m', target: intEnv('COOLDOWN_RPS', 5) },
       ],
     },
   },
@@ -100,9 +100,9 @@ function weighted(rand, items) {
 }
 
 function phaseName(progress) {
-  if (progress < 0.13) return 'warmup';
-  if (progress < 0.33) return 'low';
-  if (progress < 0.66) return 'medium';
-  if (progress < 0.86) return 'burst';
+  if (progress < 0.125) return 'warmup';
+  if (progress < 0.25) return 'low';
+  if (progress < 0.625) return 'medium';
+  if (progress < 0.875) return 'burst';
   return 'cooldown';
 }
