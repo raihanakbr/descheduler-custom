@@ -13,19 +13,22 @@ import (
 )
 
 const (
-	defaultMaxCPUMs    = 2000
-	defaultMaxMemMB    = 128
-	defaultMaxHoldMs   = 5000
-	defaultMaxInflight = 64
+	defaultMaxCPUMs       = 2000
+	defaultMaxMemMB       = 128
+	defaultMaxHoldMs      = 5000
+	defaultMaxInflight    = 64
+	defaultMaxTotalAlloc  = 0 // 0 = disabled
 )
 
 var (
-	maxCPUMs    = envInt("MAX_CPU_MS", defaultMaxCPUMs)
-	maxMemMB    = envInt("MAX_MEM_MB", defaultMaxMemMB)
-	maxHoldMs   = envInt("MAX_HOLD_MS", defaultMaxHoldMs)
-	maxInflight = envInt("MAX_INFLIGHT", defaultMaxInflight)
-	inflight    int64
-	sem         chan struct{}
+	maxCPUMs       = envInt("MAX_CPU_MS", defaultMaxCPUMs)
+	maxMemMB       = envInt("MAX_MEM_MB", defaultMaxMemMB)
+	maxHoldMs      = envInt("MAX_HOLD_MS", defaultMaxHoldMs)
+	maxInflight    = envInt("MAX_INFLIGHT", defaultMaxInflight)
+	maxTotalAlloc  = envInt("MAX_TOTAL_ALLOC_MB", defaultMaxTotalAlloc)
+	inflight       int64
+	totalAllocMB   int64
+	sem            chan struct{}
 )
 
 type workResponse struct {
@@ -51,8 +54,8 @@ func main() {
 	mux.HandleFunc("/", workHandler)
 
 	addr := ":" + envString("PORT", "8080")
-	log.Printf("starting workload-http on %s max_cpu_ms=%d max_mem_mb=%d max_hold_ms=%d max_inflight=%d",
-		addr, maxCPUMs, maxMemMB, maxHoldMs, maxInflight)
+	log.Printf("starting workload-http on %s max_cpu_ms=%d max_mem_mb=%d max_hold_ms=%d max_inflight=%d max_total_alloc_mb=%d",
+		addr, maxCPUMs, maxMemMB, maxHoldMs, maxInflight, maxTotalAlloc)
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal(err)
 	}
@@ -79,6 +82,17 @@ func workHandler(w http.ResponseWriter, r *http.Request) {
 	cpuMs := boundedQueryInt(r, "cpu_ms", 0, maxCPUMs)
 	memMB := boundedQueryInt(r, "mem_mb", 0, maxMemMB)
 	holdMs := boundedQueryInt(r, "hold_ms", 0, maxHoldMs)
+
+	// Check total alloc budget before allocating
+	if maxTotalAlloc > 0 && memMB > 0 {
+		current := atomic.LoadInt64(&totalAllocMB)
+		if current+int64(memMB) > int64(maxTotalAlloc) {
+			http.Error(w, "total memory budget exceeded", http.StatusTooManyRequests)
+			return
+		}
+		atomic.AddInt64(&totalAllocMB, int64(memMB))
+		defer atomic.AddInt64(&totalAllocMB, -int64(memMB))
+	}
 
 	buf := allocateCommitted(memMB)
 	sink := burnCPU(time.Duration(cpuMs) * time.Millisecond)

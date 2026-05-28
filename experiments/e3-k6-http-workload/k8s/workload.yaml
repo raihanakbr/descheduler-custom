@@ -31,7 +31,11 @@ spec:
             port: 8080
         env:
         - name: MAX_MEM_MB
-          value: "128"
+          value: "8"
+        - name: MAX_INFLIGHT
+          value: "16"
+        - name: MAX_TOTAL_ALLOC_MB
+          value: "176"
         resources:
           requests:
             cpu: 100m
@@ -68,7 +72,11 @@ spec:
             port: 8080
         env:
         - name: MAX_MEM_MB
-          value: "128"
+          value: "16"
+        - name: MAX_INFLIGHT
+          value: "12"
+        - name: MAX_TOTAL_ALLOC_MB
+          value: "304"
         resources:
           requests:
             cpu: 250m
@@ -105,7 +113,11 @@ spec:
             port: 8080
         env:
         - name: MAX_MEM_MB
-          value: "128"
+          value: "32"
+        - name: MAX_INFLIGHT
+          value: "6"
+        - name: MAX_TOTAL_ALLOC_MB
+          value: "176"
         resources:
           requests:
             cpu: 100m
@@ -142,7 +154,11 @@ spec:
             port: 8080
         env:
         - name: MAX_MEM_MB
-          value: "128"
+          value: "8"
+        - name: MAX_INFLIGHT
+          value: "16"
+        - name: MAX_TOTAL_ALLOC_MB
+          value: "432"
         resources:
           requests:
             cpu: 700m
