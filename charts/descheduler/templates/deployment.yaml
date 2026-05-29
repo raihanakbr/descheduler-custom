@@ -6,7 +6,7 @@ metadata:
   namespace: {{ include "descheduler.namespace" . }}
   labels:
     {{- include "descheduler.labels" . | nindent 4 }}
-  {{- if .Values.annotations }}
+  {{- if .Values.deploymentAnnotations }}
   annotations: {{- toYaml .Values.deploymentAnnotations | nindent 4 }}
   {{- end }}
 spec:
@@ -48,6 +48,10 @@ spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
       {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
