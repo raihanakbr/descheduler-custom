@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: actual-usage-agent
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: actual-usage-agent
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: actual-usage-agent
+        spec:
+          restartPolicy: Never
+          serviceAccountName: actual-usage-agent
+          securityContext:
+            fsGroup: 1000
+          containers:
+            - name: actual-usage-agent
+              image: descheduler:local
+              imagePullPolicy: IfNotPresent
+              command: ["/bin/actual-usage-agent"]
+              args:
+                - --run-once=true
+                - --metrics-source=metrics-server
+                - --output-dir=/var/log/actual-usage-agent
+                - --fragmentation-threshold=0.20
+                - --namespace=
+                - --remediation-mode=report
+            - --publish-target=node-annotations
+              volumeMounts:
+                - name: output
+                  mountPath: /var/log/actual-usage-agent
+          volumes:
+            - name: output
+              emptyDir: {}

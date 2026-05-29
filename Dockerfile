@@ -28,5 +28,6 @@ LABEL org.opencontainers.image.source https://github.com/kubernetes-sigs/desched
 USER 1000
 
 COPY --from=0 /go/src/sigs.k8s.io/descheduler/_output/bin/descheduler /bin/descheduler
+COPY --from=0 /go/src/sigs.k8s.io/descheduler/_output/bin/actual-usage-agent /bin/actual-usage-agent
 
 CMD ["/bin/descheduler", "--help"]

@@ -23,14 +23,25 @@ import (
 	v1 "k8s.io/api/core/v1"
 	policyv1 "k8s.io/api/policy/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes/fake"
 	k8stesting "k8s.io/client-go/testing"
+	fakemetricsclient "k8s.io/metrics/pkg/client/clientset/versioned/fake"
+
+	"sigs.k8s.io/descheduler/pkg/descheduler/metricscollector"
 
 	"sigs.k8s.io/descheduler/pkg/framework/plugins/defaultevictor"
 	frameworktesting "sigs.k8s.io/descheduler/pkg/framework/testing"
 	frameworktypes "sigs.k8s.io/descheduler/pkg/framework/types"
 	"sigs.k8s.io/descheduler/test"
+)
+
+var (
+	testNodesGVR = schema.GroupVersionResource{Group: "metrics.k8s.io", Version: "v1beta1", Resource: "nodes"}
+	testPodsGVR  = schema.GroupVersionResource{Group: "metrics.k8s.io", Version: "v1beta1", Resource: "pods"}
 )
 
 // withNodeCapacity overrides only the CPU and Memory allocatable on a node,
@@ -58,6 +69,21 @@ func withPodRequests(cpu, memory string) func(*v1.Pod) {
 	}
 }
 
+func withNodeTaint(key string, effect v1.TaintEffect) func(*v1.Node) {
+	return func(n *v1.Node) {
+		n.Spec.Taints = append(n.Spec.Taints, v1.Taint{Key: key, Effect: effect})
+	}
+}
+
+func withNodeLabel(key, value string) func(*v1.Node) {
+	return func(n *v1.Node) {
+		if n.Labels == nil {
+			n.Labels = map[string]string{}
+		}
+		n.Labels[key] = value
+	}
+}
+
 func buildTestNode(nodeName string, apply ...func(*v1.Node)) *v1.Node {
 	node := test.BuildTestNode(nodeName, 2000, 4294967296, 10, nil)
 	for _, fn := range apply {
@@ -77,10 +103,10 @@ func buildTestPodForNode(name, nodeName string, apply ...func(*v1.Pod)) *v1.Pod 
 
 func TestResourceDefragmentation(t *testing.T) {
 	testCases := []struct {
-		description            string
-		args                   *ResourceDefragmentationArgs
-		pods                   []*v1.Pod
-		nodes                  []*v1.Node
+		description             string
+		args                    *ResourceDefragmentationArgs
+		pods                    []*v1.Pod
+		nodes                   []*v1.Node
 		expectedEvictedPodCount uint
 		expectedEvictedPodName  string // non-empty: assert the exact pod evicted by TOPSIS
 	}{
@@ -114,20 +140,59 @@ func TestResourceDefragmentation(t *testing.T) {
 			expectedEvictedPodCount: 1,
 			expectedEvictedPodName:  "pod-only-one",
 		},
+
 		{
-			// TOPSIS must distinguish the CPU-heavy parasite from the innocent pod and
-			// evict only the one causing fragmentation (higher C1 and C3 scores).
-			description: "fragmented node with CPU-heavy pod: TOPSIS selects the right pod to evict",
+			description: "tainted target node is not treated as a feasible eviction target",
 			args:        &ResourceDefragmentationArgs{ImbalanceThreshold: 0.3, MaxEvictions: 5},
 			nodes: []*v1.Node{
-				buildTestNode("node-sick",    withNodeCapacity("2000m", "4Gi")),
-				buildTestNode("node-healthy", withNodeCapacity("2000m", "4Gi")), // has room to receive pods
+				buildTestNode("node-fragmented", withNodeCapacity("2000m", "4Gi")),
+				// This node has enough free resources, but a regular workload pod cannot land here.
+				buildTestNode("node-control-plane", withNodeCapacity("4000m", "8Gi"), withNodeTaint("node-role.kubernetes.io/control-plane", v1.TaintEffectNoSchedule)),
+			},
+			pods: []*v1.Pod{
+				buildTestPodForNode("pod-only-one", "node-fragmented", withPodRequests("1800m", "200Mi")),
+			},
+			expectedEvictedPodCount: 0,
+		},
+		{
+			description: "control-plane node and pods are fully excluded from source and target consideration",
+			args:        &ResourceDefragmentationArgs{ImbalanceThreshold: 0.3, MaxEvictions: 5},
+			nodes: []*v1.Node{
+				buildTestNode(
+					"node-control-plane",
+					withNodeCapacity("2000m", "4Gi"),
+					withNodeLabel("node-role.kubernetes.io/control-plane", ""),
+					withNodeTaint("node-role.kubernetes.io/control-plane", v1.TaintEffectNoSchedule),
+				),
+				buildTestNode("node-worker", withNodeCapacity("4000m", "8Gi")),
+			},
+			pods: []*v1.Pod{
+				// If control-plane were not excluded, this pod would be a strong eviction candidate.
+				buildTestPodForNode("cp-pod-cpu-heavy", "node-control-plane", withPodRequests("1800m", "200Mi")),
+				// Keep worker mostly idle so no worker-side fragmentation triggers eviction.
+				buildTestPodForNode("worker-idle", "node-worker", withPodRequests("100m", "100Mi")),
+			},
+			expectedEvictedPodCount: 0,
+		},
+		{
+			// TOPSIS must distinguish the CPU-heavy parasite from the innocent pod and
+			// evict only the one causing fragmentation (higher C1 and C3 scores). The
+			// non-origin target is memory-heavy, so simulating the CPU-heavy pod there
+			// improves the projected real-usage/request score instead of just moving
+			// fragmentation from one node to another.
+			description: "fragmented node with CPU-heavy pod: TOPSIS selects the right pod to evict",
+			args:        &ResourceDefragmentationArgs{ImbalanceThreshold: 0.5, MaxEvictions: 5},
+			nodes: []*v1.Node{
+				buildTestNode("node-sick", withNodeCapacity("2000m", "4Gi")),
+				buildTestNode("node-healthy", withNodeCapacity("4000m", "8Gi")), // has room to receive pods
 			},
 			pods: []*v1.Pod{
 				// CPU-heavy pod: rCPU contribution is large, rMem is tiny → high C1
 				buildTestPodForNode("pod-cpu-parasite", "node-sick", withPodRequests("1600m", "200Mi")),
 				// Innocent pod: balanced usage → should NOT be evicted
 				buildTestPodForNode("pod-innocent", "node-sick", withPodRequests("200m", "1Gi")),
+				// Target-side complementary load lets the feasibility guard project an improvement.
+				buildTestPodForNode("pod-target-mem-heavy", "node-healthy", withPodRequests("200m", "4Gi")),
 			},
 			expectedEvictedPodCount: 1,
 			expectedEvictedPodName:  "pod-cpu-parasite",
@@ -205,5 +270,60 @@ func TestResourceDefragmentation(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestResourceDefragmentationUsesMetricsServerUsage(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	nodeA := buildTestNode("node-a", withNodeCapacity("2000m", "4Gi"))
+	nodeB := buildTestNode("node-b", withNodeCapacity("4000m", "8Gi"))
+	pod := buildTestPodForNode("pod-real-cpu-heavy", "node-a", withPodRequests("1000m", "2Gi"))
+	podB := buildTestPodForNode("pod-target-mem-heavy", "node-b", withPodRequests("500m", "2Gi"))
+
+	fakeClient := fake.NewSimpleClientset(nodeA, nodeB, pod, podB)
+	metricsClient := fakemetricsclient.NewSimpleClientset()
+	if err := metricsClient.Tracker().Create(testNodesGVR, test.BuildNodeMetrics("node-a", 1800, 200*1024*1024), ""); err != nil {
+		t.Fatalf("failed creating node-a metrics: %v", err)
+	}
+	if err := metricsClient.Tracker().Create(testNodesGVR, test.BuildNodeMetrics("node-b", 200, 6*1024*1024*1024), ""); err != nil {
+		t.Fatalf("failed creating node-b metrics: %v", err)
+	}
+	if err := metricsClient.Tracker().Create(testPodsGVR, test.BuildPodMetrics("pod-real-cpu-heavy", 1800, 200*1024*1024), "default"); err != nil {
+		t.Fatalf("failed creating pod metrics: %v", err)
+	}
+	if err := metricsClient.Tracker().Create(testPodsGVR, test.BuildPodMetrics("pod-target-mem-heavy", 200, 6*1024*1024*1024), "default"); err != nil {
+		t.Fatalf("failed creating pod-b metrics: %v", err)
+	}
+
+	sharedInformerFactory := informers.NewSharedInformerFactory(fakeClient, 0)
+	// Create the node informer before Start so the factory actually starts and syncs it.
+	sharedInformerFactory.Core().V1().Nodes().Informer()
+	sharedInformerFactory.Start(ctx.Done())
+	sharedInformerFactory.WaitForCacheSync(ctx.Done())
+	collector := metricscollector.NewMetricsCollector(sharedInformerFactory.Core().V1().Nodes().Lister(), metricsClient, labels.Everything())
+	if err := collector.Collect(ctx); err != nil {
+		t.Fatalf("failed collecting metrics: %v", err)
+	}
+
+	handle, podEvictor, err := frameworktesting.InitFrameworkHandle(ctx, fakeClient, nil, defaultevictor.DefaultEvictorArgs{NodeFit: true}, nil)
+	if err != nil {
+		t.Fatalf("Unable to initialize a framework handle: %v", err)
+	}
+	handle.MetricsCollectorImpl = collector
+
+	plugin, err := New(ctx, &ResourceDefragmentationArgs{ImbalanceThreshold: 0.3, MaxEvictions: 1}, handle)
+	if err != nil {
+		t.Fatalf("Unable to initialize the plugin: %v", err)
+	}
+
+	status := plugin.(frameworktypes.BalancePlugin).Balance(ctx, []*v1.Node{nodeA, nodeB})
+	if status != nil && status.Err != nil {
+		t.Fatalf("Balance failed: %v", status.Err)
+	}
+
+	if podEvictor.TotalEvicted() != 1 {
+		t.Fatalf("expected real-usage metrics to drive 1 eviction, got %d", podEvictor.TotalEvicted())
 	}
 }
