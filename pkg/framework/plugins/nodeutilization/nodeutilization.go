@@ -174,6 +174,7 @@ func evictPodsFromSourceNodes(
 	continueEviction continueEvictionCond,
 	usageClient usageClient,
 	maxNoOfPodsToEvictPerNode *uint,
+	networkCostFilter func(pod *v1.Pod) bool,
 ) {
 	logger := klog.FromContext(ctx)
 	available, err := assessAvailableResourceInNodes(destinationNodes, resourceNames)
@@ -234,6 +235,7 @@ func evictPodsFromSourceNodes(
 			continueEviction,
 			usageClient,
 			maxNoOfPodsToEvictPerNode,
+			networkCostFilter,
 		); err != nil {
 			switch err.(type) {
 			case *evictions.EvictionTotalLimitError:
@@ -259,6 +261,7 @@ func evictPods(
 	continueEviction continueEvictionCond,
 	usageClient usageClient,
 	maxNoOfPodsToEvictPerNode *uint,
+	networkCostFilter func(pod *v1.Pod) bool,
 ) error {
 	logger := klog.FromContext(ctx)
 	// preemptive check to see if we should continue evicting pods.
@@ -303,6 +306,11 @@ func evictPods(
 		}
 
 		if !preEvictionFilterWithOptions(pod) {
+			continue
+		}
+
+		if networkCostFilter != nil && !networkCostFilter(pod) {
+			logger.V(3).Info("Skipping pod, network cost would increase", "pod", klog.KObj(pod))
 			continue
 		}
 

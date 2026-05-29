@@ -26,6 +26,7 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/descheduler/pkg/api"
 	"sigs.k8s.io/descheduler/pkg/descheduler/evictions"
+	"sigs.k8s.io/descheduler/pkg/descheduler/networkcost"
 	nodeutil "sigs.k8s.io/descheduler/pkg/descheduler/node"
 
 	podutil "sigs.k8s.io/descheduler/pkg/descheduler/pod"
@@ -257,6 +258,42 @@ func (h *HighNodeUtilization) Balance(ctx context.Context, nodes []*v1.Node) *fr
 	// sorts the nodes by the usage in ascending order.
 	sortNodesByUsage(lowNodes, true)
 
+	var networkCostFilter func(*v1.Pod) bool
+	if h.args.NetworkAware != nil {
+		destNodes := make([]*v1.Node, 0, len(schedulableNodes))
+		nodesMap := make(map[string]*v1.Node, len(nodes))
+		for _, node := range nodes {
+			nodesMap[node.Name] = node
+		}
+		for _, ni := range schedulableNodes {
+			destNodes = append(destNodes, ni.node)
+		}
+
+		costProvider, err := networkcost.BuildCostProvider(
+			ctx, h.args.NetworkAware.LatencyMetrics, h.handle.PrometheusClient(),
+		)
+		if err != nil {
+			klog.ErrorS(err, "failed to build cost provider for network-aware filtering, falling back to topology")
+			costProvider = &networkcost.TopologyCostProvider{}
+		}
+
+		minBetterPercent := h.args.NetworkAware.MinBetterCandidatesPercent
+
+		networkCostFilter = func(pod *v1.Pod) bool {
+			return networkcost.ShouldAllowEviction(
+				pod,
+				h.args.NetworkAware.NetworkGroupLabelKey,
+				destNodes,
+				h.handle.GetPodsAssignedToNodeFunc(),
+				nodes,
+				nodesMap,
+				costProvider,
+				minBetterPercent,
+				h.args.NetworkAware.ExcludeSameOwner != nil && *h.args.NetworkAware.ExcludeSameOwner,
+			)
+		}
+	}
+
 	evictPodsFromSourceNodes(
 		ctx,
 		h.args.EvictableNamespaces,
@@ -269,6 +306,7 @@ func (h *HighNodeUtilization) Balance(ctx context.Context, nodes []*v1.Node) *fr
 		continueEvictionCond,
 		h.usageClient,
 		nil,
+		networkCostFilter,
 	)
 
 	return nil

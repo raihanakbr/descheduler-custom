@@ -16,6 +16,7 @@ package nodeutilization
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/descheduler/pkg/api"
+	"sigs.k8s.io/descheduler/pkg/descheduler/networkcost"
 )
 
 // EvictionMode describe a mode of eviction. See the list below for the
@@ -49,6 +50,12 @@ type LowNodeUtilizationArgs struct {
 
 	// evictionLimits limits the number of evictions per domain. E.g. node, namespace, total.
 	EvictionLimits *api.EvictionLimits `json:"evictionLimits,omitempty"`
+
+	// NetworkAware configures network-cost-aware eviction filtering.
+	// When set, pods are only evicted if enough destination nodes offer
+	// lower network cost to the pod's dependency group.
+	// Strategy must be set to either "latency" or "topology".
+	NetworkAware *NetworkAwareConfig `json:"networkAware,omitempty"`
 }
 
 // +k8s:deepcopy-gen=true
@@ -71,6 +78,48 @@ type HighNodeUtilizationArgs struct {
 	// considered while considering resources used by pods
 	// but then filtered out before eviction
 	EvictableNamespaces *api.Namespaces `json:"evictableNamespaces,omitempty"`
+
+	// NetworkAware configures network-cost-aware eviction filtering.
+	// When set, pods are only evicted if enough destination nodes offer
+	// lower network cost to the pod's dependency group.
+	// Strategy must be set to either "latency" or "topology".
+	NetworkAware *NetworkAwareConfig `json:"networkAware,omitempty"`
+}
+
+// NetworkAwareConfig configures how network-cost-aware eviction filtering works.
+// Strategy must be set to either "latency" or "topology".
+// +k8s:deepcopy-gen=true
+type NetworkAwareConfig struct {
+	// NetworkGroupLabelKey is the label key used to identify pods that belong
+	// to the same communication group. Must match NetworkCostEvictor's
+	// networkGroupLabelKey when both plugins are active.
+	// Default: "network-group"
+	NetworkGroupLabelKey string `json:"networkGroupLabelKey,omitempty"`
+
+	// Strategy selects the cost model for network-aware eviction.
+	// Must be one of:
+	//   - "latency":  uses real-time Prometheus latency measurements.
+	//                 Requires LatencyMetrics to be configured.
+	//   - "topology": uses hardcoded topology-based costs (zone/region labels).
+	Strategy string `json:"strategy"`
+
+	// LatencyMetrics configures Prometheus latency collection.
+	// Required when Strategy is "latency".
+	LatencyMetrics *networkcost.LatencyMetricsConfig `json:"latencyMetrics,omitempty"`
+
+	// MinBetterCandidatesPercent is the minimum percentage of candidate nodes
+	// that must offer lower network cost before eviction is allowed.
+	// Default: 50, Range: 1-100
+	MinBetterCandidatesPercent int `json:"minBetterCandidatesPercent,omitempty"`
+
+	// ExcludeSameOwner controls whether pods owned by the same controller
+	// (e.g. replicas of the same Deployment) are excluded from dependency
+	// pod discovery. Set to true for typical microservice patterns where
+	// replicas don't communicate with each other. Set to false for
+	// distributed systems (e.g. Cassandra, Redis Cluster) where replicas
+	// do communicate via gossip/replication.
+	// Default: true
+	ExcludeSameOwner *bool `json:"excludeSameOwner,omitempty"`
 }
 
 // MetricsUtilization allow to consume actual resource utilization from metrics

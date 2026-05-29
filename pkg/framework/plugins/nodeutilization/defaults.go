@@ -15,6 +15,7 @@ package nodeutilization
 
 import (
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/descheduler/pkg/descheduler/networkcost"
 )
 
 func addDefaultingFuncs(scheme *runtime.Scheme) error {
@@ -37,6 +38,7 @@ func SetDefaults_LowNodeUtilizationArgs(obj runtime.Object) {
 	if args.NumberOfNodes == 0 {
 		args.NumberOfNodes = 0
 	}
+	setDefaultsNetworkAware(args.NetworkAware)
 }
 
 // SetDefaults_HighNodeUtilizationArgs
@@ -48,5 +50,26 @@ func SetDefaults_HighNodeUtilizationArgs(obj runtime.Object) {
 	}
 	if args.NumberOfNodes == 0 {
 		args.NumberOfNodes = 0
+	}
+	setDefaultsNetworkAware(args.NetworkAware)
+}
+
+// setDefaultsNetworkAware applies default values to a NetworkAwareConfig.
+func setDefaultsNetworkAware(cfg *NetworkAwareConfig) {
+	if cfg == nil {
+		return
+	}
+	if cfg.NetworkGroupLabelKey == "" {
+		cfg.NetworkGroupLabelKey = networkcost.DefaultNetworkGroupLabelKey
+	}
+	if cfg.MinBetterCandidatesPercent == 0 {
+		cfg.MinBetterCandidatesPercent = networkcost.DefaultMinBetterCandidatesPercent
+	}
+	if cfg.LatencyMetrics != nil {
+		networkcost.SetDefaultsLatencyMetrics(cfg.LatencyMetrics)
+	}
+	if cfg.ExcludeSameOwner == nil {
+		defaultTrue := true
+		cfg.ExcludeSameOwner = &defaultTrue
 	}
 }

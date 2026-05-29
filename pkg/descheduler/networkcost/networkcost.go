@@ -1,0 +1,242 @@
+/*
+Copyright 2025 The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+// Package networkcost provides topology-distance-based cost computation
+// for network-aware pod eviction decisions. It uses standard Kubernetes
+// topology labels (topology.kubernetes.io/zone and topology.kubernetes.io/region)
+// to estimate communication cost between pods on different nodes.
+package networkcost
+
+import (
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/klog/v2"
+	podutil "sigs.k8s.io/descheduler/pkg/descheduler/pod"
+)
+
+
+// isNodeUnschedulable returns true if a node should not receive new pods.
+// It checks three conditions:
+//  1. node.Spec.Unschedulable (set by kubectl cordon)
+//  2. Taints with effect NoSchedule (e.g. control-plane nodes)
+//  3. Taints with effect NoExecute (e.g. unreachable nodes)
+func isNodeUnschedulable(node *v1.Node) bool {
+	if node.Spec.Unschedulable {
+		return true
+	}
+	for _, taint := range node.Spec.Taints {
+		if taint.Effect == v1.TaintEffectNoSchedule || taint.Effect == v1.TaintEffectNoExecute {
+			return true
+		}
+	}
+	return false
+}
+
+// computePlacementCost computes the total communication cost if a pod were
+// placed on candidateNode, considering all its dependency pods.
+func computePlacementCost(
+	candidateNode *v1.Node,
+	depPods []*v1.Pod,
+	nodesMap map[string]*v1.Node,
+	provider CostProvider,
+) float64 {
+	totalCost := 0.0
+	for _, depPod := range depPods {
+		depNode, ok := nodesMap[depPod.Spec.NodeName]
+		if !ok {
+			// dependency pod's node not found in nodesMap, skip.
+			continue
+		}
+		totalCost += provider.Cost(candidateNode, depNode)
+	}
+	return totalCost
+}
+
+// FindDependencyPods finds all pods that share the same network-group label
+// value as the given pod. It searches across all provided nodes. The source
+// pod itself is excluded from the result.
+//
+// When excludeSameOwner is true, pods that share the same controller
+// (ownerReference) as the source pod are also excluded. This is the typical
+// microservice pattern where replicas of the same Deployment don't
+// communicate with each other.
+func FindDependencyPods(
+	pod *v1.Pod,
+	labelKey string,
+	getPodsAssignedToNode podutil.GetPodsAssignedToNodeFunc,
+	nodes []*v1.Node,
+	excludeSameOwner bool,
+) []*v1.Pod {
+	groupValue, exists := pod.Labels[labelKey]
+	if !exists || groupValue == "" {
+		return nil
+	}
+
+	var depPods []*v1.Pod
+	for _, node := range nodes {
+		podsOnNode, err := podutil.ListPodsOnANode(node.Name, getPodsAssignedToNode, nil)
+		if err != nil {
+			klog.V(4).InfoS("Error listing pods on node", "node", klog.KObj(node), "err", err)
+			continue
+		}
+		for _, p := range podsOnNode {
+			// skip the source pod itself
+			if p.UID == pod.UID {
+				continue
+			}
+			if p.Labels[labelKey] != groupValue {
+				continue
+			}
+			// skip replicas of the same controller (e.g. same Deployment)
+			if excludeSameOwner && hasSameOwner(pod, p) {
+				continue
+			}
+			depPods = append(depPods, p)
+		}
+	}
+	klog.V(2).InfoS("FindDependencyPods result", "pod", klog.KObj(pod), "group", groupValue, "depCount", len(depPods), "nodesScanned", len(nodes), "excludeSameOwner", excludeSameOwner)
+	return depPods
+}
+
+// hasSameOwner returns true if two pods share at least one ownerReference UID.
+// This typically means they are replicas of the same Deployment (via the same
+// ReplicaSet) or the same StatefulSet.
+func hasSameOwner(a, b *v1.Pod) bool {
+	for _, ownerA := range a.OwnerReferences {
+		for _, ownerB := range b.OwnerReferences {
+			if ownerA.UID == ownerB.UID {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// ShouldAllowEviction determines whether a pod should be allowed to be
+// evicted based on network cost. It requires that at least minBetterPercent%
+// of candidate nodes have strictly lower cost than the current node.
+//
+// This increases the probability that the scheduler (which we don't control)
+// will place the evicted pod on a node with better network locality.
+//
+// The function returns true (allow eviction) when:
+//   - The pod has no network-group label (opt-in only)
+//   - No dependency pods are found
+//   - At least minBetterPercent% of candidates have strictly lower cost
+//
+// It returns false (block eviction) when:
+//   - Fewer than minBetterPercent% of candidates are strictly better
+func ShouldAllowEviction(
+	pod *v1.Pod,
+	labelKey string,
+	candidateNodes []*v1.Node,
+	getPodsAssignedToNode podutil.GetPodsAssignedToNodeFunc,
+	allNodes []*v1.Node,
+	nodesMap map[string]*v1.Node,
+	provider CostProvider,
+	minBetterPercent int,
+	excludeSameOwner bool,
+) bool {
+	// pods without the label are always allowed (opt-in)
+	groupValue, exists := pod.Labels[labelKey]
+	if !exists || groupValue == "" {
+		klog.V(2).InfoS("ShouldAllowEviction: pod has no network-group label, allowing", "pod", klog.KObj(pod))
+		return true
+	}
+
+	klog.V(1).InfoS("ShouldAllowEviction: evaluating pod", "pod", klog.KObj(pod), "group", groupValue, "candidateNodes", len(candidateNodes))
+
+	// pre-filter: keep only schedulable candidate nodes
+	var schedulableCandidates []*v1.Node
+	for _, candidate := range candidateNodes {
+		if isNodeUnschedulable(candidate) {
+			klog.V(4).InfoS("Filtering out unschedulable candidate", "node", candidate.Name)
+			continue
+		}
+		schedulableCandidates = append(schedulableCandidates, candidate)
+	}
+	klog.V(2).InfoS("ShouldAllowEviction: filtered candidates", "pod", klog.KObj(pod), "total", len(candidateNodes), "schedulable", len(schedulableCandidates))
+
+	// find all dependency pods with same group label
+	depPods := FindDependencyPods(pod, labelKey, getPodsAssignedToNode, allNodes, excludeSameOwner)
+	if len(depPods) == 0 {
+		klog.V(1).InfoS("ShouldAllowEviction: no dependency pods found, allowing", "pod", klog.KObj(pod), "group", groupValue)
+		return true
+	}
+	klog.V(2).InfoS("ShouldAllowEviction: found dependency pods", "pod", klog.KObj(pod), "depCount", len(depPods))
+
+	// compute cost at current placement
+	currentNode, ok := nodesMap[pod.Spec.NodeName]
+	if !ok {
+		// can't find current node, allow eviction
+		klog.V(4).InfoS("Current node not found in nodes map, allowing eviction",
+			"pod", klog.KObj(pod), "nodeName", pod.Spec.NodeName)
+		return true
+	}
+	currentCost := computePlacementCost(currentNode, depPods, nodesMap, provider)
+
+	// count candidates with strictly lower or equal cost
+	betterCount := 0
+	totalCandidates := 0
+	var betterCandidates []string
+	for _, candidate := range schedulableCandidates {
+		if candidate.Name == pod.Spec.NodeName {
+			continue
+		}
+		totalCandidates++
+		candidateCost := computePlacementCost(candidate, depPods, nodesMap, provider)
+		if candidateCost <= currentCost {
+			klog.V(2).InfoS("Found better or equal candidate",
+				"pod", klog.KObj(pod),
+				"candidate", candidate.Name,
+				"candidateCost", candidateCost,
+				"currentCost", currentCost,
+			)
+			betterCount++
+			betterCandidates = append(betterCandidates, candidate.Name)
+		}
+	}
+
+	if totalCandidates == 0 {
+		klog.V(2).InfoS("No candidates available, blocking eviction",
+			"pod", klog.KObj(pod))
+		return false
+	}
+
+	// minimum floor of 1 to avoid requiring 0 nodes in small clusters
+	minRequired := max(1, (totalCandidates*minBetterPercent)/100)
+
+	if betterCount >= minRequired {
+		klog.V(2).InfoS("Enough better candidates, allowing eviction",
+			"pod", klog.KObj(pod),
+			"betterCount", betterCount,
+			"betterCandidates", betterCandidates,
+			"minRequired", minRequired,
+			"totalCandidates", totalCandidates,
+			"currentCost", currentCost,
+		)
+		return true
+	}
+
+	klog.V(2).InfoS("Not enough better candidates, blocking eviction",
+		"pod", klog.KObj(pod),
+		"betterCount", betterCount,
+		"betterCandidates", betterCandidates,
+		"minRequired", minRequired,
+		"totalCandidates", totalCandidates,
+		"currentCost", currentCost,
+	)
+	return false
+}
