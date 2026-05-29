@@ -39,18 +39,22 @@ NO_FEASIBLE_TARGET_SCORE = -999.9
 
 USAGE_MODE_REQUESTS = "requests"
 USAGE_MODE_ACTUAL_RAW = "actual-raw"
+USAGE_MODE_ACTUAL_EWMA = "actual-ewma"
 
 
 @dataclass
 class Pod:
-    """A Pod with declared requests (always present) and an optional
-    runtime usage profile. When actual_cpu / actual_mem are None, the
-    runtime usage equals the request, matching well-calibrated Pods."""
+    """A Pod with declared requests (always present) and optional runtime
+    usage / EWMA-smoothed usage profiles. Fallback chain mirrors the Go
+    metrics path: actual-ewma -> ewma_* if set, else actual_*, else
+    requests; actual-raw -> actual_* if set, else requests."""
     name: str
     cpu: int                          # request milliCPU
     mem: int                          # request Mi
-    actual_cpu: Optional[int] = None  # runtime usage in milliCPU
-    actual_mem: Optional[int] = None  # runtime usage in Mi
+    actual_cpu: Optional[int] = None  # raw runtime usage milliCPU
+    actual_mem: Optional[int] = None  # raw runtime usage Mi
+    ewma_cpu: Optional[int] = None    # EWMA-smoothed runtime usage milliCPU
+    ewma_mem: Optional[int] = None    # EWMA-smoothed runtime usage Mi
     priority: int = 0
 
     def __repr__(self) -> str:
@@ -103,11 +107,21 @@ def get_pod_requests(pod: Pod) -> Tuple[int, int]:
 
 
 def get_pod_usage(pod: Pod, usage_mode: str) -> Tuple[int, int]:
-    """Mirror of Go getPodUsage. In requests mode returns the declared
-    request; in actual modes returns the runtime usage (falling back to
-    requests when no actual profile is set, matching the Go fallback)."""
+    """Mirror of Go getPodUsage with the production fallback chain.
+    requests   -> declared request
+    actual-raw -> raw runtime usage; falls back to requests
+    actual-ewma -> EWMA-smoothed usage; falls back to raw, then requests"""
     if usage_mode == USAGE_MODE_REQUESTS:
         return pod.cpu, pod.mem
+    if usage_mode == USAGE_MODE_ACTUAL_EWMA:
+        cpu = pod.ewma_cpu
+        if cpu is None:
+            cpu = pod.actual_cpu if pod.actual_cpu is not None else pod.cpu
+        mem = pod.ewma_mem
+        if mem is None:
+            mem = pod.actual_mem if pod.actual_mem is not None else pod.mem
+        return cpu, mem
+    # actual-raw
     cpu = pod.actual_cpu if pod.actual_cpu is not None else pod.cpu
     mem = pod.actual_mem if pod.actual_mem is not None else pod.mem
     return cpu, mem
@@ -642,9 +656,81 @@ def scenario_hidden_imbalance(alloc_cpu: int, alloc_mem: int
     return [node_a, node_b, node_c], None
 
 
+def scenario_transient_spike(alloc_cpu: int, alloc_mem: int
+                             ) -> Tuple[List[Node], Optional[Pod]]:
+    """Transient spike scenario contrasting actual-raw against actual-ewma.
+
+    Three workers with the same uniform 250m/250Mi request shape:
+    - Node A is sustainably CPU-heavy (raw == ewma).
+    - Node B has a balanced EWMA history but one Pod is currently bursting
+      its CPU usage; a single sample does not move the smoothed estimate,
+      consistent with the production EWMA default beta = 0.9 (paper alpha
+      = 0.1).
+    - Node C is sustainably memory-heavy (raw == ewma) and acts as a
+      complement so that real fragmentation evictions have a useful
+      placement target.
+
+    Under actual-raw, A, B, and C are all flagged fragmented and the
+    feasibility guard accepts an eviction from B because moving the
+    bursting Pod to memory-heavy Node C is projected to reduce the
+    combined imbalance. The descheduler therefore spends part of its
+    budget on a Pod whose imbalance is transient. Under actual-ewma,
+    Node B is balanced and only the genuine CPU-skew on A and the
+    memory-skew on C drive evictions."""
+
+    # Node A: sustained CPU-heavy. Each CPU-heavy pod reports the same
+    # raw and EWMA values; balanced pods are added to keep request sums
+    # comparable across nodes.
+    def A_cpu(i: int) -> Pod:
+        return Pod(name=f"A-{i}", cpu=250, mem=250,
+                   actual_cpu=350, actual_mem=200,
+                   ewma_cpu=350,   ewma_mem=200)
+
+    def A_bal(i: int) -> Pod:
+        return Pod(name=f"A-{i}", cpu=250, mem=250,
+                   actual_cpu=250, actual_mem=250,
+                   ewma_cpu=250,   ewma_mem=250)
+
+    # Node B: balanced EWMA history. Five pods are balanced; the sixth is
+    # currently spiking on CPU but its EWMA is still balanced because the
+    # smoothed estimate is dominated by past samples.
+    def B_bal(i: int) -> Pod:
+        return Pod(name=f"B-{i}", cpu=250, mem=250,
+                   actual_cpu=250, actual_mem=250,
+                   ewma_cpu=250,   ewma_mem=250)
+
+    def B_spike(i: int) -> Pod:
+        return Pod(name=f"B-{i}", cpu=250, mem=250,
+                   actual_cpu=700, actual_mem=250,
+                   ewma_cpu=250,   ewma_mem=250)
+
+    # Node C: sustained memory-heavy. Symmetric to Node A.
+    def C_mem(i: int) -> Pod:
+        return Pod(name=f"C-{i}", cpu=250, mem=250,
+                   actual_cpu=200, actual_mem=350,
+                   ewma_cpu=200,   ewma_mem=350)
+
+    def C_bal(i: int) -> Pod:
+        return Pod(name=f"C-{i}", cpu=250, mem=250,
+                   actual_cpu=250, actual_mem=250,
+                   ewma_cpu=250,   ewma_mem=250)
+
+    node_a = Node("A", alloc_cpu, alloc_mem,
+                  pods=[A_cpu(1), A_cpu(2), A_cpu(3), A_cpu(4),
+                        A_bal(5), A_bal(6)])
+    node_b = Node("B", alloc_cpu, alloc_mem,
+                  pods=[B_bal(1), B_bal(2), B_bal(3),
+                        B_bal(4), B_bal(5), B_spike(6)])
+    node_c = Node("C", alloc_cpu, alloc_mem,
+                  pods=[C_mem(1), C_mem(2), C_mem(3), C_mem(4),
+                        C_bal(5), C_bal(6)])
+    return [node_a, node_b, node_c], None
+
+
 SCENARIOS = {
     "fragmentation": scenario_fragmentation,
     "hidden-imbalance": scenario_hidden_imbalance,
+    "transient-spike": scenario_transient_spike,
 }
 
 
@@ -658,7 +744,8 @@ def parse_args() -> argparse.Namespace:
                    default="fragmentation",
                    help="Synthetic scenario (default: fragmentation)")
     p.add_argument("--usage-mode", choices=[USAGE_MODE_REQUESTS,
-                                            USAGE_MODE_ACTUAL_RAW],
+                                            USAGE_MODE_ACTUAL_RAW,
+                                            USAGE_MODE_ACTUAL_EWMA],
                    default=USAGE_MODE_REQUESTS,
                    help="RII/TOPSIS signal source (default: requests)")
     p.add_argument("--threshold", type=float, default=0.2,
@@ -707,26 +794,32 @@ def main() -> None:
         print(f"  {n.name}: pods=[{names}]  "
               f"alloc={n.alloc_cpu}m/{n.alloc_mem}Mi")
 
-    # Side-by-side comparison of request vs actual signal at the start
+    # Side-by-side comparison of request vs actual-raw vs actual-ewma at the start
     print()
     print(hr("#"))
-    print("INITIAL STATE  (request-based vs actual-raw view)")
+    print("INITIAL STATE  (request / actual-raw / actual-ewma view)")
     print(hr("#"))
     states_req = rebuild_states(nodes, USAGE_MODE_REQUESTS)
-    states_act = rebuild_states(nodes, USAGE_MODE_ACTUAL_RAW)
+    states_raw = rebuild_states(nodes, USAGE_MODE_ACTUAL_RAW)
+    states_ewma = rebuild_states(nodes, USAGE_MODE_ACTUAL_EWMA)
     for n in nodes:
         if n.is_master:
             continue
         sr = states_req[n.name]
-        sa = states_act[n.name]
+        sa = states_raw[n.name]
+        se = states_ewma[n.name]
         rii_r = compute_rii(sr.alloc_cpu, sr.alloc_mem, sr.used_cpu, sr.used_mem)
         rii_a = compute_rii(sa.alloc_cpu, sa.alloc_mem, sa.used_cpu, sa.used_mem)
+        rii_e = compute_rii(se.alloc_cpu, se.alloc_mem, se.used_cpu, se.used_mem)
         frag_r = "YES" if abs(rii_r) > THRESHOLD else "no"
         frag_a = "YES" if abs(rii_a) > THRESHOLD else "no"
-        print(f"  {n.name}  request: used={sr.used_cpu}m/{sr.used_mem}Mi  "
+        frag_e = "YES" if abs(rii_e) > THRESHOLD else "no"
+        print(f"  {n.name}  request    : used={sr.used_cpu}m/{sr.used_mem}Mi  "
               f"RII={rii_r:+.4f}  fragmented={frag_r}")
-        print(f"      actual : used={sa.used_cpu}m/{sa.used_mem}Mi  "
+        print(f"      actual-raw : used={sa.used_cpu}m/{sa.used_mem}Mi  "
               f"RII={rii_a:+.4f}  fragmented={frag_a}")
+        print(f"      actual-ewma: used={se.used_cpu}m/{se.used_mem}Mi  "
+              f"RII={rii_e:+.4f}  fragmented={frag_e}")
 
     if probe is not None:
         print()
@@ -761,21 +854,25 @@ def main() -> None:
 
     print()
     print(hr("#"))
-    print("STATE AFTER DESCHEDULER DELETIONS  (request and actual views)")
+    print("STATE AFTER DESCHEDULER DELETIONS  (request / actual-raw / actual-ewma)")
     print(hr("#"))
     states_after_req = rebuild_states(nodes, USAGE_MODE_REQUESTS)
-    states_after_act = rebuild_states(nodes, USAGE_MODE_ACTUAL_RAW)
+    states_after_raw = rebuild_states(nodes, USAGE_MODE_ACTUAL_RAW)
+    states_after_ewma = rebuild_states(nodes, USAGE_MODE_ACTUAL_EWMA)
     for n in nodes:
         if n.is_master:
             continue
         sr = states_after_req[n.name]
-        sa = states_after_act[n.name]
+        sa = states_after_raw[n.name]
+        se = states_after_ewma[n.name]
         rii_r = compute_rii(sr.alloc_cpu, sr.alloc_mem, sr.used_cpu, sr.used_mem)
         rii_a = compute_rii(sa.alloc_cpu, sa.alloc_mem, sa.used_cpu, sa.used_mem)
+        rii_e = compute_rii(se.alloc_cpu, se.alloc_mem, se.used_cpu, se.used_mem)
         names = ", ".join(p.name for p in n.pods)
         print(f"  {n.name}: pods=[{names}]")
-        print(f"      request: used={sr.used_cpu}m/{sr.used_mem}Mi  RII={rii_r:+.4f}")
-        print(f"      actual : used={sa.used_cpu}m/{sa.used_mem}Mi  RII={rii_a:+.4f}")
+        print(f"      request    : used={sr.used_cpu}m/{sr.used_mem}Mi  RII={rii_r:+.4f}")
+        print(f"      actual-raw : used={sa.used_cpu}m/{sa.used_mem}Mi  RII={rii_a:+.4f}")
+        print(f"      actual-ewma: used={se.used_cpu}m/{se.used_mem}Mi  RII={rii_e:+.4f}")
 
     states_after = rebuild_states(nodes, USAGE_MODE)
 
@@ -810,6 +907,7 @@ def main() -> None:
         replacements = [
             Pod(name=f"R_{p.name}", cpu=p.cpu, mem=p.mem,
                 actual_cpu=p.actual_cpu, actual_mem=p.actual_mem,
+                ewma_cpu=p.ewma_cpu, ewma_mem=p.ewma_mem,
                 priority=p.priority)
             for _, p in evictions
         ]

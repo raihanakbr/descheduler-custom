@@ -40,7 +40,7 @@ This matches the request-based variant evaluated in the thesis.
 
 ## Scenarios
 
-The script ships with two scenarios, selected via `--scenario`:
+The script ships with three scenarios, selected via `--scenario`:
 
 - `fragmentation` (default). Three workers (`2000m / 2000Mi` each) with Pod
   templates `C = 400m / 100Mi` (CPU-heavy) and `M = 100m / 400Mi`
@@ -53,6 +53,13 @@ The script ships with two scenarios, selected via `--scenario`:
   `B-*` reports `250m / 250Mi`. Layout `A = 3C + 3B`, `B = 3M + 3B`,
   `C = 6B`. Per-Node request sums are identical, so request-based RII is
   zero everywhere; only the actual-usage signal reveals fragmentation.
+- `transient-spike`. Three workers (`2000m / 2000Mi` each), uniform
+  `250m / 250Mi` requests. Node `A` has a sustained CPU-heavy runtime
+  profile, Node `C` has the symmetric memory-heavy profile, and Node
+  `B` has a balanced EWMA estimate but one Pod whose current sample is
+  bursting on CPU. The actual-raw signal flags all three Nodes as
+  fragmented; the actual-ewma signal flags only `A` and `C` because the
+  smoothed estimate damps a single elevated sample.
 
 ## Usage modes
 
@@ -65,6 +72,12 @@ The script ships with two scenarios, selected via `--scenario`:
   actual values are set, matching the Go fallback). The feasibility guard
   still uses Pod requests against target free-by-requests space, since the
   default kube-scheduler admits Pods by their declared requests.
+- `actual-ewma`. RII and TOPSIS read the EWMA-smoothed runtime usage
+  carried in `Pod.ewma_cpu` and `Pod.ewma_mem` (falling back to actual
+  values, then to requests). The smoothed values in the bundled scenarios
+  are consistent with the production EWMA default `beta = 0.9` (paper
+  `alpha = 0.1`), where the smoothed estimate is dominated by past
+  samples so a single elevated reading does not move it.
 
 ## Usage
 
@@ -75,6 +88,8 @@ python3 simulate.py --threshold 0.1                                # threshold s
 python3 simulate.py --probe-cpu 1000                               # tighter probe
 python3 simulate.py --scenario hidden-imbalance --usage-mode requests --max-evictions 5
 python3 simulate.py --scenario hidden-imbalance --usage-mode actual-raw --max-evictions 4
+python3 simulate.py --scenario transient-spike --usage-mode actual-raw --max-evictions 2
+python3 simulate.py --scenario transient-spike --usage-mode actual-ewma --max-evictions 2
 python3 simulate.py --quiet                                        # suppress TOPSIS internals
 python3 simulate.py --no-scheduler                                 # skip post-eviction scheduler
 python3 simulate.py --help
@@ -86,6 +101,7 @@ No external dependencies; standard library only (`argparse`, `copy`, `math`,
 ## Thesis cross-reference
 
 This script produces the numbers used in the synthetic walk-through tables
-of the thesis report (Bab 3 illustrative and actual-usage TOPSIS scenarios,
-Bab 4 synthetic walk-through validation, and Bab 4 actual-usage walk-through).
+of the thesis report: Bab 3 illustrative TOPSIS scenarios for requests and
+actual-usage, Bab 3 EWMA walk-through example, Bab 4 synthetic walk-through
+validation, Bab 4 actual-usage walk-through, and Bab 4 EWMA walk-through.
 Re-running it should yield identical output.
