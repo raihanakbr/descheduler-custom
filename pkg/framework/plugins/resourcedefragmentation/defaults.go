@@ -27,7 +27,10 @@ func addDefaultingFuncs(scheme *runtime.Scheme) error {
 // SetDefaults_ResourceDefragmentationArgs sets default values for ResourceDefragmentationArgs.
 func SetDefaults_ResourceDefragmentationArgs(obj runtime.Object) {
 	args := obj.(*ResourceDefragmentationArgs)
-	if args.Namespaces == nil {
-		args.Namespaces = nil
+	if args.ConsolidationThreshold == 0 {
+		args.ConsolidationThreshold = 0.40
+	}
+	if args.ConsolidationTarget == 0 {
+		args.ConsolidationTarget = 0.90
 	}
 }

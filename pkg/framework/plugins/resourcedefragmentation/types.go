@@ -29,11 +29,10 @@ type ResourceDefragmentationArgs struct {
 
 	Namespaces *api.Namespaces `json:"namespaces,omitempty"`
 
-	ImbalanceThreshold float64 `json:"imbalanceThreshold,omitempty"`
-
-	// UsageMode controls which resource signal ResourceDefragmentation uses for RII/TOPSIS.
-	// Supported values: requests, actual-raw, actual-ewma.
-	// Empty keeps legacy auto behavior: requests without a metrics collector, actual-ewma with one.
+	// UsageMode controls which resource signal ResourceDefragmentation uses for
+	// the bin score / TOPSIS. Supported values: requests, actual-raw, actual-ewma,
+	// actual-ewma-persisted, published-ewma. Empty keeps legacy auto behavior:
+	// requests without a metrics collector, actual-ewma with one.
 	UsageMode string `json:"usageMode,omitempty"`
 
 	// EWMABeta controls persisted EWMA smoothing for usageMode actual-ewma-persisted.
@@ -45,4 +44,15 @@ type ResourceDefragmentationArgs struct {
 	PublishedUsageMaxAgeSeconds int64 `json:"publishedUsageMaxAgeSeconds,omitempty"`
 
 	MaxEvictions int `json:"maxEvictions,omitempty"`
+
+	// ConsolidationThreshold defines "under-utilized". A worker node whose
+	// utilization is below this value is a candidate to be emptied. Range [0, 1].
+	// Default 0.40.
+	ConsolidationThreshold float64 `json:"consolidationThreshold,omitempty"`
+
+	// ConsolidationTarget is the packing ceiling for a destination node: an
+	// evicted pod will only be relocated onto a node whose projected request
+	// utilization stays at or below this value, leaving headroom. Range [0, 1].
+	// Default 0.90.
+	ConsolidationTarget float64 `json:"consolidationTarget,omitempty"`
 }

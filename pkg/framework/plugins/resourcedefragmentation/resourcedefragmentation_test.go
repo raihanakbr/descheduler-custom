@@ -111,52 +111,81 @@ func TestResourceDefragmentation(t *testing.T) {
 		expectedEvictedPodName  string // non-empty: assert the exact pod evicted by TOPSIS
 	}{
 		{
-			description: "healthy balanced node: imbalance below threshold, no eviction",
-			args:        &ResourceDefragmentationArgs{ImbalanceThreshold: 0.3, MaxEvictions: 5},
+			// No node is under the consolidation threshold → nothing to empty.
+			description: "well-utilized cluster: no under-utilized node, no eviction",
+			args:        &ResourceDefragmentationArgs{ConsolidationThreshold: 0.40, ConsolidationTarget: 0.90, MaxEvictions: 5},
 			nodes: []*v1.Node{
 				buildTestNode("node-a", withNodeCapacity("2000m", "4Gi")),
 			},
 			pods: []*v1.Pod{
-				// rCPU = 1000/2000 = 0.50, rMem = 2Gi/4Gi = 0.50 → imbalance = 0.00 < 0.3
+				// util = max(1000/2000, 2Gi/4Gi) = 0.50 ≥ 0.40 → not a drain candidate.
 				buildTestPodForNode("pod-balanced", "node-a", withPodRequests("1000m", "2Gi")),
 			},
 			expectedEvictedPodCount: 0,
 		},
 		{
-			// Exercises the Bug 2 fix: when nPods==1, dPlus[0]==dMinus[0]==0 (denom==0).
-			// Without the fix, TOPSIS returns nil and nothing is evicted.
-			// With the fix, cc=0.5 (equidistant) and the single pod is correctly selected.
-			description: "single pod on fragmented node: TOPSIS must not return nil",
-			args:        &ResourceDefragmentationArgs{ImbalanceThreshold: 0.3, MaxEvictions: 5},
+			// An under-utilized node is emptied; its pod is relocated to the denser,
+			// balanced bin (which is itself above the threshold and pack-upward valid).
+			description: "under-utilized node drains its pod onto a denser bin",
+			args:        &ResourceDefragmentationArgs{ConsolidationThreshold: 0.40, ConsolidationTarget: 0.90, MaxEvictions: 5},
 			nodes: []*v1.Node{
-				buildTestNode("node-fragmented", withNodeCapacity("2000m", "4Gi")),
-				// node-target has ample room to absorb the pod.
-				buildTestNode("node-target", withNodeCapacity("4000m", "8Gi")),
+				buildTestNode("node-light", withNodeCapacity("2000m", "4Gi")),
+				buildTestNode("node-bin", withNodeCapacity("2000m", "4Gi")),
 			},
 			pods: []*v1.Pod{
-				// rCPU = 1800/2000 = 0.90, rMem = 200Mi/4Gi ≈ 0.048 → imbalance ≈ 0.85 >> 0.3
-				buildTestPodForNode("pod-only-one", "node-fragmented", withPodRequests("1800m", "200Mi")),
+				// node-light: util = max(0.20, 0.195) = 0.20 < 0.40 → candidate.
+				buildTestPodForNode("pod-light", "node-light", withPodRequests("400m", "800Mi")),
+				// node-bin: util = 0.50 ≥ 0.40 → not a candidate; it is the denser target.
+				buildTestPodForNode("pod-binload", "node-bin", withPodRequests("1000m", "2Gi")),
 			},
 			expectedEvictedPodCount: 1,
-			expectedEvictedPodName:  "pod-only-one",
+			expectedEvictedPodName:  "pod-light",
 		},
-
 		{
-			description: "tainted target node is not treated as a feasible eviction target",
-			args:        &ResourceDefragmentationArgs{ImbalanceThreshold: 0.3, MaxEvictions: 5},
+			// The only feasible target would exceed the 0.90 ceiling → keep the node.
+			description: "consolidation ceiling prevents overpacking",
+			args:        &ResourceDefragmentationArgs{ConsolidationThreshold: 0.40, ConsolidationTarget: 0.90, MaxEvictions: 5},
 			nodes: []*v1.Node{
-				buildTestNode("node-fragmented", withNodeCapacity("2000m", "4Gi")),
-				// This node has enough free resources, but a regular workload pod cannot land here.
-				buildTestNode("node-control-plane", withNodeCapacity("4000m", "8Gi"), withNodeTaint("node-role.kubernetes.io/control-plane", v1.TaintEffectNoSchedule)),
+				buildTestNode("node-light", withNodeCapacity("2000m", "4Gi")),
+				buildTestNode("node-almost-full", withNodeCapacity("2000m", "4Gi")),
 			},
 			pods: []*v1.Pod{
-				buildTestPodForNode("pod-only-one", "node-fragmented", withPodRequests("1800m", "200Mi")),
+				// node-light: util = max(0.125, 0.049) = 0.125 < 0.40 → candidate.
+				buildTestPodForNode("pod-drain", "node-light", withPodRequests("250m", "200Mi")),
+				// node-almost-full: 1600/2000 = 0.80; adding pod-drain → 1850/2000 = 0.925 > 0.90.
+				buildTestPodForNode("pod-heavy", "node-almost-full", withPodRequests("1600m", "3Gi")),
 			},
 			expectedEvictedPodCount: 0,
 		},
 		{
-			description: "control-plane node and pods are fully excluded from source and target consideration",
-			args:        &ResourceDefragmentationArgs{ImbalanceThreshold: 0.3, MaxEvictions: 5},
+			// Two under-utilized candidates with near-equal FSI, so the priority
+			// pr = 0.5·|RII| + 0.5·(1/FSI) is decided by imbalance: the lopsided node
+			// is drained first. With MaxEvictions=1, only its pod is evicted.
+			//   node-lopsided: |RII|≈0.34, FSI≈0.644 → pr ≈ 0.95
+			//   node-balanced: |RII|≈0.00, FSI≈0.644 → pr ≈ 0.78
+			description: "priority order: lopsided under-utilized node is drained before the balanced one",
+			args:        &ResourceDefragmentationArgs{ConsolidationThreshold: 0.40, ConsolidationTarget: 0.90, MaxEvictions: 1},
+			nodes: []*v1.Node{
+				buildTestNode("node-lopsided", withNodeCapacity("2000m", "4Gi")),
+				buildTestNode("node-balanced", withNodeCapacity("2000m", "4Gi")),
+				buildTestNode("node-bin", withNodeCapacity("2000m", "4Gi")),
+			},
+			pods: []*v1.Pod{
+				// node-lopsided: util 0.35, cpu-skewed.
+				buildTestPodForNode("pod-cpu", "node-lopsided", withPodRequests("700m", "40Mi")),
+				// node-balanced: util 0.20, even cpu:mem; similar FSI to node-lopsided.
+				buildTestPodForNode("pod-bal", "node-balanced", withPodRequests("400m", "800Mi")),
+				// node-bin: util 0.50 ≥ 0.40 → the denser pack-upward target for both.
+				buildTestPodForNode("pod-binload", "node-bin", withPodRequests("1000m", "2Gi")),
+			},
+			expectedEvictedPodCount: 1,
+			expectedEvictedPodName:  "pod-cpu",
+		},
+		{
+			// Control-plane node and its pods are excluded from both source and target
+			// consideration; the lone worker has no valid (non-control-plane) target.
+			description: "control-plane node and pods are fully excluded",
+			args:        &ResourceDefragmentationArgs{ConsolidationThreshold: 0.40, ConsolidationTarget: 0.90, MaxEvictions: 5},
 			nodes: []*v1.Node{
 				buildTestNode(
 					"node-control-plane",
@@ -167,49 +196,23 @@ func TestResourceDefragmentation(t *testing.T) {
 				buildTestNode("node-worker", withNodeCapacity("4000m", "8Gi")),
 			},
 			pods: []*v1.Pod{
-				// If control-plane were not excluded, this pod would be a strong eviction candidate.
-				buildTestPodForNode("cp-pod-cpu-heavy", "node-control-plane", withPodRequests("1800m", "200Mi")),
-				// Keep worker mostly idle so no worker-side fragmentation triggers eviction.
+				buildTestPodForNode("cp-pod", "node-control-plane", withPodRequests("1800m", "200Mi")),
+				// Under-utilized worker, but the only other node is the control-plane → no target.
 				buildTestPodForNode("worker-idle", "node-worker", withPodRequests("100m", "100Mi")),
 			},
 			expectedEvictedPodCount: 0,
 		},
 		{
-			// TOPSIS must distinguish the CPU-heavy parasite from the innocent pod and
-			// evict only the one causing fragmentation (higher C1 and C3 scores). The
-			// non-origin target is memory-heavy, so simulating the CPU-heavy pod there
-			// improves the projected real-usage/request score instead of just moving
-			// fragmentation from one node to another.
-			description: "fragmented node with CPU-heavy pod: TOPSIS selects the right pod to evict",
-			args:        &ResourceDefragmentationArgs{ImbalanceThreshold: 0.5, MaxEvictions: 5},
+			// A NoSchedule taint the pod does not tolerate makes the only other node an
+			// infeasible target → the under-utilized node cannot be drained.
+			description: "tainted target node is not a feasible relocation target",
+			args:        &ResourceDefragmentationArgs{ConsolidationThreshold: 0.40, ConsolidationTarget: 0.90, MaxEvictions: 5},
 			nodes: []*v1.Node{
-				buildTestNode("node-sick", withNodeCapacity("2000m", "4Gi")),
-				buildTestNode("node-healthy", withNodeCapacity("4000m", "8Gi")), // has room to receive pods
+				buildTestNode("node-light", withNodeCapacity("2000m", "4Gi")),
+				buildTestNode("node-tainted", withNodeCapacity("4000m", "8Gi"), withNodeTaint("dedicated", v1.TaintEffectNoSchedule)),
 			},
 			pods: []*v1.Pod{
-				// CPU-heavy pod: rCPU contribution is large, rMem is tiny → high C1
-				buildTestPodForNode("pod-cpu-parasite", "node-sick", withPodRequests("1600m", "200Mi")),
-				// Innocent pod: balanced usage → should NOT be evicted
-				buildTestPodForNode("pod-innocent", "node-sick", withPodRequests("200m", "1Gi")),
-				// Target-side complementary load lets the feasibility guard project an improvement.
-				buildTestPodForNode("pod-target-mem-heavy", "node-healthy", withPodRequests("200m", "4Gi")),
-			},
-			expectedEvictedPodCount: 1,
-			expectedEvictedPodName:  "pod-cpu-parasite",
-		},
-		{
-			// The C2 criterion returns -999.9 when the candidate pod cannot fit on any other node.
-			// This heavy penalty drives TOPSIS not to select any pod for eviction.
-			description: "fragmented node but all target nodes full: C2 penalty blocks eviction",
-			args:        &ResourceDefragmentationArgs{ImbalanceThreshold: 0.3, MaxEvictions: 5},
-			nodes: []*v1.Node{
-				buildTestNode("node-sick", withNodeCapacity("2000m", "4Gi")),
-				buildTestNode("node-full", withNodeCapacity("2000m", "4Gi")),
-			},
-			pods: []*v1.Pod{
-				buildTestPodForNode("pod-cpu-parasite", "node-sick", withPodRequests("1600m", "200Mi")),
-				// pod-blocker saturates node-full on CPU, leaving no room for pod-cpu-parasite.
-				buildTestPodForNode("pod-blocker", "node-full", withPodRequests("1900m", "3Gi")),
+				buildTestPodForNode("pod-only", "node-light", withPodRequests("400m", "200Mi")),
 			},
 			expectedEvictedPodCount: 0,
 		},
@@ -273,27 +276,34 @@ func TestResourceDefragmentation(t *testing.T) {
 	}
 }
 
+// TestResourceDefragmentationUsesMetricsServerUsage verifies that "under-utilized"
+// is judged from actual usage, not requests: node-a is heavily over-provisioned
+// (requests 1500m/3Gi) but barely used (200m/200Mi), so only with metrics-server
+// usage is it seen as a drain candidate and consolidated onto node-b.
 func TestResourceDefragmentationUsesMetricsServerUsage(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	nodeA := buildTestNode("node-a", withNodeCapacity("2000m", "4Gi"))
 	nodeB := buildTestNode("node-b", withNodeCapacity("4000m", "8Gi"))
-	pod := buildTestPodForNode("pod-real-cpu-heavy", "node-a", withPodRequests("1000m", "2Gi"))
-	podB := buildTestPodForNode("pod-target-mem-heavy", "node-b", withPodRequests("500m", "2Gi"))
+	// node-a request util = 0.75 (looks loaded), but actual util = 0.10 (idle).
+	pod := buildTestPodForNode("pod-overprovisioned", "node-a", withPodRequests("1500m", "3Gi"))
+	// node-b is the denser bin and is more utilized than node-a, so it is a valid
+	// pack-upward target.
+	podB := buildTestPodForNode("pod-binload", "node-b", withPodRequests("1000m", "2Gi"))
 
 	fakeClient := fake.NewSimpleClientset(nodeA, nodeB, pod, podB)
 	metricsClient := fakemetricsclient.NewSimpleClientset()
-	if err := metricsClient.Tracker().Create(testNodesGVR, test.BuildNodeMetrics("node-a", 1800, 200*1024*1024), ""); err != nil {
+	if err := metricsClient.Tracker().Create(testNodesGVR, test.BuildNodeMetrics("node-a", 200, 200*1024*1024), ""); err != nil {
 		t.Fatalf("failed creating node-a metrics: %v", err)
 	}
-	if err := metricsClient.Tracker().Create(testNodesGVR, test.BuildNodeMetrics("node-b", 200, 6*1024*1024*1024), ""); err != nil {
+	if err := metricsClient.Tracker().Create(testNodesGVR, test.BuildNodeMetrics("node-b", 1000, 2*1024*1024*1024), ""); err != nil {
 		t.Fatalf("failed creating node-b metrics: %v", err)
 	}
-	if err := metricsClient.Tracker().Create(testPodsGVR, test.BuildPodMetrics("pod-real-cpu-heavy", 1800, 200*1024*1024), "default"); err != nil {
+	if err := metricsClient.Tracker().Create(testPodsGVR, test.BuildPodMetrics("pod-overprovisioned", 200, 200*1024*1024), "default"); err != nil {
 		t.Fatalf("failed creating pod metrics: %v", err)
 	}
-	if err := metricsClient.Tracker().Create(testPodsGVR, test.BuildPodMetrics("pod-target-mem-heavy", 200, 6*1024*1024*1024), "default"); err != nil {
+	if err := metricsClient.Tracker().Create(testPodsGVR, test.BuildPodMetrics("pod-binload", 1000, 2*1024*1024*1024), "default"); err != nil {
 		t.Fatalf("failed creating pod-b metrics: %v", err)
 	}
 
@@ -313,7 +323,7 @@ func TestResourceDefragmentationUsesMetricsServerUsage(t *testing.T) {
 	}
 	handle.MetricsCollectorImpl = collector
 
-	plugin, err := New(ctx, &ResourceDefragmentationArgs{ImbalanceThreshold: 0.3, MaxEvictions: 1}, handle)
+	plugin, err := New(ctx, &ResourceDefragmentationArgs{ConsolidationThreshold: 0.40, ConsolidationTarget: 0.90, MaxEvictions: 1}, handle)
 	if err != nil {
 		t.Fatalf("Unable to initialize the plugin: %v", err)
 	}
@@ -324,6 +334,6 @@ func TestResourceDefragmentationUsesMetricsServerUsage(t *testing.T) {
 	}
 
 	if podEvictor.TotalEvicted() != 1 {
-		t.Fatalf("expected real-usage metrics to drive 1 eviction, got %d", podEvictor.TotalEvicted())
+		t.Fatalf("expected actual-usage metrics to drive 1 consolidation eviction, got %d", podEvictor.TotalEvicted())
 	}
 }

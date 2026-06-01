@@ -35,5 +35,11 @@ func ValidateResourceDefragmentationArgs(obj runtime.Object) error {
 	default:
 		allErrs = append(allErrs, fmt.Errorf("unsupported usageMode %q, must be one of %q, %q, %q, %q, %q", args.UsageMode, UsageModeRequests, UsageModeActualRaw, UsageModeActualEWMA, UsageModeActualEWMAPersisted, UsageModePublishedEWMA))
 	}
+	if args.ConsolidationThreshold < 0 || args.ConsolidationThreshold > 1 {
+		allErrs = append(allErrs, fmt.Errorf("consolidationThreshold must be in range [0, 1], got %v", args.ConsolidationThreshold))
+	}
+	if args.ConsolidationTarget < 0 || args.ConsolidationTarget > 1 {
+		allErrs = append(allErrs, fmt.Errorf("consolidationTarget must be in range [0, 1], got %v", args.ConsolidationTarget))
+	}
 	return utilerrors.NewAggregate(allErrs)
 }
