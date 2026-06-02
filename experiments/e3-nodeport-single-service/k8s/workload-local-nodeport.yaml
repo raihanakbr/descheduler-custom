@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: e3-nodeport-local
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workload-http-local
+  namespace: e3-nodeport-local
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: workload-http-local
+  template:
+    metadata:
+      labels:
+        app: workload-http-local
+    spec:
+      containers:
+      - name: workload
+        image: docker.io/matthewhjt/workload-http:manual-v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        env:
+        - name: MAX_CPU_MS
+          value: "1000"
+        - name: MAX_MEM_MB
+          value: "96"
+        - name: MAX_HOLD_MS
+          value: "3000"
+        - name: MAX_INFLIGHT
+          value: "32"
+        - name: MAX_TOTAL_ALLOC_MB
+          value: "192"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 500m
+            memory: 300Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: workload-http-local
+  namespace: e3-nodeport-local
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local
+  selector:
+    app: workload-http-local
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+
