@@ -53,7 +53,7 @@ wait
 
 # Memory-heavy traffic through worker-b entrypoint
 for i in $(seq 1 100); do
-  curl -s "http://172.31.18.78:${PORT}/memory/work?cpu_ms=20&mem_mb=64&hold_ms=1000" >/dev/null &
+  curl -s "http://172.31.18.78:${PORT}/memory/work?cpu_ms=20&mem_mb=24&hold_ms=500" >/dev/null &
 done
 wait
 
@@ -83,7 +83,7 @@ The default k6 profile sends approximately 45% CPU-heavy traffic, 30%
 memory-heavy traffic, and 25% balanced traffic. The rate can be adjusted with:
 
 ```bash
-TARGET_RPS=40 PREALLOCATED_VUS=80 MAX_VUS=160 NODEPORT="$PORT" k6 run k6/nodeport-mixed.js
+TARGET_RPS=25 PREALLOCATED_VUS=50 MAX_VUS=100 NODEPORT="$PORT" k6 run k6/nodeport-mixed.js
 ```
 
 ## Deploy local NodePort routing
@@ -110,7 +110,7 @@ kubectl delete namespace e3-nodeport-local
 - All Pods use the same image and the same declared requests.
 - Runtime profile is controlled through HTTP parameters:
   - `/cpu/work?cpu_ms=250&mem_mb=4&hold_ms=0`
-  - `/memory/work?cpu_ms=20&mem_mb=64&hold_ms=1000`
+  - `/memory/work?cpu_ms=20&mem_mb=24&hold_ms=500`
   - `/balanced/work?cpu_ms=100&mem_mb=16&hold_ms=200`
 - The default NodePort variant may forward requests across nodes. This is the
   behavior being tested first.
