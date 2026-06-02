@@ -34,7 +34,7 @@ export default function () {
 
   if (r < 0.35) {
     ip = workerIPs[0];
-    path = '/memory/work?cpu_ms=5&mem_mb=48&hold_ms=2000';
+    path = '/memory/work?cpu_ms=5&mem_mb=24&hold_ms=1500';
   } else if (r < 0.85) {
     ip = workerIPs[1];
     path = '/cpu/work?cpu_ms=1100&mem_mb=0&hold_ms=0';
