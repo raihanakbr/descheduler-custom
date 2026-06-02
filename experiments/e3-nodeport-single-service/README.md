@@ -72,6 +72,20 @@ kubectl top pods -n e3-nodeport
 kubectl get pods -n e3-nodeport -o wide
 ```
 
+Or run the same mixed traffic profile with k6:
+
+```bash
+PORT=$(kubectl get svc -n e3-nodeport workload-http -o jsonpath='{.spec.ports[0].nodePort}')
+NODEPORT="$PORT" WORKER_IPS="172.31.18.162,172.31.18.78,172.31.17.242" k6 run k6/nodeport-mixed.js
+```
+
+The default k6 profile sends approximately 45% CPU-heavy traffic, 30%
+memory-heavy traffic, and 25% balanced traffic. The rate can be adjusted with:
+
+```bash
+TARGET_RPS=40 PREALLOCATED_VUS=80 MAX_VUS=160 NODEPORT="$PORT" k6 run k6/nodeport-mixed.js
+```
+
 ## Deploy local NodePort routing
 
 This variant uses the same Deployment shape, but the Service sets
@@ -100,4 +114,3 @@ kubectl delete namespace e3-nodeport-local
   - `/balanced/work?cpu_ms=100&mem_mb=16&hold_ms=200`
 - The default NodePort variant may forward requests across nodes. This is the
   behavior being tested first.
-
