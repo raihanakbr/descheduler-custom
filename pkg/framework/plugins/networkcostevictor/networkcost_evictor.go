@@ -24,6 +24,7 @@ package networkcostevictor
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -45,11 +46,16 @@ type NetworkCostEvictor struct {
 	handle       frameworktypes.Handle
 	args         *NetworkCostEvictorArgs
 	costProvider networkcost.CostProvider
+	providerOnce sync.Once
+	providerErr  error
 }
 
 var _ frameworktypes.EvictorPlugin = &NetworkCostEvictor{}
 
 // New builds the NetworkCostEvictor plugin from its arguments while passing a handle.
+// The CostProvider is built lazily on first use to allow the Prometheus client
+// time to initialize (the SA token reconciler may not have run yet at plugin
+// construction time).
 func New(ctx context.Context, args runtime.Object, handle frameworktypes.Handle) (frameworktypes.Plugin, error) {
 	networkCostArgs, ok := args.(*NetworkCostEvictorArgs)
 	if !ok {
@@ -57,20 +63,49 @@ func New(ctx context.Context, args runtime.Object, handle frameworktypes.Handle)
 	}
 	logger := klog.FromContext(ctx).WithValues("plugin", PluginName)
 
-	// Build the CostProvider based on config
-	provider, err := networkcost.BuildCostProvider(
-		ctx, networkCostArgs.LatencyMetrics, handle.PrometheusClient(),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to build cost provider: %w", err)
+	// If no latency metrics configured, build topology provider eagerly (no Prometheus needed)
+	if networkCostArgs.LatencyMetrics == nil || networkCostArgs.LatencyMetrics.Prometheus == nil {
+		provider, err := networkcost.BuildCostProvider(ctx, nil, nil)
+		if err != nil {
+			return nil, fmt.Errorf("failed to build cost provider: %w", err)
+		}
+		return &NetworkCostEvictor{
+			logger:       logger,
+			handle:       handle,
+			args:         networkCostArgs,
+			costProvider: provider,
+		}, nil
 	}
 
+	// For latency mode, defer provider construction until first use so the
+	// Prometheus client has time to be initialized by the SA token reconciler.
+	logger.V(2).Info("Latency metrics configured, CostProvider will be built lazily on first PreEvictionFilter call")
 	return &NetworkCostEvictor{
-		logger:       logger,
-		handle:       handle,
-		args:         networkCostArgs,
-		costProvider: provider,
+		logger: logger,
+		handle: handle,
+		args:   networkCostArgs,
 	}, nil
+}
+
+// ensureCostProvider lazily builds the CostProvider on first use.
+func (n *NetworkCostEvictor) ensureCostProvider() error {
+	n.providerOnce.Do(func() {
+		promClient := n.handle.PrometheusClient()
+		if promClient == nil {
+			n.providerErr = fmt.Errorf("Prometheus client not available; ensure metricsProviders with source=Prometheus is configured at policy level")
+			return
+		}
+		provider, err := networkcost.BuildCostProvider(
+			context.TODO(), n.args.LatencyMetrics, promClient,
+		)
+		if err != nil {
+			n.providerErr = fmt.Errorf("failed to build cost provider: %w", err)
+			return
+		}
+		n.costProvider = provider
+		n.logger.V(2).Info("Latency CostProvider built successfully")
+	})
+	return n.providerErr
 }
 
 // Name retrieves the plugin name.
@@ -94,6 +129,14 @@ func (n *NetworkCostEvictor) Filter(pod *v1.Pod) bool {
 //  5. Allows eviction only if minBetterCandidatesPercent% of candidates are better.
 func (n *NetworkCostEvictor) PreEvictionFilter(pod *v1.Pod) bool {
 	n.logger.V(1).Info("NetworkCostEvictor PreEvictionFilter called", "pod", klog.KObj(pod), "node", pod.Spec.NodeName)
+
+	// Lazily build latency CostProvider if needed
+	if n.costProvider == nil {
+		if err := n.ensureCostProvider(); err != nil {
+			n.logger.Error(err, "CostProvider not available, blocking eviction as safety measure", "pod", klog.KObj(pod))
+			return false
+		}
+	}
 
 	// pods without the network-group label are always allowed (opt-in)
 	groupValue, exists := pod.Labels[n.args.NetworkGroupLabelKey]
