@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: workload-ingress
+  namespace: e3-load
+spec:
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /hot
+        pathType: Prefix
+        backend:
+          service:
+            name: workload-hot
+            port:
+              number: 80
+      - path: /warm
+        pathType: Prefix
+        backend:
+          service:
+            name: workload-warm
+            port:
+              number: 80
+      - path: /mem
+        pathType: Prefix
+        backend:
+          service:
+            name: workload-mem
+            port:
+              number: 80
+      - path: /idle
+        pathType: Prefix
+        backend:
+          service:
+            name: workload-idle-overrequest
+            port:
+              number: 80

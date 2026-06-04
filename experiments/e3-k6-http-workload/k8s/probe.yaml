@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fragmentation-probe
+  namespace: e3-load
+  labels:
+    app: fragmentation-probe
+spec:
+  restartPolicy: Never
+  containers:
+  - name: probe
+    image: registry.k8s.io/pause:3.9
+    resources:
+      requests:
+        cpu: 900m
+        memory: 512Mi
+      limits:
+        cpu: 900m
+        memory: 512Mi
