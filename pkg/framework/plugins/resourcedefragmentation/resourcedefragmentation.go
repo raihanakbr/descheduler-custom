@@ -141,6 +141,17 @@ func (r *ResourceDefragmentation) consolidationTarget() float64 {
 	return defaultConsolidationTarget
 }
 
+func (r *ResourceDefragmentation) balancePenaltyWeight() float64 {
+	w := r.args.BalancePenaltyWeight
+	if w < 0 {
+		return 0
+	}
+	if w > 1 {
+		return 1
+	}
+	return w
+}
+
 // Balance extension point implementation for the plugin.
 func (r *ResourceDefragmentation) Balance(ctx context.Context, nodes []*v1.Node) *frameworktypes.Status {
 	logger := klog.FromContext(klog.NewContext(ctx, r.logger)).WithValues("ExtensionPoint", frameworktypes.BalanceExtensionPoint)
@@ -549,6 +560,17 @@ func (r *ResourceDefragmentation) predictSchedulerTarget(pod *v1.Pod, sourceName
 		}
 		if nodeMinUtilization(s) < sourceUtil {
 			continue
+		}
+		// Balance gate (λ = balancePenaltyWeight): reject a target whose cpu:mem
+		// balance this placement would degrade by more than (1 − λ). Stops a skewed
+		// pod from being poured onto a clean balanced node (which just relocates the
+		// stranding). λ=0 disables it; complementary moves raise balance so they pass.
+		if lambda := r.balancePenaltyWeight(); lambda > 0 {
+			preBalance := 1.0 - math.Abs(float64(s.RequestedCPU)/float64(s.AllocatableCPU)-float64(s.RequestedMem)/float64(s.AllocatableMem))
+			postBalance := 1.0 - math.Abs(projCpu-projMem)
+			if preBalance-postBalance > 1.0-lambda {
+				continue
+			}
 		}
 		score := nodeBinScore(s.RequestedCPU+podCpu, s.RequestedMem+podMem, s.AllocatableCPU, s.AllocatableMem)
 		if score > bestScore {

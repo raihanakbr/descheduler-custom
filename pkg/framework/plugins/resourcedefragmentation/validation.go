@@ -41,5 +41,8 @@ func ValidateResourceDefragmentationArgs(obj runtime.Object) error {
 	if args.ConsolidationTarget < 0 || args.ConsolidationTarget > 1 {
 		allErrs = append(allErrs, fmt.Errorf("consolidationTarget must be in range [0, 1], got %v", args.ConsolidationTarget))
 	}
+	if args.BalancePenaltyWeight < 0 || args.BalancePenaltyWeight > 1 {
+		allErrs = append(allErrs, fmt.Errorf("balancePenaltyWeight must be in range [0, 1], got %v", args.BalancePenaltyWeight))
+	}
 	return utilerrors.NewAggregate(allErrs)
 }

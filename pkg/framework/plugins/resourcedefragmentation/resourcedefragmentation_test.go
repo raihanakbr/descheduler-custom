@@ -203,6 +203,41 @@ func TestResourceDefragmentation(t *testing.T) {
 			expectedEvictedPodCount: 0,
 		},
 		{
+			// Balance gate ON (λ=0.70): a cpu-skewed pod's only feasible target is a
+			// clean balanced node; placing it there drops that node's balance by ~0.34
+			// > (1−λ)=0.30, so the gate rejects it and the pod is left in place. This is
+			// the S3 fix — it refuses to relocate stranding onto a clean node.
+			description: "balance gate blocks pouring a skewed pod onto a clean balanced node",
+			args:        &ResourceDefragmentationArgs{ConsolidationThreshold: 0.40, ConsolidationTarget: 0.90, BalancePenaltyWeight: 0.70, MaxEvictions: 5},
+			nodes: []*v1.Node{
+				buildTestNode("node-cpuskew", withNodeCapacity("2000m", "4Gi")),
+				buildTestNode("node-bin", withNodeCapacity("2000m", "4Gi")),
+			},
+			pods: []*v1.Pod{
+				// node-cpuskew: util max-dim 0.35, avg 0.18 < 0.40 → candidate.
+				buildTestPodForNode("pod-cpu", "node-cpuskew", withPodRequests("700m", "40Mi")),
+				// node-bin: balanced & well-utilized (0.5/0.5) → a bin, not a candidate;
+				// adding the cpu pod would skew it to 0.85/0.51 (balance 1.0 → 0.66).
+				buildTestPodForNode("pod-binload", "node-bin", withPodRequests("1000m", "2Gi")),
+			},
+			expectedEvictedPodCount: 0,
+		},
+		{
+			// Same layout with λ=0 → gate disabled → legacy behavior: the move proceeds.
+			description: "balance gate disabled (lambda=0) reproduces the legacy skewing move",
+			args:        &ResourceDefragmentationArgs{ConsolidationThreshold: 0.40, ConsolidationTarget: 0.90, BalancePenaltyWeight: 0, MaxEvictions: 5},
+			nodes: []*v1.Node{
+				buildTestNode("node-cpuskew", withNodeCapacity("2000m", "4Gi")),
+				buildTestNode("node-bin", withNodeCapacity("2000m", "4Gi")),
+			},
+			pods: []*v1.Pod{
+				buildTestPodForNode("pod-cpu", "node-cpuskew", withPodRequests("700m", "40Mi")),
+				buildTestPodForNode("pod-binload", "node-bin", withPodRequests("1000m", "2Gi")),
+			},
+			expectedEvictedPodCount: 1,
+			expectedEvictedPodName:  "pod-cpu",
+		},
+		{
 			// A NoSchedule taint the pod does not tolerate makes the only other node an
 			// infeasible target → the under-utilized node cannot be drained.
 			description: "tainted target node is not a feasible relocation target",

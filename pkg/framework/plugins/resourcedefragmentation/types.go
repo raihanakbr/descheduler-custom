@@ -55,4 +55,13 @@ type ResourceDefragmentationArgs struct {
 	// utilization stays at or below this value, leaving headroom. Range [0, 1].
 	// Default 0.90.
 	ConsolidationTarget float64 `json:"consolidationTarget,omitempty"`
+
+	// BalancePenaltyWeight (λ, range [0,1]) gates relocation targets by how much a
+	// placement would worsen the destination's cpu:mem balance. A target is
+	// rejected if it would reduce that node's balance (1 − |cpuFrac − memFrac|) by
+	// more than (1 − λ). This stops a skewed pod from being poured onto a clean
+	// balanced node — which only relocates stranding instead of reducing it — while
+	// always admitting complementary moves (which raise balance). λ=0 disables the
+	// gate (legacy behavior); higher λ is stricter. Default 0 (off).
+	BalancePenaltyWeight float64 `json:"balancePenaltyWeight,omitempty"`
 }
