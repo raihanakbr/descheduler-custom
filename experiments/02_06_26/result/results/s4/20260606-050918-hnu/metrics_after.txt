@@ -1,0 +1,12 @@
+== METRICS (after) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}

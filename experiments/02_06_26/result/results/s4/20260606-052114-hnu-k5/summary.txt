@@ -1,0 +1,6 @@
+scenario:            s4
+timestamp:           20260606-052114-hnu-k5
+per_pass_evictions:  0
+total_evictions(E):  0
+converged:           1   (1 = a pass evicted 0)
+passes_run:          1 (max 5)

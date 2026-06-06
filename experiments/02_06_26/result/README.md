@@ -102,3 +102,4 @@ pass; cross-check against `events_descheduled.txt`.
 | **S1** under-utilized | every worker 2×(250m/100Mi) ≈ 25%/25% | pure consolidation (O1) |
 | **S2** fragmented | W1–3 cpu-skewed 2×(750m/20Mi); W4–6 mem-skewed 2×(50m/240Mi) | reducible stranding (O2/O3) |
 | **S3** mixed | W1–2 under-util; W3–4 cpu-skewed; W5–6 balanced-full 2×(800m/320Mi, kept) | O1+O2 together |
+| **S4** hogs+jumbo | W1–2 cpu-hog 3×(600m/24Mi)≈0.95/0.15; W3–4 mem-hog 3×(60m/240Mi)≈0.14/0.95; W5 jumbo 1×(920m/375Mi)≈0.51/0.52; W6 empty | merge hogs around an unmovable jumbo (5/6 filled) |

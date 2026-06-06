@@ -1,0 +1,401 @@
+### S4 / rd seed 1/5 (05:11:41)
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s4/20260606-051149-rd-k1
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 4 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 1 eviction decision(s)
+  pass 3: running descheduler job...
+  pass 3: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.112
+H_balanced(200m/80Mi)=24   H_skewed(700m/20Mi)=6
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1960    2000       362       811   0.98   0.45    4
+ip-172-31-16-198        1420    2000       578       811   0.71   0.71    4
+ip-172-31-19-34          220    2000       530       811   0.11   0.65    2
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146        1680    2000       689       811   0.84   0.85    3
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.1118, "H_balanced": 24, "H_skewed": 6}
+scenario:            s4
+timestamp:           20260606-051149-rd-k1
+per_pass_evictions:  4 1 0
+total_evictions(E):  5
+converged:           1   (1 = a pass evicted 0)
+passes_run:          3 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s4/20260606-051149-rd-k1
+### S4 / rd seed 2/5 (05:13:05)
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s4/20260606-051313-rd-k2
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 4 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 1 eviction decision(s)
+  pass 3: running descheduler job...
+  pass 3: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.112
+H_balanced(200m/80Mi)=24   H_skewed(700m/20Mi)=6
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1960    2000       362       811   0.98   0.45    4
+ip-172-31-16-198        1420    2000       578       811   0.71   0.71    4
+ip-172-31-19-34          220    2000       530       811   0.11   0.65    2
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146        1680    2000       689       811   0.84   0.85    3
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.1118, "H_balanced": 24, "H_skewed": 6}
+scenario:            s4
+timestamp:           20260606-051313-rd-k2
+per_pass_evictions:  4 1 0
+total_evictions(E):  5
+converged:           1   (1 = a pass evicted 0)
+passes_run:          3 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s4/20260606-051313-rd-k2
+### S4 / rd seed 3/5 (05:14:29)
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s4/20260606-051438-rd-k3
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 4 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 1 eviction decision(s)
+  pass 3: running descheduler job...
+  pass 3: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.112
+H_balanced(200m/80Mi)=24   H_skewed(700m/20Mi)=6
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1960    2000       362       811   0.98   0.45    4
+ip-172-31-16-198        1420    2000       578       811   0.71   0.71    4
+ip-172-31-19-34          220    2000       530       811   0.11   0.65    2
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146        1680    2000       689       811   0.84   0.85    3
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.1118, "H_balanced": 24, "H_skewed": 6}
+scenario:            s4
+timestamp:           20260606-051438-rd-k3
+per_pass_evictions:  4 1 0
+total_evictions(E):  5
+converged:           1   (1 = a pass evicted 0)
+passes_run:          3 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s4/20260606-051438-rd-k3
+### S4 / rd seed 4/5 (05:15:55)
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s4/20260606-051604-rd-k4
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 4 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 1 eviction decision(s)
+  pass 3: running descheduler job...
+  pass 3: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.112
+H_balanced(200m/80Mi)=24   H_skewed(700m/20Mi)=6
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1960    2000       362       811   0.98   0.45    4
+ip-172-31-16-198        1420    2000       578       811   0.71   0.71    4
+ip-172-31-19-34          220    2000       530       811   0.11   0.65    2
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146        1680    2000       689       811   0.84   0.85    3
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.1118, "H_balanced": 24, "H_skewed": 6}
+scenario:            s4
+timestamp:           20260606-051604-rd-k4
+per_pass_evictions:  4 1 0
+total_evictions(E):  5
+converged:           1   (1 = a pass evicted 0)
+passes_run:          3 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s4/20260606-051604-rd-k4
+### S4 / rd seed 5/5 (05:17:21)
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s4/20260606-051731-rd-k5
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 4 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 1 eviction decision(s)
+  pass 3: running descheduler job...
+  pass 3: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.112
+H_balanced(200m/80Mi)=24   H_skewed(700m/20Mi)=6
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1960    2000       362       811   0.98   0.45    4
+ip-172-31-16-198        1420    2000       578       811   0.71   0.71    4
+ip-172-31-19-34          220    2000       530       811   0.11   0.65    2
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146        1680    2000       689       811   0.84   0.85    3
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.1118, "H_balanced": 24, "H_skewed": 6}
+scenario:            s4
+timestamp:           20260606-051731-rd-k5
+per_pass_evictions:  4 1 0
+total_evictions(E):  5
+converged:           1   (1 = a pass evicted 0)
+passes_run:          3 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s4/20260606-051731-rd-k5
+### S4 / hnu seed 1/5 (05:18:46)
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s4/20260606-051854-hnu-k1
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+scenario:            s4
+timestamp:           20260606-051854-hnu-k1
+per_pass_evictions:  0
+total_evictions(E):  0
+converged:           1   (1 = a pass evicted 0)
+passes_run:          1 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s4/20260606-051854-hnu-k1
+### S4 / hnu seed 2/5 (05:19:20)
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s4/20260606-051929-hnu-k2
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+scenario:            s4
+timestamp:           20260606-051929-hnu-k2
+per_pass_evictions:  0
+total_evictions(E):  0
+converged:           1   (1 = a pass evicted 0)
+passes_run:          1 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s4/20260606-051929-hnu-k2
+### S4 / hnu seed 3/5 (05:19:55)
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s4/20260606-052004-hnu-k3
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+scenario:            s4
+timestamp:           20260606-052004-hnu-k3
+per_pass_evictions:  0
+total_evictions(E):  0
+converged:           1   (1 = a pass evicted 0)
+passes_run:          1 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s4/20260606-052004-hnu-k3
+### S4 / hnu seed 4/5 (05:20:30)
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s4/20260606-052038-hnu-k4
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+scenario:            s4
+timestamp:           20260606-052038-hnu-k4
+per_pass_evictions:  0
+total_evictions(E):  0
+converged:           1   (1 = a pass evicted 0)
+passes_run:          1 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s4/20260606-052038-hnu-k4
+### S4 / hnu seed 5/5 (05:21:05)
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s4/20260606-052114-hnu-k5
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+scenario:            s4
+timestamp:           20260606-052114-hnu-k5
+per_pass_evictions:  0
+total_evictions(E):  0
+converged:           1   (1 = a pass evicted 0)
+passes_run:          1 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s4/20260606-052114-hnu-k5
+### S4 MULTISEED DONE (05:21:41)

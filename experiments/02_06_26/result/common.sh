@@ -132,19 +132,23 @@ run_descheduler_pass() {
   kubectl -n "$DESCHED_NS" wait --for=condition=complete job/"$DESCHED_JOB" --timeout=180s >/dev/null 2>&1 \
     || echo "  WARNING: descheduler job did not report complete in 180s" >&2
   kubectl -n "$DESCHED_NS" logs job/"$DESCHED_JOB" > "$dir/desched_pass${pass}.log" 2>&1 || true
+  # Tool-agnostic E: count the framework-level evictions.go "Evicted pod" line,
+  # which EVERY plugin emits (RD's custom "Eviction decision" line is emitted
+  # only by ResourceDefragmentation, so it under-counts HNU/B1/B2 baselines).
   local count
-  count="$(grep -c 'Eviction decision' "$dir/desched_pass${pass}.log" 2>/dev/null)" || count=0
+  count="$(grep -c '"Evicted pod"' "$dir/desched_pass${pass}.log" 2>/dev/null)" || count=0
   echo "$count"
 }
 
 # exp_run_and_capture : before snapshot -> N descheduler passes -> after snapshot.
 exp_run_and_capture() {
   discover_workers
-  local ts dir; ts="$(date +%Y%m%d-%H%M%S)"; dir="$(results_dir "$ts")"; mkdir -p "$dir"
+  local ts dir; ts="$(date +%Y%m%d-%H%M%S)${RUN_TAG:+-$RUN_TAG}"; dir="$(results_dir "$ts")"; mkdir -p "$dir"
   echo "Results -> $dir"
 
   echo "== BEFORE =="
   snapshot before "$dir"
+  kubectl -n "$NS" get pods -o wide --sort-by=.spec.nodeName > "$dir/pods_before.txt" 2>/dev/null || true
 
   local -a passes=(); local total=0 converged=0 p e
   for (( p=1; p<=MAX_PASSES; p++ )); do
