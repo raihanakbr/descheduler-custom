@@ -43,16 +43,22 @@ ensure_namespace() {
   kubectl get ns "$NS" >/dev/null 2>&1 || kubectl create ns "$NS" >/dev/null
 }
 
-# place_on_node NODE NAME REPLICAS CPU MEM
+# place_on_node NODE NAME REPLICAS CPU MEM [PRIORITY_CLASS]
 #
 # Seeds a Deployment onto exactly one worker. Assumes every worker is currently
 # cordoned (see exp_setup_begin): it uncordons just NODE so the scheduler has no
 # other choice, applies the Deployment, waits for it to be Ready, then re-cordons
 # NODE so the next group lands elsewhere. The pods carry NO nodeName/affinity, so
 # the descheduler can later move them freely.
+#
+# The optional 6th arg sets spec.priorityClassName so the pods carry a non-zero
+# pod priority (activates the selector's C4 criterion). Omitted -> no priority
+# (every pre-existing scenario is unchanged).
 place_on_node() {
-  local node="$1" name="$2" replicas="$3" cpu="$4" mem="$5"
-  echo "  -> $name : ${replicas} x (cpu=$cpu mem=$mem) on $node" >&2
+  local node="$1" name="$2" replicas="$3" cpu="$4" mem="$5" prio="${6:-}"
+  local prio_line=""
+  if [[ -n "$prio" ]]; then prio_line="priorityClassName: \"$prio\""; fi
+  echo "  -> $name : ${replicas} x (cpu=$cpu mem=$mem${prio:+ prio=$prio}) on $node" >&2
   kubectl uncordon "$node" >/dev/null
   cat <<EOF | kubectl apply -f - >/dev/null
 apiVersion: apps/v1
@@ -76,6 +82,7 @@ spec:
         scenario: "$SCENARIO"
     spec:
       terminationGracePeriodSeconds: 0
+      $prio_line
       containers:
       - name: pause
         image: $PAUSE_IMAGE

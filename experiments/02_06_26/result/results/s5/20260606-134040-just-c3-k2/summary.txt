@@ -1,0 +1,6 @@
+scenario:            s5
+timestamp:           20260606-134040-just-c3-k2
+per_pass_evictions:  3 0
+total_evictions(E):  3
+converged:           1   (1 = a pass evicted 0)
+passes_run:          2 (max 5)

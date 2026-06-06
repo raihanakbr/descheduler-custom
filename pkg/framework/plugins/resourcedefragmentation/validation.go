@@ -44,5 +44,12 @@ func ValidateResourceDefragmentationArgs(obj runtime.Object) error {
 	if args.BalancePenaltyWeight < 0 || args.BalancePenaltyWeight > 1 {
 		allErrs = append(allErrs, fmt.Errorf("balancePenaltyWeight must be in range [0, 1], got %v", args.BalancePenaltyWeight))
 	}
+	switch args.SelectionPolicy {
+	case "", SelectionTOPSIS, SelectionJustC1, SelectionJustC2, SelectionJustC3, SelectionJustC4,
+		SelectionNoC1, SelectionNoC2, SelectionNoC3, SelectionNoC4,
+		SelectionRandom, SelectionLargest, SelectionLowestPriority:
+	default:
+		allErrs = append(allErrs, fmt.Errorf("unsupported selectionPolicy %q", args.SelectionPolicy))
+	}
 	return utilerrors.NewAggregate(allErrs)
 }

@@ -1,0 +1,45 @@
+I0606 13:33:09.535806       1 feature_gate.go:466] feature gates: {map[]}
+I0606 13:33:09.663203       1 secure_serving.go:57] Forcing use of http/1.1 only
+I0606 13:33:09.663575       1 named_certificates.go:53] "Loaded SNI cert" index=0 certName="self-signed loopback" certDetail="\"apiserver-loopback-client@1780752789\" [serving] validServingFor=[apiserver-loopback-client] issuer=\"apiserver-loopback-client-ca@1780752789\" (2026-06-06 12:33:09 +0000 UTC to 2029-06-06 12:33:09 +0000 UTC (now=2026-06-06 13:33:09.663532246 +0000 UTC))"
+I0606 13:33:09.663645       1 secure_serving.go:211] Serving securely on [::]:10258
+I0606 13:33:09.663663       1 tracing.go:88] Did not find a trace collector endpoint defined. Switching to NoopTraceProvider
+I0606 13:33:09.663730       1 tlsconfig.go:243] "Starting DynamicServingCertificateController"
+I0606 13:33:09.664057       1 envvar.go:172] "Feature gate default state" feature="WatchListClient" enabled=true
+I0606 13:33:09.664079       1 envvar.go:172] "Feature gate default state" feature="ClientsAllowCBOR" enabled=false
+I0606 13:33:09.664086       1 envvar.go:172] "Feature gate default state" feature="ClientsPreferCBOR" enabled=false
+I0606 13:33:09.664092       1 envvar.go:172] "Feature gate default state" feature="InOrderInformers" enabled=true
+I0606 13:33:09.664099       1 envvar.go:172] "Feature gate default state" feature="InOrderInformersBatchProcess" enabled=true
+I0606 13:33:09.664105       1 envvar.go:172] "Feature gate default state" feature="InformerResourceVersion" enabled=true
+W0606 13:33:09.672568       1 descheduler.go:333] failed to convert Descheduler minor version '' to float: strconv.ParseFloat: parsing "": invalid syntax
+I0606 13:33:09.681822       1 reflector.go:367] "Starting reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 13:33:09.681833       1 reflector.go:367] "Starting reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 13:33:09.681854       1 reflector.go:411] "Listing and watching" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 13:33:09.681855       1 reflector.go:411] "Listing and watching" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 13:33:09.682213       1 reflector.go:367] "Starting reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 13:33:09.682315       1 reflector.go:411] "Listing and watching" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 13:33:09.686328       1 reflector.go:978] "Exiting watch because received the bookmark that marks the end of initial events stream" reflector="k8s.io/client-go/informers/factory.go:161" totalItems=1 duration="4.442158ms"
+I0606 13:33:09.686371       1 reflector.go:446] "Caches populated" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 13:33:09.692758       1 reflector.go:978] "Exiting watch because received the bookmark that marks the end of initial events stream" reflector="k8s.io/client-go/informers/factory.go:161" totalItems=8 duration="10.388107ms"
+I0606 13:33:09.692809       1 reflector.go:446] "Caches populated" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 13:33:09.694792       1 reflector.go:978] "Exiting watch because received the bookmark that marks the end of initial events stream" reflector="k8s.io/client-go/informers/factory.go:161" totalItems=28 duration="12.568343ms"
+I0606 13:33:09.694907       1 reflector.go:446] "Caches populated" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 13:33:09.782722       1 descheduler.go:235] Resetting pod evictor counters
+I0606 13:33:09.782825       1 resourcedefragmentation.go:178] "Starting resource defragmentation balance pass" plugin="ResourceDefragmentation" ExtensionPoint="Balance" nodeCount=7
+I0606 13:33:09.782869       1 resourcedefragmentation.go:185] "Skipping control-plane node" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-84-108"
+I0606 13:33:09.782918       1 resourcedefragmentation.go:219] "Node state" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-1-245" avgUtilization=0.16814267417169437 minUtilization=0.08628534834338872 binScore=0.5022140112575415 usageSource="requests"
+I0606 13:33:09.782950       1 resourcedefragmentation.go:219] "Node state" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-16-198" avgUtilization=0.7655411156418046 minUtilization=0.73 binScore=0.8472294421790978 usageSource="requests"
+I0606 13:33:09.782994       1 resourcedefragmentation.go:219] "Node state" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-19-34" avgUtilization=0.055810706720585405 minUtilization=0.05 binScore=0.5220946466397073 usageSource="requests"
+I0606 13:33:09.783023       1 resourcedefragmentation.go:219] "Node state" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-3-39" avgUtilization=0.8868091661852494 minUtilization=0.8 binScore=0.8565954169073753 usageSource="requests"
+I0606 13:33:09.783037       1 resourcedefragmentation.go:219] "Node state" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-31-146" avgUtilization=0.05581100337958193 minUtilization=0.05 binScore=0.522094498310209 usageSource="requests"
+I0606 13:33:09.783078       1 resourcedefragmentation.go:219] "Node state" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-6-144" avgUtilization=0.05581115171122249 minUtilization=0.05 binScore=0.5220944241443888 usageSource="requests"
+I0606 13:33:09.783148       1 resourcedefragmentation.go:257] "Node is a drain candidate" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-1-245" avgUtilization=0.16814267417169437 binScore=0.5022140112575415 imbalanceIndex=0.16371465165661128 freeSpaceIndex=0.6852859887424585 priority=0.8114797143504585
+I0606 13:33:09.783176       1 resourcedefragmentation.go:280] "Draining under-utilized node" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-1-245" priority=0.8114797143504585
+I0606 13:33:09.783194       1 resourcedefragmentation.go:867] "Candidate score inputs" plugin="ResourceDefragmentation" pod="defrag-exp/s5-cpu-245-7cc476ccfd-xq2rs" originNode="ip-172-31-1-245" c1=0.005741376023572609 c2=-999.9 c3=0.20616323916738494 c4=0
+I0606 13:33:09.783248       1 resourcedefragmentation.go:294] "No feasible scheduler target within ceiling; leaving pod in place" plugin="ResourceDefragmentation" ExtensionPoint="Balance" pod="defrag-exp/s5-cpu-245-7cc476ccfd-xq2rs" originNode="ip-172-31-1-245"
+I0606 13:33:09.783314       1 profile.go:425] "Total number of evictions/requests" extension point="Balance" evictedPods=0 evictionRequests=0
+I0606 13:33:09.783337       1 descheduler.go:252] "Number of evictions/requests" totalEvicted=0 evictionRequests=0
+I0606 13:33:09.783523       1 reflector.go:373] "Stopping reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 13:33:09.783626       1 reflector.go:373] "Stopping reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 13:33:09.783761       1 reflector.go:373] "Stopping reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 13:33:09.784150       1 tlsconfig.go:258] "Shutting down DynamicServingCertificateController"
+I0606 13:33:09.784284       1 secure_serving.go:259] Stopped listening on [::]:10258

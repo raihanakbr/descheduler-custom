@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"math/rand"
 	"sort"
 	"strconv"
 	"time"
@@ -49,7 +50,24 @@ const (
 
 	defaultConsolidationThreshold = 0.40
 	defaultConsolidationTarget    = 0.90
+
+	// Pod-selection policies (ablation knob; see ResourceDefragmentationArgs.SelectionPolicy).
+	SelectionTOPSIS         = "topsis"
+	SelectionJustC1         = "just-c1"
+	SelectionJustC2         = "just-c2"
+	SelectionJustC3         = "just-c3"
+	SelectionJustC4         = "just-c4"
+	SelectionNoC1           = "no-c1"
+	SelectionNoC2           = "no-c2"
+	SelectionNoC3           = "no-c3"
+	SelectionNoC4           = "no-c4"
+	SelectionRandom         = "random"
+	SelectionLargest        = "largest"
+	SelectionLowestPriority = "lowest-priority"
 )
+
+// defaultTopsisWeights is the full-method weight vector for C1, C2, C3, C4.
+var defaultTopsisWeights = []float64{0.30, 0.30, 0.25, 0.15}
 
 // ResourceDefragmentation evicts pods so the kube-scheduler re-packs them onto a
 // minimal set of balanced nodes.
@@ -67,6 +85,7 @@ type ResourceDefragmentation struct {
 	handle    frameworktypes.Handle
 	args      *ResourceDefragmentationArgs
 	podFilter podutil.FilterFunc
+	rng       *rand.Rand
 }
 
 var _ frameworktypes.BalancePlugin = &ResourceDefragmentation{}
@@ -119,6 +138,7 @@ func New(ctx context.Context, args runtime.Object, handle frameworktypes.Handle)
 		handle:    handle,
 		args:      resourceDefragmentationArgs,
 		podFilter: podFilter,
+		rng:       rand.New(rand.NewSource(resourceDefragmentationArgs.SelectionSeed)),
 	}, nil
 }
 
@@ -261,7 +281,7 @@ func (r *ResourceDefragmentation) Balance(ctx context.Context, nodes []*v1.Node)
 
 		remaining := append([]*v1.Pod(nil), dc.pods...)
 		for iteration < r.args.MaxEvictions && len(remaining) > 0 {
-			pod := r.topsis(ctx, dc.node, remaining, nodeStates)
+			pod := r.selectPod(ctx, dc.node, remaining, nodeStates)
 			if pod == nil {
 				logger.V(1).Info("TOPSIS returned no candidate, stopping node", "node", dc.node.Name)
 				break
@@ -732,12 +752,102 @@ func (r *ResourceDefragmentation) computeC4(pod *v1.Pod) float64 {
 // topsis selects the best pod to evict from a drain node using four criteria:
 // C1 pod size (benefit), C2 predicted-destination bin score (benefit),
 // C3 residual emptiness (benefit), C4 priority (cost).
-func (r *ResourceDefragmentation) topsis(ctx context.Context, node *v1.Node, pods []*v1.Pod, nodeStates map[string]*NodeResourceState) *v1.Pod {
+// selectionPolicy resolves the configured ablation policy, defaulting to TOPSIS.
+func (r *ResourceDefragmentation) selectionPolicy() string {
+	switch r.args.SelectionPolicy {
+	case SelectionJustC1, SelectionJustC2, SelectionJustC3, SelectionJustC4,
+		SelectionNoC1, SelectionNoC2, SelectionNoC3, SelectionNoC4,
+		SelectionRandom, SelectionLargest, SelectionLowestPriority, SelectionTOPSIS:
+		return r.args.SelectionPolicy
+	default:
+		return SelectionTOPSIS
+	}
+}
+
+// topsisWeights returns the criterion weight vector for the active policy. The
+// just-cN / no-cN variants zero out columns; ranking is scale-invariant so the
+// remaining weights need not be renormalized.
+func (r *ResourceDefragmentation) topsisWeights() []float64 {
+	switch r.selectionPolicy() {
+	case SelectionJustC1:
+		return []float64{1, 0, 0, 0}
+	case SelectionJustC2:
+		return []float64{0, 1, 0, 0}
+	case SelectionJustC3:
+		return []float64{0, 0, 1, 0}
+	case SelectionJustC4:
+		return []float64{0, 0, 0, 1}
+	case SelectionNoC1:
+		return []float64{0, defaultTopsisWeights[1], defaultTopsisWeights[2], defaultTopsisWeights[3]}
+	case SelectionNoC2:
+		return []float64{defaultTopsisWeights[0], 0, defaultTopsisWeights[2], defaultTopsisWeights[3]}
+	case SelectionNoC3:
+		return []float64{defaultTopsisWeights[0], defaultTopsisWeights[1], 0, defaultTopsisWeights[3]}
+	case SelectionNoC4:
+		return []float64{defaultTopsisWeights[0], defaultTopsisWeights[1], defaultTopsisWeights[2], 0}
+	default:
+		return defaultTopsisWeights
+	}
+}
+
+func podPriority(pod *v1.Pod) int32 {
+	if pod.Spec.Priority != nil {
+		return *pod.Spec.Priority
+	}
+	return 0
+}
+
+// largestPod returns the pod with the largest footprint max(cpuReq, memReq)/alloc.
+func largestPod(pods []*v1.Pod, state *NodeResourceState) *v1.Pod {
+	best := pods[0]
+	bestF := -1.0
+	for _, p := range pods {
+		c, m := getPodRequests(p)
+		f := math.Max(float64(c)/float64(state.AllocatableCPU), float64(m)/float64(state.AllocatableMem))
+		if f > bestF {
+			bestF = f
+			best = p
+		}
+	}
+	return best
+}
+
+// lowestPriorityPod returns the pod with the lowest priority.
+func lowestPriorityPod(pods []*v1.Pod) *v1.Pod {
+	best := pods[0]
+	bestPr := podPriority(best)
+	for _, p := range pods[1:] {
+		if pr := podPriority(p); pr < bestPr {
+			bestPr = pr
+			best = p
+		}
+	}
+	return best
+}
+
+// selectPod chooses which pod to evict from a drain node according to the active
+// SelectionPolicy. The default (and the only non-ablation path) is full TOPSIS.
+func (r *ResourceDefragmentation) selectPod(ctx context.Context, node *v1.Node, pods []*v1.Pod, nodeStates map[string]*NodeResourceState) *v1.Pod {
+	if len(pods) == 0 {
+		return nil
+	}
+	switch r.selectionPolicy() {
+	case SelectionRandom:
+		return pods[r.rng.Intn(len(pods))]
+	case SelectionLargest:
+		return largestPod(pods, nodeStates[node.Name])
+	case SelectionLowestPriority:
+		return lowestPriorityPod(pods)
+	default:
+		return r.topsis(ctx, node, pods, nodeStates, r.topsisWeights())
+	}
+}
+
+func (r *ResourceDefragmentation) topsis(ctx context.Context, node *v1.Node, pods []*v1.Pod, nodeStates map[string]*NodeResourceState, weights []float64) *v1.Pod {
 	if len(pods) == 0 {
 		return nil
 	}
 
-	weights := []float64{0.30, 0.30, 0.25, 0.15}
 	isBenefit := []bool{true, true, true, false}
 
 	nPods := len(pods)

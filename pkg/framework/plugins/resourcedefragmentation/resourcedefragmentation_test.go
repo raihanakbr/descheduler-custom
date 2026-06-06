@@ -238,6 +238,25 @@ func TestResourceDefragmentation(t *testing.T) {
 			expectedEvictedPodName:  "pod-cpu",
 		},
 		{
+			// Ablation knob wiring: with selectionPolicy=largest, the bigger pod on a
+			// mixed drain node is chosen (not whatever TOPSIS would pick).
+			description: "selectionPolicy=largest evicts the largest pod on a mixed node",
+			args:        &ResourceDefragmentationArgs{ConsolidationThreshold: 0.40, ConsolidationTarget: 0.90, SelectionPolicy: "largest", MaxEvictions: 1},
+			nodes: []*v1.Node{
+				buildTestNode("node-drain", withNodeCapacity("2000m", "4Gi")),
+				buildTestNode("node-bin", withNodeCapacity("2000m", "4Gi")),
+			},
+			pods: []*v1.Pod{
+				// node-drain: avg util ~0.25 < 0.40 → candidate; two pods of different size.
+				buildTestPodForNode("pod-small", "node-drain", withPodRequests("200m", "200Mi")),
+				buildTestPodForNode("pod-big", "node-drain", withPodRequests("700m", "40Mi")),
+				// node-bin: balanced, well-utilized → the target.
+				buildTestPodForNode("pod-binload", "node-bin", withPodRequests("1000m", "2Gi")),
+			},
+			expectedEvictedPodCount: 1,
+			expectedEvictedPodName:  "pod-big",
+		},
+		{
 			// A NoSchedule taint the pod does not tolerate makes the only other node an
 			// infeasible target → the under-utilized node cannot be drained.
 			description: "tainted target node is not a feasible relocation target",

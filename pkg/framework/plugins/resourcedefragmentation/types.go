@@ -64,4 +64,20 @@ type ResourceDefragmentationArgs struct {
 	// always admitting complementary moves (which raise balance). λ=0 disables the
 	// gate (legacy behavior); higher λ is stricter. Default 0 (off).
 	BalancePenaltyWeight float64 `json:"balancePenaltyWeight,omitempty"`
+
+	// SelectionPolicy overrides how the pod to evict is chosen from a drain node,
+	// for ablation studies. Everything else (candidacy, priority ordering, the
+	// target gate) is unchanged, so a metric difference isolates the selector.
+	// Values:
+	//   "" / "topsis"      full TOPSIS over C1..C4 (default)
+	//   "just-c1".."just-c4"  TOPSIS with only that criterion's weight
+	//   "no-c1".."no-c4"      TOPSIS with that criterion's weight zeroed
+	//   "random"             uniformly random pod (seeded by SelectionSeed)
+	//   "largest"            pod with the largest footprint max(cpu,mem)/alloc
+	//   "lowest-priority"    pod with the lowest priority (≡ just-c4)
+	SelectionPolicy string `json:"selectionPolicy,omitempty"`
+
+	// SelectionSeed seeds the RNG used by SelectionPolicy "random", for
+	// reproducible ablation runs. Default 0.
+	SelectionSeed int64 `json:"selectionSeed,omitempty"`
 }
