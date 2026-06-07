@@ -1,0 +1,1571 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "flannel.alpha.coreos.com/backend-data": "{\"VNI\":1,\"VtepMAC\":\"fe:63:68:0e:06:bb\"}",
+                    "flannel.alpha.coreos.com/backend-type": "vxlan",
+                    "flannel.alpha.coreos.com/kube-subnet-manager": "true",
+                    "flannel.alpha.coreos.com/public-ip": "172.31.1.245",
+                    "node.alpha.kubernetes.io/ttl": "0",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-05-29T14:17:08Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "amd64",
+                    "beta.kubernetes.io/os": "linux",
+                    "experiment": "high-cpu",
+                    "kubernetes.io/arch": "amd64",
+                    "kubernetes.io/hostname": "ip-172-31-1-245",
+                    "kubernetes.io/os": "linux"
+                },
+                "name": "ip-172-31-1-245",
+                "resourceVersion": "334277",
+                "uid": "7a611510-7bed-422f-a600-8fea3f422cd0"
+            },
+            "spec": {
+                "podCIDR": "10.244.0.0/24",
+                "podCIDRs": [
+                    "10.244.0.0/24"
+                ]
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "172.31.1.245",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "ip-172-31-1-245",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "2",
+                    "ephemeral-storage": "6482880911",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "830732Ki",
+                    "pods": "110"
+                },
+                "capacity": {
+                    "cpu": "2",
+                    "ephemeral-storage": "7034376Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "933132Ki",
+                    "pods": "110"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-06-06T22:27:14Z",
+                        "lastTransitionTime": "2026-06-06T22:27:14Z",
+                        "message": "Flannel is running on this node",
+                        "reason": "FlannelIsUp",
+                        "status": "False",
+                        "type": "NetworkUnavailable"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:34:51Z",
+                        "lastTransitionTime": "2026-05-29T14:17:08Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:34:51Z",
+                        "lastTransitionTime": "2026-05-29T14:17:08Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:34:51Z",
+                        "lastTransitionTime": "2026-05-29T14:17:08Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:34:51Z",
+                        "lastTransitionTime": "2026-05-29T14:36:11Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "declaredFeatures": [
+                    "ExtendWebSocketsToKubelet",
+                    "InPlacePodLevelResourcesVerticalScaling",
+                    "InPlacePodVerticalScalingInitContainers",
+                    "RestartAllContainersOnContainerExits"
+                ],
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "images": [
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:9a85a935b662bd40f8407b7826f57d5a71a8ec9d34a6f231cc3348c4239d8415",
+                            "docker.io/keegou/descheduler-custom:beta-1"
+                        ],
+                        "sizeBytes": 60371785
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:7ae63f0127191cbebcbca5d665645833669f4d8a78d2bb11eaedeced1955c6c2",
+                            "docker.io/keegou/descheduler-custom:v2.2.1"
+                        ],
+                        "sizeBytes": 60360165
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:849bea947419ecfa1c0a840fb83b0ae873cfe833112b01d483a0a16425d0cf1f",
+                            "docker.io/keegou/descheduler-custom:alpha-5"
+                        ],
+                        "sizeBytes": 60356871
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:b3d7dfdf03507cb459d225bb15396a29eddb0c3e80a99af1279cb5e205f49023",
+                            "docker.io/keegou/descheduler-custom:alpha-4"
+                        ],
+                        "sizeBytes": 60355258
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:aaaf4bdc0a2645b3e6ad76f0ce3b0bee6056e95765071c4ae15e06ef55ff73ee",
+                            "docker.io/keegou/descheduler-custom:v2.2.2"
+                        ],
+                        "sizeBytes": 60352512
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:9693cd008c0302c7a9f3d19fcf90339fa293a4ce73b87708b568c2077dff07e8",
+                            "docker.io/keegou/descheduler-custom:v2.1.0"
+                        ],
+                        "sizeBytes": 60351919
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:0b830a41067fe4864d46223d2f0950ee6a89ed4f393b3476bf3b169af8c434e7",
+                            "docker.io/keegou/descheduler-custom:v2.0.0"
+                        ],
+                        "sizeBytes": 60348134
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:60353950ad929b8810dc4cb5ad0d63038e674ea8adae46b1d47edced3894e4ea",
+                            "docker.io/keegou/descheduler-custom:v2.2.0"
+                        ],
+                        "sizeBytes": 60343221
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:829d9b6bb7e8a7084a52ee2fa2447e2ed08def3468a4103aad6916e4811f34e2",
+                            "docker.io/keegou/descheduler-custom:alpha-8"
+                        ],
+                        "sizeBytes": 60328670
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:c6c538d637d424c1d3f165b88f10591998532e0bb8e4c2e57a5c46d17dcbffac",
+                            "docker.io/keegou/descheduler-custom:alpha-6"
+                        ],
+                        "sizeBytes": 60328348
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:f81e217f3866f8616c3701396f020d5cbc85e2596e0b7191db4744636b6664db",
+                            "docker.io/keegou/descheduler-custom:alpha-7"
+                        ],
+                        "sizeBytes": 60326186
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:8101eabe4e25877ffd1379c30dafee2e8d1e2f49e410029150dd65c98668784f",
+                            "docker.io/keegou/descheduler-custom:v1.0.0"
+                        ],
+                        "sizeBytes": 60326024
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/flannel-io/flannel@sha256:cc44a1a8969c4f14b8dd45664546f14abc3fc7682b125399103e555f1ad2528b",
+                            "ghcr.io/flannel-io/flannel:v0.28.4"
+                        ],
+                        "sizeBytes": 35057873
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/kube-proxy@sha256:a96b6e12863ef766d18f69afaad7a5329220c37ce21cb232bcb58362d284f3f7",
+                            "registry.k8s.io/kube-proxy:v1.36.1"
+                        ],
+                        "sizeBytes": 28853312
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/flannel-io/flannel-cni-plugin@sha256:7c3377e977b4b77b8efdad96e207ebee371537d6dcd7b9c40853cf0c0f0aade3",
+                            "ghcr.io/flannel-io/flannel-cni-plugin:v1.9.1-flannel1"
+                        ],
+                        "sizeBytes": 5144597
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause@sha256:7031c1b283388d2c2e09b57badb803c05ebed362dc88d84b480cc47f72a21097",
+                            "registry.k8s.io/pause:3.9"
+                        ],
+                        "sizeBytes": 321520
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause@sha256:278fb9dbcca9518083ad1e11276933a2e96f23de604a3a08cc3c80002767d24c",
+                            "registry.k8s.io/pause:3.10.1"
+                        ],
+                        "sizeBytes": 320448
+                    }
+                ],
+                "nodeInfo": {
+                    "architecture": "amd64",
+                    "bootID": "6fcd6aca-7434-4427-bc07-3ad1de27ba34",
+                    "containerRuntimeVersion": "containerd://2.2.4",
+                    "kernelVersion": "6.17.0-1017-aws",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.36.1",
+                    "machineID": "ec2edff43816402c84e497c1fc69ec3d",
+                    "operatingSystem": "linux",
+                    "osImage": "Ubuntu 24.04.4 LTS",
+                    "systemUUID": "ec2edff4-3816-402c-84e4-97c1fc69ec3d"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "flannel.alpha.coreos.com/backend-data": "{\"VNI\":1,\"VtepMAC\":\"8e:d5:b6:d4:55:7c\"}",
+                    "flannel.alpha.coreos.com/backend-type": "vxlan",
+                    "flannel.alpha.coreos.com/kube-subnet-manager": "true",
+                    "flannel.alpha.coreos.com/public-ip": "172.31.16.198",
+                    "node.alpha.kubernetes.io/ttl": "0",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-05-31T08:26:10Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "amd64",
+                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/arch": "amd64",
+                    "kubernetes.io/hostname": "ip-172-31-16-198",
+                    "kubernetes.io/os": "linux"
+                },
+                "name": "ip-172-31-16-198",
+                "resourceVersion": "334279",
+                "uid": "e159f11d-0d80-4441-a72a-1e67144c59fa"
+            },
+            "spec": {
+                "podCIDR": "10.244.5.0/24",
+                "podCIDRs": [
+                    "10.244.5.0/24"
+                ]
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "172.31.16.198",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "ip-172-31-16-198",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "2",
+                    "ephemeral-storage": "6482880911",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "830876Ki",
+                    "pods": "110"
+                },
+                "capacity": {
+                    "cpu": "2",
+                    "ephemeral-storage": "7034376Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "933276Ki",
+                    "pods": "110"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-06-06T22:27:13Z",
+                        "lastTransitionTime": "2026-06-06T22:27:13Z",
+                        "message": "Flannel is running on this node",
+                        "reason": "FlannelIsUp",
+                        "status": "False",
+                        "type": "NetworkUnavailable"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:38:59Z",
+                        "lastTransitionTime": "2026-06-01T23:39:07Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:38:59Z",
+                        "lastTransitionTime": "2026-06-01T23:39:07Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:38:59Z",
+                        "lastTransitionTime": "2026-06-01T23:39:07Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:38:59Z",
+                        "lastTransitionTime": "2026-06-01T23:39:07Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "declaredFeatures": [
+                    "ExtendWebSocketsToKubelet",
+                    "InPlacePodLevelResourcesVerticalScaling",
+                    "InPlacePodVerticalScalingInitContainers",
+                    "RestartAllContainersOnContainerExits"
+                ],
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "images": [
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:829d9b6bb7e8a7084a52ee2fa2447e2ed08def3468a4103aad6916e4811f34e2",
+                            "docker.io/keegou/descheduler-custom:alpha-8"
+                        ],
+                        "sizeBytes": 60328670
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:bfeb749636c5510c9a7fe859e7a8da2062036ab89a65dbd85d8d34a889873227",
+                            "docker.io/keegou/descheduler-custom:alpha-9"
+                        ],
+                        "sizeBytes": 60320529
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/flannel-io/flannel@sha256:cc44a1a8969c4f14b8dd45664546f14abc3fc7682b125399103e555f1ad2528b",
+                            "ghcr.io/flannel-io/flannel:v0.28.4"
+                        ],
+                        "sizeBytes": 35057873
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/kube-proxy@sha256:a96b6e12863ef766d18f69afaad7a5329220c37ce21cb232bcb58362d284f3f7",
+                            "registry.k8s.io/kube-proxy:v1.36.1"
+                        ],
+                        "sizeBytes": 28853312
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/flannel-io/flannel-cni-plugin@sha256:7c3377e977b4b77b8efdad96e207ebee371537d6dcd7b9c40853cf0c0f0aade3",
+                            "ghcr.io/flannel-io/flannel-cni-plugin:v1.9.1-flannel1"
+                        ],
+                        "sizeBytes": 5144597
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause@sha256:7031c1b283388d2c2e09b57badb803c05ebed362dc88d84b480cc47f72a21097",
+                            "registry.k8s.io/pause:3.9"
+                        ],
+                        "sizeBytes": 321520
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause@sha256:278fb9dbcca9518083ad1e11276933a2e96f23de604a3a08cc3c80002767d24c",
+                            "registry.k8s.io/pause:3.10.1"
+                        ],
+                        "sizeBytes": 320448
+                    }
+                ],
+                "nodeInfo": {
+                    "architecture": "amd64",
+                    "bootID": "03fc97e9-580b-4f23-8373-960354837a20",
+                    "containerRuntimeVersion": "containerd://2.2.4",
+                    "kernelVersion": "6.17.0-1013-aws",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.36.1",
+                    "machineID": "ec293ddedd89fa80344bf1840a8fd884",
+                    "operatingSystem": "linux",
+                    "osImage": "Ubuntu 24.04.4 LTS",
+                    "systemUUID": "ec293dde-dd89-fa80-344b-f1840a8fd884"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "flannel.alpha.coreos.com/backend-data": "{\"VNI\":1,\"VtepMAC\":\"d6:fb:7b:c0:50:f6\"}",
+                    "flannel.alpha.coreos.com/backend-type": "vxlan",
+                    "flannel.alpha.coreos.com/kube-subnet-manager": "true",
+                    "flannel.alpha.coreos.com/public-ip": "172.31.19.34",
+                    "node.alpha.kubernetes.io/ttl": "0",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-05-31T08:29:18Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "amd64",
+                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/arch": "amd64",
+                    "kubernetes.io/hostname": "ip-172-31-19-34",
+                    "kubernetes.io/os": "linux"
+                },
+                "name": "ip-172-31-19-34",
+                "resourceVersion": "334281",
+                "uid": "296c3aef-2735-4773-b12e-cb12465955a5"
+            },
+            "spec": {
+                "podCIDR": "10.244.7.0/24",
+                "podCIDRs": [
+                    "10.244.7.0/24"
+                ]
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "172.31.19.34",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "ip-172-31-19-34",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "2",
+                    "ephemeral-storage": "6482880911",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "830876Ki",
+                    "pods": "110"
+                },
+                "capacity": {
+                    "cpu": "2",
+                    "ephemeral-storage": "7034376Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "933276Ki",
+                    "pods": "110"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-06-06T22:27:13Z",
+                        "lastTransitionTime": "2026-06-06T22:27:13Z",
+                        "message": "Flannel is running on this node",
+                        "reason": "FlannelIsUp",
+                        "status": "False",
+                        "type": "NetworkUnavailable"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:39:43Z",
+                        "lastTransitionTime": "2026-06-01T23:39:07Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:39:43Z",
+                        "lastTransitionTime": "2026-06-01T23:39:07Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:39:43Z",
+                        "lastTransitionTime": "2026-06-01T23:39:07Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:39:43Z",
+                        "lastTransitionTime": "2026-06-01T23:39:07Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "declaredFeatures": [
+                    "ExtendWebSocketsToKubelet",
+                    "InPlacePodLevelResourcesVerticalScaling",
+                    "InPlacePodVerticalScalingInitContainers",
+                    "RestartAllContainersOnContainerExits"
+                ],
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "images": [
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:849bea947419ecfa1c0a840fb83b0ae873cfe833112b01d483a0a16425d0cf1f",
+                            "docker.io/keegou/descheduler-custom:alpha-5"
+                        ],
+                        "sizeBytes": 60356871
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:829d9b6bb7e8a7084a52ee2fa2447e2ed08def3468a4103aad6916e4811f34e2",
+                            "docker.io/keegou/descheduler-custom:alpha-8"
+                        ],
+                        "sizeBytes": 60328670
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/flannel-io/flannel@sha256:cc44a1a8969c4f14b8dd45664546f14abc3fc7682b125399103e555f1ad2528b",
+                            "ghcr.io/flannel-io/flannel:v0.28.4"
+                        ],
+                        "sizeBytes": 35057873
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/kube-proxy@sha256:a96b6e12863ef766d18f69afaad7a5329220c37ce21cb232bcb58362d284f3f7",
+                            "registry.k8s.io/kube-proxy:v1.36.1"
+                        ],
+                        "sizeBytes": 28853312
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/flannel-io/flannel-cni-plugin@sha256:7c3377e977b4b77b8efdad96e207ebee371537d6dcd7b9c40853cf0c0f0aade3",
+                            "ghcr.io/flannel-io/flannel-cni-plugin:v1.9.1-flannel1"
+                        ],
+                        "sizeBytes": 5144597
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause@sha256:7031c1b283388d2c2e09b57badb803c05ebed362dc88d84b480cc47f72a21097",
+                            "registry.k8s.io/pause:3.9"
+                        ],
+                        "sizeBytes": 321520
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause@sha256:278fb9dbcca9518083ad1e11276933a2e96f23de604a3a08cc3c80002767d24c",
+                            "registry.k8s.io/pause:3.10.1"
+                        ],
+                        "sizeBytes": 320448
+                    }
+                ],
+                "nodeInfo": {
+                    "architecture": "amd64",
+                    "bootID": "22929346-06e3-40df-9fdb-d8151aa8f54a",
+                    "containerRuntimeVersion": "containerd://2.2.4",
+                    "kernelVersion": "6.17.0-1013-aws",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.36.1",
+                    "machineID": "ec2f5dc57eb72bddee02f7ba05ed1771",
+                    "operatingSystem": "linux",
+                    "osImage": "Ubuntu 24.04.4 LTS",
+                    "systemUUID": "ec2f5dc5-7eb7-2bdd-ee02-f7ba05ed1771"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "flannel.alpha.coreos.com/backend-data": "{\"VNI\":1,\"VtepMAC\":\"9a:4a:6c:18:99:be\"}",
+                    "flannel.alpha.coreos.com/backend-type": "vxlan",
+                    "flannel.alpha.coreos.com/kube-subnet-manager": "true",
+                    "flannel.alpha.coreos.com/public-ip": "172.31.3.39",
+                    "node.alpha.kubernetes.io/ttl": "0",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-05-29T14:21:42Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "amd64",
+                    "beta.kubernetes.io/os": "linux",
+                    "experiment": "high-mem",
+                    "kubernetes.io/arch": "amd64",
+                    "kubernetes.io/hostname": "ip-172-31-3-39",
+                    "kubernetes.io/os": "linux"
+                },
+                "name": "ip-172-31-3-39",
+                "resourceVersion": "334282",
+                "uid": "8f38b098-dfb6-4560-9997-e5ee7757b5ff"
+            },
+            "spec": {
+                "podCIDR": "10.244.1.0/24",
+                "podCIDRs": [
+                    "10.244.1.0/24"
+                ]
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "172.31.3.39",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "ip-172-31-3-39",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "2",
+                    "ephemeral-storage": "6482880911",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "830880Ki",
+                    "pods": "110"
+                },
+                "capacity": {
+                    "cpu": "2",
+                    "ephemeral-storage": "7034376Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "933280Ki",
+                    "pods": "110"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-06-06T22:27:13Z",
+                        "lastTransitionTime": "2026-06-06T22:27:13Z",
+                        "message": "Flannel is running on this node",
+                        "reason": "FlannelIsUp",
+                        "status": "False",
+                        "type": "NetworkUnavailable"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:36:59Z",
+                        "lastTransitionTime": "2026-05-29T14:21:42Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:36:59Z",
+                        "lastTransitionTime": "2026-05-29T14:21:42Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:36:59Z",
+                        "lastTransitionTime": "2026-05-29T14:21:42Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:36:59Z",
+                        "lastTransitionTime": "2026-05-29T14:36:11Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "declaredFeatures": [
+                    "ExtendWebSocketsToKubelet",
+                    "InPlacePodLevelResourcesVerticalScaling",
+                    "InPlacePodVerticalScalingInitContainers",
+                    "RestartAllContainersOnContainerExits"
+                ],
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "images": [
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:7ae63f0127191cbebcbca5d665645833669f4d8a78d2bb11eaedeced1955c6c2",
+                            "docker.io/keegou/descheduler-custom:v2.2.1"
+                        ],
+                        "sizeBytes": 60360165
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:aaaf4bdc0a2645b3e6ad76f0ce3b0bee6056e95765071c4ae15e06ef55ff73ee",
+                            "docker.io/keegou/descheduler-custom:v2.2.2"
+                        ],
+                        "sizeBytes": 60352512
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:9693cd008c0302c7a9f3d19fcf90339fa293a4ce73b87708b568c2077dff07e8",
+                            "docker.io/keegou/descheduler-custom:alpha"
+                        ],
+                        "sizeBytes": 60351919
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:5e95268ffe62392ec0c5963b7e7d776a6a4dfd7ef553607ccd805f469dabafac",
+                            "docker.io/keegou/descheduler-custom:alpha-2"
+                        ],
+                        "sizeBytes": 60348136
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:f5583d1c6e2053a20ad6c55004f9f1fde2358135aee4c514bdb856d1f8d7c815",
+                            "docker.io/keegou/descheduler-custom:alpha-3"
+                        ],
+                        "sizeBytes": 60347122
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:60353950ad929b8810dc4cb5ad0d63038e674ea8adae46b1d47edced3894e4ea",
+                            "docker.io/keegou/descheduler-custom:v2.2.0"
+                        ],
+                        "sizeBytes": 60343221
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:f81e217f3866f8616c3701396f020d5cbc85e2596e0b7191db4744636b6664db",
+                            "docker.io/keegou/descheduler-custom:alpha-7"
+                        ],
+                        "sizeBytes": 60326186
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:8101eabe4e25877ffd1379c30dafee2e8d1e2f49e410029150dd65c98668784f",
+                            "docker.io/keegou/descheduler-custom:v1.0.0"
+                        ],
+                        "sizeBytes": 60326024
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:bfeb749636c5510c9a7fe859e7a8da2062036ab89a65dbd85d8d34a889873227",
+                            "docker.io/keegou/descheduler-custom:alpha-9"
+                        ],
+                        "sizeBytes": 60320529
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/flannel-io/flannel@sha256:cc44a1a8969c4f14b8dd45664546f14abc3fc7682b125399103e555f1ad2528b",
+                            "ghcr.io/flannel-io/flannel:v0.28.4"
+                        ],
+                        "sizeBytes": 35057873
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/kube-proxy@sha256:a96b6e12863ef766d18f69afaad7a5329220c37ce21cb232bcb58362d284f3f7",
+                            "registry.k8s.io/kube-proxy:v1.36.1"
+                        ],
+                        "sizeBytes": 28853312
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/flannel-io/flannel-cni-plugin@sha256:7c3377e977b4b77b8efdad96e207ebee371537d6dcd7b9c40853cf0c0f0aade3",
+                            "ghcr.io/flannel-io/flannel-cni-plugin:v1.9.1-flannel1"
+                        ],
+                        "sizeBytes": 5144597
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause@sha256:7031c1b283388d2c2e09b57badb803c05ebed362dc88d84b480cc47f72a21097",
+                            "registry.k8s.io/pause:3.9"
+                        ],
+                        "sizeBytes": 321520
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause@sha256:278fb9dbcca9518083ad1e11276933a2e96f23de604a3a08cc3c80002767d24c",
+                            "registry.k8s.io/pause:3.10.1"
+                        ],
+                        "sizeBytes": 320448
+                    }
+                ],
+                "nodeInfo": {
+                    "architecture": "amd64",
+                    "bootID": "cc5f4fb1-5ba0-46a3-871b-01cc7f7bf46f",
+                    "containerRuntimeVersion": "containerd://2.2.4",
+                    "kernelVersion": "6.17.0-1013-aws",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.36.1",
+                    "machineID": "ec2849b984bdfd92f56edd76a8aaabc3",
+                    "operatingSystem": "linux",
+                    "osImage": "Ubuntu 24.04.4 LTS",
+                    "systemUUID": "ec2849b9-84bd-fd92-f56e-dd76a8aaabc3"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "flannel.alpha.coreos.com/backend-data": "{\"VNI\":1,\"VtepMAC\":\"42:d0:1a:82:3e:9a\"}",
+                    "flannel.alpha.coreos.com/backend-type": "vxlan",
+                    "flannel.alpha.coreos.com/kube-subnet-manager": "true",
+                    "flannel.alpha.coreos.com/public-ip": "172.31.31.146",
+                    "node.alpha.kubernetes.io/ttl": "0",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-05-31T08:21:06Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "amd64",
+                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/arch": "amd64",
+                    "kubernetes.io/hostname": "ip-172-31-31-146",
+                    "kubernetes.io/os": "linux"
+                },
+                "name": "ip-172-31-31-146",
+                "resourceVersion": "334284",
+                "uid": "5a4b436c-e83e-4d9e-94d6-63cc522e1f7e"
+            },
+            "spec": {
+                "podCIDR": "10.244.4.0/24",
+                "podCIDRs": [
+                    "10.244.4.0/24"
+                ]
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "172.31.31.146",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "ip-172-31-31-146",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "2",
+                    "ephemeral-storage": "6482880911",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "830876Ki",
+                    "pods": "110"
+                },
+                "capacity": {
+                    "cpu": "2",
+                    "ephemeral-storage": "7034376Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "933276Ki",
+                    "pods": "110"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-06-06T22:27:24Z",
+                        "lastTransitionTime": "2026-06-06T22:27:24Z",
+                        "message": "Flannel is running on this node",
+                        "reason": "FlannelIsUp",
+                        "status": "False",
+                        "type": "NetworkUnavailable"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:40:29Z",
+                        "lastTransitionTime": "2026-06-01T23:39:07Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:40:29Z",
+                        "lastTransitionTime": "2026-06-01T23:39:07Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:40:29Z",
+                        "lastTransitionTime": "2026-06-01T23:39:07Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:40:29Z",
+                        "lastTransitionTime": "2026-06-01T23:39:07Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "declaredFeatures": [
+                    "ExtendWebSocketsToKubelet",
+                    "InPlacePodLevelResourcesVerticalScaling",
+                    "InPlacePodVerticalScalingInitContainers",
+                    "RestartAllContainersOnContainerExits"
+                ],
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "images": [
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:849bea947419ecfa1c0a840fb83b0ae873cfe833112b01d483a0a16425d0cf1f",
+                            "docker.io/keegou/descheduler-custom:alpha-5"
+                        ],
+                        "sizeBytes": 60356871
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:829d9b6bb7e8a7084a52ee2fa2447e2ed08def3468a4103aad6916e4811f34e2",
+                            "docker.io/keegou/descheduler-custom:alpha-8"
+                        ],
+                        "sizeBytes": 60328670
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:f81e217f3866f8616c3701396f020d5cbc85e2596e0b7191db4744636b6664db",
+                            "docker.io/keegou/descheduler-custom:alpha-7"
+                        ],
+                        "sizeBytes": 60326186
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/flannel-io/flannel@sha256:cc44a1a8969c4f14b8dd45664546f14abc3fc7682b125399103e555f1ad2528b",
+                            "ghcr.io/flannel-io/flannel:v0.28.4"
+                        ],
+                        "sizeBytes": 35057873
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/kube-proxy@sha256:a96b6e12863ef766d18f69afaad7a5329220c37ce21cb232bcb58362d284f3f7",
+                            "registry.k8s.io/kube-proxy:v1.36.1"
+                        ],
+                        "sizeBytes": 28853312
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/flannel-io/flannel-cni-plugin@sha256:7c3377e977b4b77b8efdad96e207ebee371537d6dcd7b9c40853cf0c0f0aade3",
+                            "ghcr.io/flannel-io/flannel-cni-plugin:v1.9.1-flannel1"
+                        ],
+                        "sizeBytes": 5144597
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause@sha256:7031c1b283388d2c2e09b57badb803c05ebed362dc88d84b480cc47f72a21097",
+                            "registry.k8s.io/pause:3.9"
+                        ],
+                        "sizeBytes": 321520
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause@sha256:278fb9dbcca9518083ad1e11276933a2e96f23de604a3a08cc3c80002767d24c",
+                            "registry.k8s.io/pause:3.10.1"
+                        ],
+                        "sizeBytes": 320448
+                    }
+                ],
+                "nodeInfo": {
+                    "architecture": "amd64",
+                    "bootID": "d371bcbc-513c-414c-86d9-6216dcc67ae1",
+                    "containerRuntimeVersion": "containerd://2.2.4",
+                    "kernelVersion": "6.17.0-1013-aws",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.36.1",
+                    "machineID": "ec2758838c0cdbabbd7498d624f1798a",
+                    "operatingSystem": "linux",
+                    "osImage": "Ubuntu 24.04.4 LTS",
+                    "systemUUID": "ec275883-8c0c-dbab-bd74-98d624f1798a"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "flannel.alpha.coreos.com/backend-data": "{\"VNI\":1,\"VtepMAC\":\"9a:cb:dc:b6:3d:4d\"}",
+                    "flannel.alpha.coreos.com/backend-type": "vxlan",
+                    "flannel.alpha.coreos.com/kube-subnet-manager": "true",
+                    "flannel.alpha.coreos.com/public-ip": "172.31.6.144",
+                    "node.alpha.kubernetes.io/ttl": "0",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-05-29T14:27:54Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "amd64",
+                    "beta.kubernetes.io/os": "linux",
+                    "experiment": "balanced",
+                    "kubernetes.io/arch": "amd64",
+                    "kubernetes.io/hostname": "ip-172-31-6-144",
+                    "kubernetes.io/os": "linux"
+                },
+                "name": "ip-172-31-6-144",
+                "resourceVersion": "334286",
+                "uid": "ee09f11c-42b3-48a1-a9cb-c63469d779b6"
+            },
+            "spec": {
+                "podCIDR": "10.244.2.0/24",
+                "podCIDRs": [
+                    "10.244.2.0/24"
+                ]
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "172.31.6.144",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "ip-172-31-6-144",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "2",
+                    "ephemeral-storage": "6482880911",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "830728Ki",
+                    "pods": "110"
+                },
+                "capacity": {
+                    "cpu": "2",
+                    "ephemeral-storage": "7034376Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "933128Ki",
+                    "pods": "110"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-06-06T22:27:29Z",
+                        "lastTransitionTime": "2026-06-06T22:27:29Z",
+                        "message": "Flannel is running on this node",
+                        "reason": "FlannelIsUp",
+                        "status": "False",
+                        "type": "NetworkUnavailable"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:38:47Z",
+                        "lastTransitionTime": "2026-05-29T14:27:54Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:38:47Z",
+                        "lastTransitionTime": "2026-05-29T14:27:54Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:38:47Z",
+                        "lastTransitionTime": "2026-05-29T14:27:54Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:38:47Z",
+                        "lastTransitionTime": "2026-05-29T14:36:05Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "declaredFeatures": [
+                    "ExtendWebSocketsToKubelet",
+                    "InPlacePodLevelResourcesVerticalScaling",
+                    "InPlacePodVerticalScalingInitContainers",
+                    "RestartAllContainersOnContainerExits"
+                ],
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "images": [
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:849bea947419ecfa1c0a840fb83b0ae873cfe833112b01d483a0a16425d0cf1f",
+                            "docker.io/keegou/descheduler-custom:alpha-5"
+                        ],
+                        "sizeBytes": 60356871
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:b3d7dfdf03507cb459d225bb15396a29eddb0c3e80a99af1279cb5e205f49023",
+                            "docker.io/keegou/descheduler-custom:alpha-4"
+                        ],
+                        "sizeBytes": 60355258
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:9693cd008c0302c7a9f3d19fcf90339fa293a4ce73b87708b568c2077dff07e8",
+                            "docker.io/keegou/descheduler-custom:alpha"
+                        ],
+                        "sizeBytes": 60351919
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:5e95268ffe62392ec0c5963b7e7d776a6a4dfd7ef553607ccd805f469dabafac",
+                            "docker.io/keegou/descheduler-custom:alpha-2"
+                        ],
+                        "sizeBytes": 60348136
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:f5583d1c6e2053a20ad6c55004f9f1fde2358135aee4c514bdb856d1f8d7c815",
+                            "docker.io/keegou/descheduler-custom:alpha-3"
+                        ],
+                        "sizeBytes": 60347122
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:829d9b6bb7e8a7084a52ee2fa2447e2ed08def3468a4103aad6916e4811f34e2",
+                            "docker.io/keegou/descheduler-custom:alpha-8"
+                        ],
+                        "sizeBytes": 60328670
+                    },
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom@sha256:8101eabe4e25877ffd1379c30dafee2e8d1e2f49e410029150dd65c98668784f",
+                            "docker.io/keegou/descheduler-custom:v1.0.0"
+                        ],
+                        "sizeBytes": 60326024
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/flannel-io/flannel@sha256:cc44a1a8969c4f14b8dd45664546f14abc3fc7682b125399103e555f1ad2528b",
+                            "ghcr.io/flannel-io/flannel:v0.28.4"
+                        ],
+                        "sizeBytes": 35057873
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/kube-proxy@sha256:a96b6e12863ef766d18f69afaad7a5329220c37ce21cb232bcb58362d284f3f7",
+                            "registry.k8s.io/kube-proxy:v1.36.1"
+                        ],
+                        "sizeBytes": 28853312
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/coredns/coredns@sha256:e7e6440cfd1e919280958f5b5a6ab2b184d385bba774c12ad2a9e1e4183f90d9",
+                            "registry.k8s.io/coredns/coredns:v1.14.2"
+                        ],
+                        "sizeBytes": 23257541
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/flannel-io/flannel-cni-plugin@sha256:7c3377e977b4b77b8efdad96e207ebee371537d6dcd7b9c40853cf0c0f0aade3",
+                            "ghcr.io/flannel-io/flannel-cni-plugin:v1.9.1-flannel1"
+                        ],
+                        "sizeBytes": 5144597
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause@sha256:7031c1b283388d2c2e09b57badb803c05ebed362dc88d84b480cc47f72a21097",
+                            "registry.k8s.io/pause:3.9"
+                        ],
+                        "sizeBytes": 321520
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause@sha256:278fb9dbcca9518083ad1e11276933a2e96f23de604a3a08cc3c80002767d24c",
+                            "registry.k8s.io/pause:3.10.1"
+                        ],
+                        "sizeBytes": 320448
+                    }
+                ],
+                "nodeInfo": {
+                    "architecture": "amd64",
+                    "bootID": "c7497f6f-702e-44bf-b66e-5857a7c9fe49",
+                    "containerRuntimeVersion": "containerd://2.2.4",
+                    "kernelVersion": "6.17.0-1017-aws",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.36.1",
+                    "machineID": "ec2bbcd299b97d311006d8f7c6402736",
+                    "operatingSystem": "linux",
+                    "osImage": "Ubuntu 24.04.4 LTS",
+                    "systemUUID": "ec2bbcd2-99b9-7d31-1006-d8f7c6402736"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "flannel.alpha.coreos.com/backend-data": "{\"VNI\":1,\"VtepMAC\":\"82:30:f4:4c:db:f2\"}",
+                    "flannel.alpha.coreos.com/backend-type": "vxlan",
+                    "flannel.alpha.coreos.com/kube-subnet-manager": "true",
+                    "flannel.alpha.coreos.com/public-ip": "172.31.84.108",
+                    "node.alpha.kubernetes.io/ttl": "0",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-05-29T14:12:08Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "amd64",
+                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/arch": "amd64",
+                    "kubernetes.io/hostname": "ip-172-31-84-108",
+                    "kubernetes.io/os": "linux",
+                    "node-role.kubernetes.io/control-plane": "",
+                    "node.kubernetes.io/exclude-from-external-load-balancers": ""
+                },
+                "name": "ip-172-31-84-108",
+                "resourceVersion": "332072",
+                "uid": "9c182cc1-b0c0-4478-bc72-7ca857e244ea"
+            },
+            "spec": {
+                "podCIDR": "10.244.3.0/24",
+                "podCIDRs": [
+                    "10.244.3.0/24"
+                ],
+                "taints": [
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node-role.kubernetes.io/control-plane"
+                    }
+                ]
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "172.31.84.108",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "ip-172-31-84-108",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "2",
+                    "ephemeral-storage": "6482880911",
+                    "hugepages-2Mi": "0",
+                    "memory": "3900936Ki",
+                    "pods": "110"
+                },
+                "capacity": {
+                    "cpu": "2",
+                    "ephemeral-storage": "7034376Ki",
+                    "hugepages-2Mi": "0",
+                    "memory": "4003336Ki",
+                    "pods": "110"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-06-06T22:27:14Z",
+                        "lastTransitionTime": "2026-06-06T22:27:14Z",
+                        "message": "Flannel is running on this node",
+                        "reason": "FlannelIsUp",
+                        "status": "False",
+                        "type": "NetworkUnavailable"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:36:55Z",
+                        "lastTransitionTime": "2026-05-29T14:12:06Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:36:55Z",
+                        "lastTransitionTime": "2026-05-29T14:12:06Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:36:55Z",
+                        "lastTransitionTime": "2026-05-29T14:12:06Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-06-07T01:36:55Z",
+                        "lastTransitionTime": "2026-05-29T14:36:11Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "declaredFeatures": [
+                    "ExtendWebSocketsToKubelet",
+                    "InPlacePodLevelResourcesVerticalScaling",
+                    "InPlacePodVerticalScalingInitContainers",
+                    "RestartAllContainersOnContainerExits"
+                ],
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "images": [
+                    {
+                        "names": [
+                            "docker.io/keegou/descheduler-custom:alpha-9"
+                        ],
+                        "sizeBytes": 60320529
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/flannel-io/flannel@sha256:cc44a1a8969c4f14b8dd45664546f14abc3fc7682b125399103e555f1ad2528b",
+                            "ghcr.io/flannel-io/flannel:v0.28.4"
+                        ],
+                        "sizeBytes": 35057873
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/kube-apiserver@sha256:2460df74307cafacf674573c88df511aeb1aece9daa7fbd968fe27cb1c8c4588",
+                            "registry.k8s.io/kube-apiserver:v1.36.1"
+                        ],
+                        "sizeBytes": 29742835
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/kube-proxy@sha256:a96b6e12863ef766d18f69afaad7a5329220c37ce21cb232bcb58362d284f3f7",
+                            "registry.k8s.io/kube-proxy:v1.36.1"
+                        ],
+                        "sizeBytes": 28853312
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/kube-controller-manager@sha256:c8adb8daee5b30576bd87638a89351ab8388b3fda466bedb7eacf10cde77dbe7",
+                            "registry.k8s.io/kube-controller-manager:v1.36.1"
+                        ],
+                        "sizeBytes": 26407325
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/coredns/coredns@sha256:e7e6440cfd1e919280958f5b5a6ab2b184d385bba774c12ad2a9e1e4183f90d9",
+                            "registry.k8s.io/coredns/coredns:v1.14.2"
+                        ],
+                        "sizeBytes": 23257541
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/etcd@sha256:397189418d1a00e500c0605ad18d1baf3b541a1004d768448c367e48071622e5",
+                            "registry.k8s.io/etcd:3.6.8-0"
+                        ],
+                        "sizeBytes": 22885795
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/kube-scheduler@sha256:3a4333e8ba6e1f74c9bc467c791a06a26808474e8819582cf130cfe0fddc3155",
+                            "registry.k8s.io/kube-scheduler:v1.36.1"
+                        ],
+                        "sizeBytes": 20440795
+                    },
+                    {
+                        "names": [
+                            "ghcr.io/flannel-io/flannel-cni-plugin@sha256:7c3377e977b4b77b8efdad96e207ebee371537d6dcd7b9c40853cf0c0f0aade3",
+                            "ghcr.io/flannel-io/flannel-cni-plugin:v1.9.1-flannel1"
+                        ],
+                        "sizeBytes": 5144597
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause@sha256:f548e0e8e3dc1896ca956272154dde3314e8cc4fde0a57577ee9fa1c63f5baf4",
+                            "registry.k8s.io/pause:3.10.2"
+                        ],
+                        "sizeBytes": 320805
+                    },
+                    {
+                        "names": [
+                            "registry.k8s.io/pause@sha256:278fb9dbcca9518083ad1e11276933a2e96f23de604a3a08cc3c80002767d24c",
+                            "registry.k8s.io/pause:3.10.1"
+                        ],
+                        "sizeBytes": 320448
+                    }
+                ],
+                "nodeInfo": {
+                    "architecture": "amd64",
+                    "bootID": "b8a8e207-afbd-44a4-b51c-36423eb0e894",
+                    "containerRuntimeVersion": "containerd://2.2.4",
+                    "kernelVersion": "6.17.0-1013-aws",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.36.1",
+                    "machineID": "ec2e1734f18e030e3356dad9154c6c87",
+                    "operatingSystem": "linux",
+                    "osImage": "Ubuntu 24.04.4 LTS",
+                    "systemUUID": "ec2e1734-f18e-030e-3356-dad9154c6c87"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    }
+                ]
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

@@ -1,0 +1,13 @@
+NAME                           READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s1-fill-144-75b6ddcffc-6l9cb   1/1     Running   0          74s   10.244.0.53    ip-172-31-1-245    <none>           <none>
+s1-fill-144-75b6ddcffc-mlm8m   1/1     Running   0          74s   10.244.0.52    ip-172-31-1-245    <none>           <none>
+s1-fill-146-f9dd78d6c-t2xt8    1/1     Running   0          74s   10.244.0.56    ip-172-31-1-245    <none>           <none>
+s1-fill-245-7659c95b6c-npz74   1/1     Running   0          75s   10.244.0.50    ip-172-31-1-245    <none>           <none>
+s1-fill-245-7659c95b6c-pbx5f   1/1     Running   0          74s   10.244.0.51    ip-172-31-1-245    <none>           <none>
+s1-fill-39-7d47c6f544-74qg5    1/1     Running   0          74s   10.244.0.54    ip-172-31-1-245    <none>           <none>
+s1-fill-39-7d47c6f544-rcdnv    1/1     Running   0          74s   10.244.0.55    ip-172-31-1-245    <none>           <none>
+s1-fill-146-f9dd78d6c-rscdf    1/1     Running   0          74s   10.244.5.226   ip-172-31-16-198   <none>           <none>
+s1-fill-198-6f65649bd4-jhdd8   1/1     Running   0          85s   10.244.5.224   ip-172-31-16-198   <none>           <none>
+s1-fill-198-6f65649bd4-k4gnq   1/1     Running   0          85s   10.244.5.225   ip-172-31-16-198   <none>           <none>
+s1-fill-34-65d8fd768c-6x2l7    1/1     Running   0          48s   10.244.5.227   ip-172-31-16-198   <none>           <none>
+s1-fill-34-65d8fd768c-sdh74    1/1     Running   0          48s   10.244.5.228   ip-172-31-16-198   <none>           <none>

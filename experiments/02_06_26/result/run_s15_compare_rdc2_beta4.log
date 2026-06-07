@@ -1,0 +1,1150 @@
+============================================================
+### s1 / rdc2 / seed 1   (09:51:01)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s1-fill-245 : 2 x (cpu=250m mem=100Mi) on ip-172-31-1-245
+  -> s1-fill-198 : 2 x (cpu=250m mem=100Mi) on ip-172-31-16-198
+  -> s1-fill-34 : 2 x (cpu=250m mem=100Mi) on ip-172-31-19-34
+  -> s1-fill-39 : 2 x (cpu=250m mem=100Mi) on ip-172-31-3-39
+  -> s1-fill-146 : 2 x (cpu=250m mem=100Mi) on ip-172-31-31-146
+  -> s1-fill-144 : 2 x (cpu=250m mem=100Mi) on ip-172-31-6-144
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s1:
+NAME                           READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s1-fill-245-7659c95b6c-gkqlh   1/1     Running   0          7s    10.244.0.47    ip-172-31-1-245    <none>           <none>
+s1-fill-245-7659c95b6c-kq7p6   1/1     Running   0          7s    10.244.0.48    ip-172-31-1-245    <none>           <none>
+s1-fill-198-6f65649bd4-jhdd8   1/1     Running   0          6s    10.244.5.224   ip-172-31-16-198   <none>           <none>
+s1-fill-198-6f65649bd4-k4gnq   1/1     Running   0          6s    10.244.5.225   ip-172-31-16-198   <none>           <none>
+s1-fill-34-65d8fd768c-6z2cp    1/1     Running   0          5s    10.244.7.215   ip-172-31-19-34    <none>           <none>
+s1-fill-34-65d8fd768c-cwqmh    1/1     Running   0          5s    10.244.7.216   ip-172-31-19-34    <none>           <none>
+s1-fill-39-7d47c6f544-dvh6b    1/1     Running   0          4s    10.244.1.59    ip-172-31-3-39     <none>           <none>
+s1-fill-39-7d47c6f544-k78zd    1/1     Running   0          4s    10.244.1.58    ip-172-31-3-39     <none>           <none>
+s1-fill-146-f9dd78d6c-2xmlm    1/1     Running   0          3s    10.244.4.132   ip-172-31-31-146   <none>           <none>
+s1-fill-146-f9dd78d6c-jmkkk    1/1     Running   0          3s    10.244.4.131   ip-172-31-31-146   <none>           <none>
+s1-fill-144-75b6ddcffc-dhthb   1/1     Running   0          1s    10.244.2.202   ip-172-31-6-144    <none>           <none>
+s1-fill-144-75b6ddcffc-v4gr6   1/1     Running   0          1s    10.244.2.203   ip-172-31-6-144    <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s1/20260607-095109-rdc2-k1
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=6  N_empty=0
+S (stranding, sum|cpuFrac-memFrac|) = 0.049
+H_balanced(200m/80Mi)=42   H_skewed(700m/20Mi)=12
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245          600    2000       250       811   0.30   0.31    2
+ip-172-31-16-198         600    2000       250       811   0.30   0.31    2
+ip-172-31-19-34          600    2000       250       811   0.30   0.31    2
+ip-172-31-3-39           600    2000       250       811   0.30   0.31    2
+ip-172-31-31-146         600    2000       250       811   0.30   0.31    2
+ip-172-31-6-144          600    2000       250       811   0.30   0.31    2
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 6, "N_empty": 0, "S": 0.0488, "H_balanced": 42, "H_skewed": 12}
+  pass 1: running descheduler job...
+  pass 1: 8 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 2 eviction decision(s)
+  pass 3: running descheduler job...
+  pass 3: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=2  N_empty=4
+S (stranding, sum|cpuFrac-memFrac|) = 0.050
+H_balanced(200m/80Mi)=39   H_skewed(700m/20Mi)=8
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1850    2000       750       811   0.93   0.92    7
+ip-172-31-16-198        1350    2000       550       811   0.68   0.68    5
+ip-172-31-19-34          100    2000        50       811   0.05   0.06    0
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146         100    2000        50       811   0.05   0.06    0
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 2, "N_empty": 4, "S": 0.0499, "H_balanced": 39, "H_skewed": 8}
+scenario:            s1
+timestamp:           20260607-095109-rdc2-k1
+per_pass_evictions:  8 2 0
+total_evictions(E):  10
+converged:           1   (1 = a pass evicted 0)
+passes_run:          3 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s1/20260607-095109-rdc2-k1
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s1 workloads in ns/defrag-exp ...
+deployment.apps "s1-fill-144" deleted from defrag-exp namespace
+deployment.apps "s1-fill-146" deleted from defrag-exp namespace
+deployment.apps "s1-fill-198" deleted from defrag-exp namespace
+deployment.apps "s1-fill-245" deleted from defrag-exp namespace
+deployment.apps "s1-fill-34" deleted from defrag-exp namespace
+deployment.apps "s1-fill-39" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s1 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+============================================================
+### s1 / rdc2 / seed 2   (09:52:29)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s1-fill-245 : 2 x (cpu=250m mem=100Mi) on ip-172-31-1-245
+  -> s1-fill-198 : 2 x (cpu=250m mem=100Mi) on ip-172-31-16-198
+  -> s1-fill-34 : 2 x (cpu=250m mem=100Mi) on ip-172-31-19-34
+  -> s1-fill-39 : 2 x (cpu=250m mem=100Mi) on ip-172-31-3-39
+  -> s1-fill-146 : 2 x (cpu=250m mem=100Mi) on ip-172-31-31-146
+  -> s1-fill-144 : 2 x (cpu=250m mem=100Mi) on ip-172-31-6-144
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s1:
+NAME                           READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s1-fill-245-7659c95b6c-c5lwn   1/1     Running   0          7s    10.244.0.59    ip-172-31-1-245    <none>           <none>
+s1-fill-245-7659c95b6c-tb8g6   1/1     Running   0          7s    10.244.0.60    ip-172-31-1-245    <none>           <none>
+s1-fill-198-6f65649bd4-dctfq   1/1     Running   0          6s    10.244.5.229   ip-172-31-16-198   <none>           <none>
+s1-fill-198-6f65649bd4-rkg6f   1/1     Running   0          6s    10.244.5.230   ip-172-31-16-198   <none>           <none>
+s1-fill-34-65d8fd768c-9nkcj    1/1     Running   0          4s    10.244.7.217   ip-172-31-19-34    <none>           <none>
+s1-fill-34-65d8fd768c-slng9    1/1     Running   0          4s    10.244.7.218   ip-172-31-19-34    <none>           <none>
+s1-fill-39-7d47c6f544-9kfmr    1/1     Running   0          3s    10.244.1.60    ip-172-31-3-39     <none>           <none>
+s1-fill-39-7d47c6f544-bmpdm    1/1     Running   0          3s    10.244.1.61    ip-172-31-3-39     <none>           <none>
+s1-fill-146-f9dd78d6c-9njqj    1/1     Running   0          2s    10.244.4.133   ip-172-31-31-146   <none>           <none>
+s1-fill-146-f9dd78d6c-d7bwc    1/1     Running   0          2s    10.244.4.134   ip-172-31-31-146   <none>           <none>
+s1-fill-144-75b6ddcffc-cz989   1/1     Running   0          1s    10.244.2.204   ip-172-31-6-144    <none>           <none>
+s1-fill-144-75b6ddcffc-hjz6j   1/1     Running   0          1s    10.244.2.205   ip-172-31-6-144    <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s1/20260607-095236-rdc2-k2
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=6  N_empty=0
+S (stranding, sum|cpuFrac-memFrac|) = 0.049
+H_balanced(200m/80Mi)=42   H_skewed(700m/20Mi)=12
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245          600    2000       250       811   0.30   0.31    2
+ip-172-31-16-198         600    2000       250       811   0.30   0.31    2
+ip-172-31-19-34          600    2000       250       811   0.30   0.31    2
+ip-172-31-3-39           600    2000       250       811   0.30   0.31    2
+ip-172-31-31-146         600    2000       250       811   0.30   0.31    2
+ip-172-31-6-144          600    2000       250       811   0.30   0.31    2
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 6, "N_empty": 0, "S": 0.0488, "H_balanced": 42, "H_skewed": 12}
+  pass 1: running descheduler job...
+  pass 1: 8 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 2 eviction decision(s)
+  pass 3: running descheduler job...
+  pass 3: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=2  N_empty=4
+S (stranding, sum|cpuFrac-memFrac|) = 0.050
+H_balanced(200m/80Mi)=39   H_skewed(700m/20Mi)=8
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1850    2000       750       811   0.93   0.92    7
+ip-172-31-16-198         100    2000        50       811   0.05   0.06    0
+ip-172-31-19-34         1350    2000       550       811   0.68   0.68    5
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146         100    2000        50       811   0.05   0.06    0
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 2, "N_empty": 4, "S": 0.0499, "H_balanced": 39, "H_skewed": 8}
+scenario:            s1
+timestamp:           20260607-095236-rdc2-k2
+per_pass_evictions:  8 2 0
+total_evictions(E):  10
+converged:           1   (1 = a pass evicted 0)
+passes_run:          3 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s1/20260607-095236-rdc2-k2
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s1 workloads in ns/defrag-exp ...
+deployment.apps "s1-fill-144" deleted from defrag-exp namespace
+deployment.apps "s1-fill-146" deleted from defrag-exp namespace
+deployment.apps "s1-fill-198" deleted from defrag-exp namespace
+deployment.apps "s1-fill-245" deleted from defrag-exp namespace
+deployment.apps "s1-fill-34" deleted from defrag-exp namespace
+deployment.apps "s1-fill-39" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s1 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+============================================================
+### s1 / rdc2 / seed 3   (09:53:53)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s1-fill-245 : 2 x (cpu=250m mem=100Mi) on ip-172-31-1-245
+  -> s1-fill-198 : 2 x (cpu=250m mem=100Mi) on ip-172-31-16-198
+  -> s1-fill-34 : 2 x (cpu=250m mem=100Mi) on ip-172-31-19-34
+  -> s1-fill-39 : 2 x (cpu=250m mem=100Mi) on ip-172-31-3-39
+  -> s1-fill-146 : 2 x (cpu=250m mem=100Mi) on ip-172-31-31-146
+  -> s1-fill-144 : 2 x (cpu=250m mem=100Mi) on ip-172-31-6-144
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s1:
+NAME                           READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s1-fill-245-7659c95b6c-6kdl7   1/1     Running   0          7s    10.244.0.71    ip-172-31-1-245    <none>           <none>
+s1-fill-245-7659c95b6c-fssnr   1/1     Running   0          7s    10.244.0.72    ip-172-31-1-245    <none>           <none>
+s1-fill-198-6f65649bd4-bhzh5   1/1     Running   0          6s    10.244.5.231   ip-172-31-16-198   <none>           <none>
+s1-fill-198-6f65649bd4-nqmvb   1/1     Running   0          6s    10.244.5.232   ip-172-31-16-198   <none>           <none>
+s1-fill-34-65d8fd768c-hdcg7    1/1     Running   0          5s    10.244.7.222   ip-172-31-19-34    <none>           <none>
+s1-fill-34-65d8fd768c-twplt    1/1     Running   0          5s    10.244.7.223   ip-172-31-19-34    <none>           <none>
+s1-fill-39-7d47c6f544-dp588    1/1     Running   0          4s    10.244.1.62    ip-172-31-3-39     <none>           <none>
+s1-fill-39-7d47c6f544-vdjpn    1/1     Running   0          4s    10.244.1.63    ip-172-31-3-39     <none>           <none>
+s1-fill-146-f9dd78d6c-6jnrm    1/1     Running   0          3s    10.244.4.136   ip-172-31-31-146   <none>           <none>
+s1-fill-146-f9dd78d6c-6vldn    1/1     Running   0          3s    10.244.4.135   ip-172-31-31-146   <none>           <none>
+s1-fill-144-75b6ddcffc-lrhff   1/1     Running   0          1s    10.244.2.206   ip-172-31-6-144    <none>           <none>
+s1-fill-144-75b6ddcffc-mmsl8   1/1     Running   0          1s    10.244.2.207   ip-172-31-6-144    <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s1/20260607-095401-rdc2-k3
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=6  N_empty=0
+S (stranding, sum|cpuFrac-memFrac|) = 0.049
+H_balanced(200m/80Mi)=42   H_skewed(700m/20Mi)=12
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245          600    2000       250       811   0.30   0.31    2
+ip-172-31-16-198         600    2000       250       811   0.30   0.31    2
+ip-172-31-19-34          600    2000       250       811   0.30   0.31    2
+ip-172-31-3-39           600    2000       250       811   0.30   0.31    2
+ip-172-31-31-146         600    2000       250       811   0.30   0.31    2
+ip-172-31-6-144          600    2000       250       811   0.30   0.31    2
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 6, "N_empty": 0, "S": 0.0488, "H_balanced": 42, "H_skewed": 12}
+  pass 1: running descheduler job...
+  pass 1: 8 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 2 eviction decision(s)
+  pass 3: running descheduler job...
+  pass 3: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=2  N_empty=4
+S (stranding, sum|cpuFrac-memFrac|) = 0.050
+H_balanced(200m/80Mi)=39   H_skewed(700m/20Mi)=8
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1850    2000       750       811   0.93   0.92    7
+ip-172-31-16-198         100    2000        50       811   0.05   0.06    0
+ip-172-31-19-34         1350    2000       550       811   0.68   0.68    5
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146         100    2000        50       811   0.05   0.06    0
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 2, "N_empty": 4, "S": 0.0499, "H_balanced": 39, "H_skewed": 8}
+scenario:            s1
+timestamp:           20260607-095401-rdc2-k3
+per_pass_evictions:  8 2 0
+total_evictions(E):  10
+converged:           1   (1 = a pass evicted 0)
+passes_run:          3 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s1/20260607-095401-rdc2-k3
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s1 workloads in ns/defrag-exp ...
+deployment.apps "s1-fill-144" deleted from defrag-exp namespace
+deployment.apps "s1-fill-146" deleted from defrag-exp namespace
+deployment.apps "s1-fill-198" deleted from defrag-exp namespace
+deployment.apps "s1-fill-245" deleted from defrag-exp namespace
+deployment.apps "s1-fill-34" deleted from defrag-exp namespace
+deployment.apps "s1-fill-39" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s1 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+============================================================
+### s2 / rdc2 / seed 1   (09:55:18)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s2-cpu-245 : 2 x (cpu=750m mem=20Mi) on ip-172-31-1-245
+  -> s2-cpu-198 : 2 x (cpu=750m mem=20Mi) on ip-172-31-16-198
+  -> s2-cpu-34 : 2 x (cpu=750m mem=20Mi) on ip-172-31-19-34
+  -> s2-mem-39 : 2 x (cpu=50m mem=240Mi) on ip-172-31-3-39
+  -> s2-mem-146 : 2 x (cpu=50m mem=240Mi) on ip-172-31-31-146
+  -> s2-mem-144 : 2 x (cpu=50m mem=240Mi) on ip-172-31-6-144
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s2:
+NAME                          READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s2-cpu-245-846fcd67f4-7twx9   1/1     Running   0          10s   10.244.0.83    ip-172-31-1-245    <none>           <none>
+s2-cpu-245-846fcd67f4-jchrw   1/1     Running   0          10s   10.244.0.84    ip-172-31-1-245    <none>           <none>
+s2-cpu-198-7f87654f6f-52xs4   1/1     Running   0          9s    10.244.5.234   ip-172-31-16-198   <none>           <none>
+s2-cpu-198-7f87654f6f-jkgxd   1/1     Running   0          9s    10.244.5.233   ip-172-31-16-198   <none>           <none>
+s2-cpu-34-6694c57846-hkpsv    1/1     Running   0          8s    10.244.7.228   ip-172-31-19-34    <none>           <none>
+s2-cpu-34-6694c57846-x5fwr    1/1     Running   0          8s    10.244.7.227   ip-172-31-19-34    <none>           <none>
+s2-mem-39-6c9ff4fc6d-dzrvh    1/1     Running   0          6s    10.244.1.65    ip-172-31-3-39     <none>           <none>
+s2-mem-39-6c9ff4fc6d-vbrbm    1/1     Running   0          6s    10.244.1.64    ip-172-31-3-39     <none>           <none>
+s2-mem-146-7ff7c4f86f-25sbd   1/1     Running   0          4s    10.244.4.137   ip-172-31-31-146   <none>           <none>
+s2-mem-146-7ff7c4f86f-v54br   1/1     Running   0          4s    10.244.4.138   ip-172-31-31-146   <none>           <none>
+s2-mem-144-769fd78487-tn8fl   1/1     Running   0          2s    10.244.2.208   ip-172-31-6-144    <none>           <none>
+s2-mem-144-769fd78487-z4xdc   1/1     Running   0          2s    10.244.2.209   ip-172-31-6-144    <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s2/20260607-095528-rdc2-k1
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=6  N_empty=0
+S (stranding, sum|cpuFrac-memFrac|) = 3.727
+H_balanced(200m/80Mi)=15   H_skewed(700m/20Mi)=6
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1600    2000        90       811   0.80   0.11    2
+ip-172-31-16-198        1600    2000        90       811   0.80   0.11    2
+ip-172-31-19-34         1600    2000        90       811   0.80   0.11    2
+ip-172-31-3-39           200    2000       530       811   0.10   0.65    2
+ip-172-31-31-146         200    2000       530       811   0.10   0.65    2
+ip-172-31-6-144          200    2000       530       811   0.10   0.65    2
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 6, "N_empty": 0, "S": 3.7269, "H_balanced": 15, "H_skewed": 6}
+  pass 1: running descheduler job...
+  pass 1: 6 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=3  N_empty=3
+S (stranding, sum|cpuFrac-memFrac|) = 0.971
+H_balanced(200m/80Mi)=29   H_skewed(700m/20Mi)=6
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1750    2000       810       811   0.88   1.00    5
+ip-172-31-16-198        1750    2000       810       811   0.88   1.00    5
+ip-172-31-19-34         1600    2000        90       811   0.80   0.11    2
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146         100    2000        50       811   0.05   0.06    0
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 3, "N_empty": 3, "S": 0.9707, "H_balanced": 29, "H_skewed": 6}
+scenario:            s2
+timestamp:           20260607-095528-rdc2-k1
+per_pass_evictions:  6 0
+total_evictions(E):  6
+converged:           1   (1 = a pass evicted 0)
+passes_run:          2 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s2/20260607-095528-rdc2-k1
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s2 workloads in ns/defrag-exp ...
+deployment.apps "s2-cpu-198" deleted from defrag-exp namespace
+deployment.apps "s2-cpu-245" deleted from defrag-exp namespace
+deployment.apps "s2-cpu-34" deleted from defrag-exp namespace
+deployment.apps "s2-mem-144" deleted from defrag-exp namespace
+deployment.apps "s2-mem-146" deleted from defrag-exp namespace
+deployment.apps "s2-mem-39" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s2 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+============================================================
+### s2 / rdc2 / seed 2   (09:56:20)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s2-cpu-245 : 2 x (cpu=750m mem=20Mi) on ip-172-31-1-245
+  -> s2-cpu-198 : 2 x (cpu=750m mem=20Mi) on ip-172-31-16-198
+  -> s2-cpu-34 : 2 x (cpu=750m mem=20Mi) on ip-172-31-19-34
+  -> s2-mem-39 : 2 x (cpu=50m mem=240Mi) on ip-172-31-3-39
+  -> s2-mem-146 : 2 x (cpu=50m mem=240Mi) on ip-172-31-31-146
+  -> s2-mem-144 : 2 x (cpu=50m mem=240Mi) on ip-172-31-6-144
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s2:
+NAME                          READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s2-cpu-245-846fcd67f4-lbj2j   1/1     Running   0          10s   10.244.0.91    ip-172-31-1-245    <none>           <none>
+s2-cpu-245-846fcd67f4-mgfm6   1/1     Running   0          10s   10.244.0.90    ip-172-31-1-245    <none>           <none>
+s2-cpu-198-7f87654f6f-c7cw4   1/1     Running   0          9s    10.244.5.238   ip-172-31-16-198   <none>           <none>
+s2-cpu-198-7f87654f6f-l5wwb   1/1     Running   0          9s    10.244.5.239   ip-172-31-16-198   <none>           <none>
+s2-cpu-34-6694c57846-j4tw9    1/1     Running   0          8s    10.244.7.229   ip-172-31-19-34    <none>           <none>
+s2-cpu-34-6694c57846-ldpr2    1/1     Running   0          8s    10.244.7.230   ip-172-31-19-34    <none>           <none>
+s2-mem-39-6c9ff4fc6d-45v75    1/1     Running   0          6s    10.244.1.67    ip-172-31-3-39     <none>           <none>
+s2-mem-39-6c9ff4fc6d-ct5kt    1/1     Running   0          7s    10.244.1.66    ip-172-31-3-39     <none>           <none>
+s2-mem-146-7ff7c4f86f-64f5t   1/1     Running   0          4s    10.244.4.140   ip-172-31-31-146   <none>           <none>
+s2-mem-146-7ff7c4f86f-759kc   1/1     Running   0          4s    10.244.4.139   ip-172-31-31-146   <none>           <none>
+s2-mem-144-769fd78487-pd7jd   1/1     Running   0          2s    10.244.2.210   ip-172-31-6-144    <none>           <none>
+s2-mem-144-769fd78487-qkv7w   1/1     Running   0          2s    10.244.2.211   ip-172-31-6-144    <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s2/20260607-095630-rdc2-k2
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=6  N_empty=0
+S (stranding, sum|cpuFrac-memFrac|) = 3.727
+H_balanced(200m/80Mi)=15   H_skewed(700m/20Mi)=6
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1600    2000        90       811   0.80   0.11    2
+ip-172-31-16-198        1600    2000        90       811   0.80   0.11    2
+ip-172-31-19-34         1600    2000        90       811   0.80   0.11    2
+ip-172-31-3-39           200    2000       530       811   0.10   0.65    2
+ip-172-31-31-146         200    2000       530       811   0.10   0.65    2
+ip-172-31-6-144          200    2000       530       811   0.10   0.65    2
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 6, "N_empty": 0, "S": 3.7269, "H_balanced": 15, "H_skewed": 6}
+  pass 1: running descheduler job...
+  pass 1: 6 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=3  N_empty=3
+S (stranding, sum|cpuFrac-memFrac|) = 0.971
+H_balanced(200m/80Mi)=29   H_skewed(700m/20Mi)=6
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1750    2000       810       811   0.88   1.00    5
+ip-172-31-16-198        1750    2000       810       811   0.88   1.00    5
+ip-172-31-19-34         1600    2000        90       811   0.80   0.11    2
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146         100    2000        50       811   0.05   0.06    0
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 3, "N_empty": 3, "S": 0.9707, "H_balanced": 29, "H_skewed": 6}
+scenario:            s2
+timestamp:           20260607-095630-rdc2-k2
+per_pass_evictions:  6 0
+total_evictions(E):  6
+converged:           1   (1 = a pass evicted 0)
+passes_run:          2 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s2/20260607-095630-rdc2-k2
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s2 workloads in ns/defrag-exp ...
+deployment.apps "s2-cpu-198" deleted from defrag-exp namespace
+deployment.apps "s2-cpu-245" deleted from defrag-exp namespace
+deployment.apps "s2-cpu-34" deleted from defrag-exp namespace
+deployment.apps "s2-mem-144" deleted from defrag-exp namespace
+deployment.apps "s2-mem-146" deleted from defrag-exp namespace
+deployment.apps "s2-mem-39" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s2 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+============================================================
+### s2 / rdc2 / seed 3   (09:57:22)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s2-cpu-245 : 2 x (cpu=750m mem=20Mi) on ip-172-31-1-245
+  -> s2-cpu-198 : 2 x (cpu=750m mem=20Mi) on ip-172-31-16-198
+  -> s2-cpu-34 : 2 x (cpu=750m mem=20Mi) on ip-172-31-19-34
+  -> s2-mem-39 : 2 x (cpu=50m mem=240Mi) on ip-172-31-3-39
+  -> s2-mem-146 : 2 x (cpu=50m mem=240Mi) on ip-172-31-31-146
+  -> s2-mem-144 : 2 x (cpu=50m mem=240Mi) on ip-172-31-6-144
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s2:
+NAME                          READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s2-cpu-245-846fcd67f4-5j5qn   1/1     Running   0          10s   10.244.0.98    ip-172-31-1-245    <none>           <none>
+s2-cpu-245-846fcd67f4-g76qx   1/1     Running   0          10s   10.244.0.97    ip-172-31-1-245    <none>           <none>
+s2-cpu-198-7f87654f6f-h8jnl   1/1     Running   0          8s    10.244.5.244   ip-172-31-16-198   <none>           <none>
+s2-cpu-198-7f87654f6f-wbr65   1/1     Running   0          8s    10.244.5.243   ip-172-31-16-198   <none>           <none>
+s2-cpu-34-6694c57846-889p6    1/1     Running   0          7s    10.244.7.232   ip-172-31-19-34    <none>           <none>
+s2-cpu-34-6694c57846-k7d4v    1/1     Running   0          7s    10.244.7.231   ip-172-31-19-34    <none>           <none>
+s2-mem-39-6c9ff4fc6d-d2hnh    1/1     Running   0          6s    10.244.1.69    ip-172-31-3-39     <none>           <none>
+s2-mem-39-6c9ff4fc6d-lvhhn    1/1     Running   0          6s    10.244.1.68    ip-172-31-3-39     <none>           <none>
+s2-mem-146-7ff7c4f86f-q6wcd   1/1     Running   0          4s    10.244.4.142   ip-172-31-31-146   <none>           <none>
+s2-mem-146-7ff7c4f86f-vwc4b   1/1     Running   0          4s    10.244.4.141   ip-172-31-31-146   <none>           <none>
+s2-mem-144-769fd78487-dzzrc   1/1     Running   0          2s    10.244.2.213   ip-172-31-6-144    <none>           <none>
+s2-mem-144-769fd78487-qbdrb   1/1     Running   0          2s    10.244.2.212   ip-172-31-6-144    <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s2/20260607-095732-rdc2-k3
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=6  N_empty=0
+S (stranding, sum|cpuFrac-memFrac|) = 3.727
+H_balanced(200m/80Mi)=15   H_skewed(700m/20Mi)=6
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1600    2000        90       811   0.80   0.11    2
+ip-172-31-16-198        1600    2000        90       811   0.80   0.11    2
+ip-172-31-19-34         1600    2000        90       811   0.80   0.11    2
+ip-172-31-3-39           200    2000       530       811   0.10   0.65    2
+ip-172-31-31-146         200    2000       530       811   0.10   0.65    2
+ip-172-31-6-144          200    2000       530       811   0.10   0.65    2
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 6, "N_empty": 0, "S": 3.7269, "H_balanced": 15, "H_skewed": 6}
+  pass 1: running descheduler job...
+  pass 1: 6 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=3  N_empty=3
+S (stranding, sum|cpuFrac-memFrac|) = 0.971
+H_balanced(200m/80Mi)=29   H_skewed(700m/20Mi)=6
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1750    2000       810       811   0.88   1.00    5
+ip-172-31-16-198        1750    2000       810       811   0.88   1.00    5
+ip-172-31-19-34         1600    2000        90       811   0.80   0.11    2
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146         100    2000        50       811   0.05   0.06    0
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 3, "N_empty": 3, "S": 0.9707, "H_balanced": 29, "H_skewed": 6}
+scenario:            s2
+timestamp:           20260607-095732-rdc2-k3
+per_pass_evictions:  6 0
+total_evictions(E):  6
+converged:           1   (1 = a pass evicted 0)
+passes_run:          2 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s2/20260607-095732-rdc2-k3
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s2 workloads in ns/defrag-exp ...
+deployment.apps "s2-cpu-198" deleted from defrag-exp namespace
+deployment.apps "s2-cpu-245" deleted from defrag-exp namespace
+deployment.apps "s2-cpu-34" deleted from defrag-exp namespace
+deployment.apps "s2-mem-144" deleted from defrag-exp namespace
+deployment.apps "s2-mem-146" deleted from defrag-exp namespace
+deployment.apps "s2-mem-39" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s2 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+============================================================
+### s3 / rdc2 / seed 1   (09:58:24)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s3-under-245 : 2 x (cpu=250m mem=100Mi) on ip-172-31-1-245
+  -> s3-under-198 : 2 x (cpu=250m mem=100Mi) on ip-172-31-16-198
+  -> s3-cpu-34 : 2 x (cpu=750m mem=20Mi) on ip-172-31-19-34
+  -> s3-cpu-39 : 2 x (cpu=750m mem=20Mi) on ip-172-31-3-39
+  -> s3-full-146 : 2 x (cpu=800m mem=320Mi) on ip-172-31-31-146
+  -> s3-full-144 : 2 x (cpu=800m mem=320Mi) on ip-172-31-6-144
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s3:
+NAME                            READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s3-under-245-574b8b4b46-c4zbh   1/1     Running   0          7s    10.244.0.105   ip-172-31-1-245    <none>           <none>
+s3-under-245-574b8b4b46-rs8fn   1/1     Running   0          7s    10.244.0.104   ip-172-31-1-245    <none>           <none>
+s3-under-198-c45f6ffd9-4859m    1/1     Running   0          6s    10.244.5.249   ip-172-31-16-198   <none>           <none>
+s3-under-198-c45f6ffd9-hcvk6    1/1     Running   0          6s    10.244.5.248   ip-172-31-16-198   <none>           <none>
+s3-cpu-34-848456d98d-4bkmt      1/1     Running   0          5s    10.244.7.233   ip-172-31-19-34    <none>           <none>
+s3-cpu-34-848456d98d-x9gpd      1/1     Running   0          5s    10.244.7.234   ip-172-31-19-34    <none>           <none>
+s3-cpu-39-694f845c9f-bzwpw      1/1     Running   0          4s    10.244.1.71    ip-172-31-3-39     <none>           <none>
+s3-cpu-39-694f845c9f-zmpkm      1/1     Running   0          4s    10.244.1.70    ip-172-31-3-39     <none>           <none>
+s3-full-146-5bdc7c699-5zvph     1/1     Running   0          3s    10.244.4.143   ip-172-31-31-146   <none>           <none>
+s3-full-146-5bdc7c699-khs7w     1/1     Running   0          3s    10.244.4.144   ip-172-31-31-146   <none>           <none>
+s3-full-144-569b4d6597-4trqq    1/1     Running   0          2s    10.244.2.214   ip-172-31-6-144    <none>           <none>
+s3-full-144-569b4d6597-ts5l9    1/1     Running   0          2s    10.244.2.215   ip-172-31-6-144    <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s3/20260607-095832-rdc2-k1
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=6  N_empty=0
+S (stranding, sum|cpuFrac-memFrac|) = 1.395
+H_balanced(200m/80Mi)=20   H_skewed(700m/20Mi)=4
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245          600    2000       250       811   0.30   0.31    2
+ip-172-31-16-198         600    2000       250       811   0.30   0.31    2
+ip-172-31-19-34         1600    2000        90       811   0.80   0.11    2
+ip-172-31-3-39          1600    2000        90       811   0.80   0.11    2
+ip-172-31-31-146        1700    2000       690       811   0.85   0.85    2
+ip-172-31-6-144         1700    2000       690       811   0.85   0.85    2
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 6, "N_empty": 0, "S": 1.3953, "H_balanced": 20, "H_skewed": 4}
+  pass 1: running descheduler job...
+  pass 1: 2 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 1.386
+H_balanced(200m/80Mi)=19   H_skewed(700m/20Mi)=2
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1350    2000       270       811   0.68   0.33    3
+ip-172-31-16-198        1350    2000       270       811   0.68   0.33    3
+ip-172-31-19-34         1600    2000        90       811   0.80   0.11    2
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146        1700    2000       690       811   0.85   0.85    2
+ip-172-31-6-144         1700    2000       690       811   0.85   0.85    2
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 5, "N_empty": 1, "S": 1.386, "H_balanced": 19, "H_skewed": 2}
+scenario:            s3
+timestamp:           20260607-095832-rdc2-k1
+per_pass_evictions:  2 0
+total_evictions(E):  2
+converged:           1   (1 = a pass evicted 0)
+passes_run:          2 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s3/20260607-095832-rdc2-k1
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s3 workloads in ns/defrag-exp ...
+deployment.apps "s3-cpu-34" deleted from defrag-exp namespace
+deployment.apps "s3-cpu-39" deleted from defrag-exp namespace
+deployment.apps "s3-full-144" deleted from defrag-exp namespace
+deployment.apps "s3-full-146" deleted from defrag-exp namespace
+deployment.apps "s3-under-198" deleted from defrag-exp namespace
+deployment.apps "s3-under-245" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s3 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+============================================================
+### s3 / rdc2 / seed 2   (09:59:25)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s3-under-245 : 2 x (cpu=250m mem=100Mi) on ip-172-31-1-245
+  -> s3-under-198 : 2 x (cpu=250m mem=100Mi) on ip-172-31-16-198
+  -> s3-cpu-34 : 2 x (cpu=750m mem=20Mi) on ip-172-31-19-34
+  -> s3-cpu-39 : 2 x (cpu=750m mem=20Mi) on ip-172-31-3-39
+  -> s3-full-146 : 2 x (cpu=800m mem=320Mi) on ip-172-31-31-146
+  -> s3-full-144 : 2 x (cpu=800m mem=320Mi) on ip-172-31-6-144
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s3:
+NAME                            READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s3-under-245-574b8b4b46-72dfj   1/1     Running   0          7s    10.244.0.107   ip-172-31-1-245    <none>           <none>
+s3-under-245-574b8b4b46-w9qpk   1/1     Running   0          7s    10.244.0.108   ip-172-31-1-245    <none>           <none>
+s3-under-198-c45f6ffd9-b8mzr    1/1     Running   0          6s    10.244.5.252   ip-172-31-16-198   <none>           <none>
+s3-under-198-c45f6ffd9-dvwtv    1/1     Running   0          6s    10.244.5.251   ip-172-31-16-198   <none>           <none>
+s3-cpu-34-848456d98d-phx8z      1/1     Running   0          5s    10.244.7.236   ip-172-31-19-34    <none>           <none>
+s3-cpu-34-848456d98d-xwg7j      1/1     Running   0          5s    10.244.7.235   ip-172-31-19-34    <none>           <none>
+s3-cpu-39-694f845c9f-k5qhq      1/1     Running   0          3s    10.244.1.72    ip-172-31-3-39     <none>           <none>
+s3-cpu-39-694f845c9f-nq88d      1/1     Running   0          3s    10.244.1.73    ip-172-31-3-39     <none>           <none>
+s3-full-146-5bdc7c699-ths99     1/1     Running   0          2s    10.244.4.148   ip-172-31-31-146   <none>           <none>
+s3-full-146-5bdc7c699-zrdsp     1/1     Running   0          2s    10.244.4.147   ip-172-31-31-146   <none>           <none>
+s3-full-144-569b4d6597-s8cnk    1/1     Running   0          1s    10.244.2.217   ip-172-31-6-144    <none>           <none>
+s3-full-144-569b4d6597-vcqpf    1/1     Running   0          1s    10.244.2.216   ip-172-31-6-144    <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s3/20260607-095933-rdc2-k2
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=6  N_empty=0
+S (stranding, sum|cpuFrac-memFrac|) = 1.395
+H_balanced(200m/80Mi)=20   H_skewed(700m/20Mi)=4
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245          600    2000       250       811   0.30   0.31    2
+ip-172-31-16-198         600    2000       250       811   0.30   0.31    2
+ip-172-31-19-34         1600    2000        90       811   0.80   0.11    2
+ip-172-31-3-39          1600    2000        90       811   0.80   0.11    2
+ip-172-31-31-146        1700    2000       690       811   0.85   0.85    2
+ip-172-31-6-144         1700    2000       690       811   0.85   0.85    2
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 6, "N_empty": 0, "S": 1.3953, "H_balanced": 20, "H_skewed": 4}
+  pass 1: running descheduler job...
+  pass 1: 2 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 1.386
+H_balanced(200m/80Mi)=19   H_skewed(700m/20Mi)=2
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1350    2000       270       811   0.68   0.33    3
+ip-172-31-16-198        1350    2000       270       811   0.68   0.33    3
+ip-172-31-19-34         1600    2000        90       811   0.80   0.11    2
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146        1700    2000       690       811   0.85   0.85    2
+ip-172-31-6-144         1700    2000       690       811   0.85   0.85    2
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 5, "N_empty": 1, "S": 1.386, "H_balanced": 19, "H_skewed": 2}
+scenario:            s3
+timestamp:           20260607-095933-rdc2-k2
+per_pass_evictions:  2 0
+total_evictions(E):  2
+converged:           1   (1 = a pass evicted 0)
+passes_run:          2 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s3/20260607-095933-rdc2-k2
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s3 workloads in ns/defrag-exp ...
+deployment.apps "s3-cpu-34" deleted from defrag-exp namespace
+deployment.apps "s3-cpu-39" deleted from defrag-exp namespace
+deployment.apps "s3-full-144" deleted from defrag-exp namespace
+deployment.apps "s3-full-146" deleted from defrag-exp namespace
+deployment.apps "s3-under-198" deleted from defrag-exp namespace
+deployment.apps "s3-under-245" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s3 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+============================================================
+### s3 / rdc2 / seed 3   (10:00:24)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s3-under-245 : 2 x (cpu=250m mem=100Mi) on ip-172-31-1-245
+  -> s3-under-198 : 2 x (cpu=250m mem=100Mi) on ip-172-31-16-198
+  -> s3-cpu-34 : 2 x (cpu=750m mem=20Mi) on ip-172-31-19-34
+  -> s3-cpu-39 : 2 x (cpu=750m mem=20Mi) on ip-172-31-3-39
+  -> s3-full-146 : 2 x (cpu=800m mem=320Mi) on ip-172-31-31-146
+  -> s3-full-144 : 2 x (cpu=800m mem=320Mi) on ip-172-31-6-144
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s3:
+NAME                            READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s3-under-245-574b8b4b46-vtllp   1/1     Running   0          7s    10.244.0.111   ip-172-31-1-245    <none>           <none>
+s3-under-245-574b8b4b46-x7ksb   1/1     Running   0          7s    10.244.0.110   ip-172-31-1-245    <none>           <none>
+s3-under-198-c45f6ffd9-9cswk    1/1     Running   0          6s    10.244.5.254   ip-172-31-16-198   <none>           <none>
+s3-under-198-c45f6ffd9-rv9nl    1/1     Running   0          6s    10.244.5.2     ip-172-31-16-198   <none>           <none>
+s3-cpu-34-848456d98d-hvqsc      1/1     Running   0          5s    10.244.7.238   ip-172-31-19-34    <none>           <none>
+s3-cpu-34-848456d98d-p97mh      1/1     Running   0          5s    10.244.7.237   ip-172-31-19-34    <none>           <none>
+s3-cpu-39-694f845c9f-rg5ls      1/1     Running   0          3s    10.244.1.74    ip-172-31-3-39     <none>           <none>
+s3-cpu-39-694f845c9f-zxq4k      1/1     Running   0          3s    10.244.1.75    ip-172-31-3-39     <none>           <none>
+s3-full-146-5bdc7c699-pz9r2     1/1     Running   0          2s    10.244.4.151   ip-172-31-31-146   <none>           <none>
+s3-full-146-5bdc7c699-wc5p8     1/1     Running   0          2s    10.244.4.152   ip-172-31-31-146   <none>           <none>
+s3-full-144-569b4d6597-8ngt7    1/1     Running   0          1s    10.244.2.219   ip-172-31-6-144    <none>           <none>
+s3-full-144-569b4d6597-h9tbg    1/1     Running   0          1s    10.244.2.218   ip-172-31-6-144    <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s3/20260607-100031-rdc2-k3
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=6  N_empty=0
+S (stranding, sum|cpuFrac-memFrac|) = 1.395
+H_balanced(200m/80Mi)=20   H_skewed(700m/20Mi)=4
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245          600    2000       250       811   0.30   0.31    2
+ip-172-31-16-198         600    2000       250       811   0.30   0.31    2
+ip-172-31-19-34         1600    2000        90       811   0.80   0.11    2
+ip-172-31-3-39          1600    2000        90       811   0.80   0.11    2
+ip-172-31-31-146        1700    2000       690       811   0.85   0.85    2
+ip-172-31-6-144         1700    2000       690       811   0.85   0.85    2
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 6, "N_empty": 0, "S": 1.3953, "H_balanced": 20, "H_skewed": 4}
+  pass 1: running descheduler job...
+  pass 1: 2 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 1.386
+H_balanced(200m/80Mi)=19   H_skewed(700m/20Mi)=2
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1350    2000       270       811   0.68   0.33    3
+ip-172-31-16-198        1350    2000       270       811   0.68   0.33    3
+ip-172-31-19-34         1600    2000        90       811   0.80   0.11    2
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146        1700    2000       690       811   0.85   0.85    2
+ip-172-31-6-144         1700    2000       690       811   0.85   0.85    2
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 5, "N_empty": 1, "S": 1.386, "H_balanced": 19, "H_skewed": 2}
+scenario:            s3
+timestamp:           20260607-100031-rdc2-k3
+per_pass_evictions:  2 0
+total_evictions(E):  2
+converged:           1   (1 = a pass evicted 0)
+passes_run:          2 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s3/20260607-100031-rdc2-k3
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s3 workloads in ns/defrag-exp ...
+deployment.apps "s3-cpu-34" deleted from defrag-exp namespace
+deployment.apps "s3-cpu-39" deleted from defrag-exp namespace
+deployment.apps "s3-full-144" deleted from defrag-exp namespace
+deployment.apps "s3-full-146" deleted from defrag-exp namespace
+deployment.apps "s3-under-198" deleted from defrag-exp namespace
+deployment.apps "s3-under-245" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s3 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+============================================================
+### s4 / rdc2 / seed 1   (10:01:23)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s4-cpu-245 : 3 x (cpu=600m mem=24Mi) on ip-172-31-1-245
+  -> s4-cpu-198 : 3 x (cpu=600m mem=24Mi) on ip-172-31-16-198
+  -> s4-mem-34 : 3 x (cpu=60m mem=240Mi) on ip-172-31-19-34
+  -> s4-mem-39 : 3 x (cpu=60m mem=240Mi) on ip-172-31-3-39
+  -> s4-jumbo-146 : 1 x (cpu=920m mem=375Mi) on ip-172-31-31-146
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s4:
+NAME                            READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s4-cpu-245-cccd9967b-7v522      1/1     Running   0          8s    10.244.0.114   ip-172-31-1-245    <none>           <none>
+s4-cpu-245-cccd9967b-hd7d9      1/1     Running   0          8s    10.244.0.115   ip-172-31-1-245    <none>           <none>
+s4-cpu-245-cccd9967b-sj7w8      1/1     Running   0          8s    10.244.0.113   ip-172-31-1-245    <none>           <none>
+s4-cpu-198-c8bbfc967-gglgz      1/1     Running   0          6s    10.244.5.6     ip-172-31-16-198   <none>           <none>
+s4-cpu-198-c8bbfc967-hw782      1/1     Running   0          6s    10.244.5.4     ip-172-31-16-198   <none>           <none>
+s4-cpu-198-c8bbfc967-vtp99      1/1     Running   0          6s    10.244.5.5     ip-172-31-16-198   <none>           <none>
+s4-mem-34-67b57f4875-xl2ps      1/1     Running   0          5s    10.244.7.240   ip-172-31-19-34    <none>           <none>
+s4-mem-34-67b57f4875-g2mp8      1/1     Running   0          5s    10.244.7.241   ip-172-31-19-34    <none>           <none>
+s4-mem-34-67b57f4875-p8l49      1/1     Running   0          5s    10.244.7.239   ip-172-31-19-34    <none>           <none>
+s4-mem-39-5d5899dbd4-27l6b      1/1     Running   0          3s    10.244.1.78    ip-172-31-3-39     <none>           <none>
+s4-mem-39-5d5899dbd4-fnf78      1/1     Running   0          3s    10.244.1.77    ip-172-31-3-39     <none>           <none>
+s4-mem-39-5d5899dbd4-snpdz      1/1     Running   0          3s    10.244.1.76    ip-172-31-3-39     <none>           <none>
+s4-jumbo-146-6b466bd845-5nc95   1/1     Running   0          1s    10.244.4.155   ip-172-31-31-146   <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s4/20260607-100131-rdc2-k1
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 4 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 1 eviction decision(s)
+  pass 3: running descheduler job...
+  pass 3: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.112
+H_balanced(200m/80Mi)=24   H_skewed(700m/20Mi)=6
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1420    2000       578       811   0.71   0.71    4
+ip-172-31-16-198        1960    2000       362       811   0.98   0.45    4
+ip-172-31-19-34          220    2000       530       811   0.11   0.65    2
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146        1680    2000       689       811   0.84   0.85    3
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.1119, "H_balanced": 24, "H_skewed": 6}
+scenario:            s4
+timestamp:           20260607-100131-rdc2-k1
+per_pass_evictions:  4 1 0
+total_evictions(E):  5
+converged:           1   (1 = a pass evicted 0)
+passes_run:          3 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s4/20260607-100131-rdc2-k1
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s4 workloads in ns/defrag-exp ...
+deployment.apps "s4-cpu-198" deleted from defrag-exp namespace
+deployment.apps "s4-cpu-245" deleted from defrag-exp namespace
+deployment.apps "s4-jumbo-146" deleted from defrag-exp namespace
+deployment.apps "s4-mem-34" deleted from defrag-exp namespace
+deployment.apps "s4-mem-39" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s4 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+============================================================
+### s4 / rdc2 / seed 2   (10:02:50)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s4-cpu-245 : 3 x (cpu=600m mem=24Mi) on ip-172-31-1-245
+  -> s4-cpu-198 : 3 x (cpu=600m mem=24Mi) on ip-172-31-16-198
+  -> s4-mem-34 : 3 x (cpu=60m mem=240Mi) on ip-172-31-19-34
+  -> s4-mem-39 : 3 x (cpu=60m mem=240Mi) on ip-172-31-3-39
+  -> s4-jumbo-146 : 1 x (cpu=920m mem=375Mi) on ip-172-31-31-146
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s4:
+NAME                            READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s4-cpu-245-cccd9967b-8smw6      1/1     Running   0          8s    10.244.0.121   ip-172-31-1-245    <none>           <none>
+s4-cpu-245-cccd9967b-ljrj4      1/1     Running   0          8s    10.244.0.120   ip-172-31-1-245    <none>           <none>
+s4-cpu-245-cccd9967b-xl7gw      1/1     Running   0          8s    10.244.0.119   ip-172-31-1-245    <none>           <none>
+s4-cpu-198-c8bbfc967-8khqr      1/1     Running   0          7s    10.244.5.10    ip-172-31-16-198   <none>           <none>
+s4-cpu-198-c8bbfc967-s79rr      1/1     Running   0          7s    10.244.5.12    ip-172-31-16-198   <none>           <none>
+s4-cpu-198-c8bbfc967-zgp5x      1/1     Running   0          7s    10.244.5.11    ip-172-31-16-198   <none>           <none>
+s4-mem-34-67b57f4875-zpkm4      1/1     Running   0          5s    10.244.7.244   ip-172-31-19-34    <none>           <none>
+s4-mem-34-67b57f4875-4n5qg      1/1     Running   0          6s    10.244.7.242   ip-172-31-19-34    <none>           <none>
+s4-mem-34-67b57f4875-gl9kr      1/1     Running   0          5s    10.244.7.243   ip-172-31-19-34    <none>           <none>
+s4-mem-39-5d5899dbd4-4nz7l      1/1     Running   0          3s    10.244.1.79    ip-172-31-3-39     <none>           <none>
+s4-mem-39-5d5899dbd4-bzccw      1/1     Running   0          3s    10.244.1.80    ip-172-31-3-39     <none>           <none>
+s4-mem-39-5d5899dbd4-ppnxb      1/1     Running   0          3s    10.244.1.81    ip-172-31-3-39     <none>           <none>
+s4-jumbo-146-6b466bd845-w5nt6   1/1     Running   0          2s    10.244.4.158   ip-172-31-31-146   <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s4/20260607-100259-rdc2-k2
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 4 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 1 eviction decision(s)
+  pass 3: running descheduler job...
+  pass 3: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.112
+H_balanced(200m/80Mi)=24   H_skewed(700m/20Mi)=6
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1420    2000       578       811   0.71   0.71    4
+ip-172-31-16-198        1960    2000       362       811   0.98   0.45    4
+ip-172-31-19-34          220    2000       530       811   0.11   0.65    2
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146        1680    2000       689       811   0.84   0.85    3
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.1119, "H_balanced": 24, "H_skewed": 6}
+scenario:            s4
+timestamp:           20260607-100259-rdc2-k2
+per_pass_evictions:  4 1 0
+total_evictions(E):  5
+converged:           1   (1 = a pass evicted 0)
+passes_run:          3 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s4/20260607-100259-rdc2-k2
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s4 workloads in ns/defrag-exp ...
+deployment.apps "s4-cpu-198" deleted from defrag-exp namespace
+deployment.apps "s4-cpu-245" deleted from defrag-exp namespace
+deployment.apps "s4-jumbo-146" deleted from defrag-exp namespace
+deployment.apps "s4-mem-34" deleted from defrag-exp namespace
+deployment.apps "s4-mem-39" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s4 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+============================================================
+### s4 / rdc2 / seed 3   (10:04:16)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s4-cpu-245 : 3 x (cpu=600m mem=24Mi) on ip-172-31-1-245
+  -> s4-cpu-198 : 3 x (cpu=600m mem=24Mi) on ip-172-31-16-198
+  -> s4-mem-34 : 3 x (cpu=60m mem=240Mi) on ip-172-31-19-34
+  -> s4-mem-39 : 3 x (cpu=60m mem=240Mi) on ip-172-31-3-39
+  -> s4-jumbo-146 : 1 x (cpu=920m mem=375Mi) on ip-172-31-31-146
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s4:
+NAME                            READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s4-cpu-245-cccd9967b-sqlq8      1/1     Running   0          8s    10.244.0.126   ip-172-31-1-245    <none>           <none>
+s4-cpu-245-cccd9967b-t4xld      1/1     Running   0          8s    10.244.0.125   ip-172-31-1-245    <none>           <none>
+s4-cpu-245-cccd9967b-z5kxc      1/1     Running   0          8s    10.244.0.127   ip-172-31-1-245    <none>           <none>
+s4-cpu-198-c8bbfc967-8kk5w      1/1     Running   0          7s    10.244.5.17    ip-172-31-16-198   <none>           <none>
+s4-cpu-198-c8bbfc967-9gqzd      1/1     Running   0          7s    10.244.5.16    ip-172-31-16-198   <none>           <none>
+s4-cpu-198-c8bbfc967-plf69      1/1     Running   0          7s    10.244.5.18    ip-172-31-16-198   <none>           <none>
+s4-mem-34-67b57f4875-lfnrd      1/1     Running   0          5s    10.244.7.246   ip-172-31-19-34    <none>           <none>
+s4-mem-34-67b57f4875-57pxq      1/1     Running   0          5s    10.244.7.247   ip-172-31-19-34    <none>           <none>
+s4-mem-34-67b57f4875-b2v2x      1/1     Running   0          5s    10.244.7.245   ip-172-31-19-34    <none>           <none>
+s4-mem-39-5d5899dbd4-2m26m      1/1     Running   0          3s    10.244.1.84    ip-172-31-3-39     <none>           <none>
+s4-mem-39-5d5899dbd4-7ksj7      1/1     Running   0          3s    10.244.1.83    ip-172-31-3-39     <none>           <none>
+s4-mem-39-5d5899dbd4-tmcwv      1/1     Running   0          3s    10.244.1.82    ip-172-31-3-39     <none>           <none>
+s4-jumbo-146-6b466bd845-d2v4t   1/1     Running   0          1s    10.244.4.161   ip-172-31-31-146   <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s4/20260607-100424-rdc2-k3
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=5  N_empty=1
+S (stranding, sum|cpuFrac-memFrac|) = 3.243
+H_balanced(200m/80Mi)=13   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1900    2000       122       811   0.95   0.15    3
+ip-172-31-16-198        1900    2000       122       811   0.95   0.15    3
+ip-172-31-19-34          280    2000       770       811   0.14   0.95    3
+ip-172-31-3-39           280    2000       770       811   0.14   0.95    3
+ip-172-31-31-146        1020    2000       425       811   0.51   0.52    1
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 5, "N_empty": 1, "S": 3.2426, "H_balanced": 13, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 4 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 1 eviction decision(s)
+  pass 3: running descheduler job...
+  pass 3: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.112
+H_balanced(200m/80Mi)=24   H_skewed(700m/20Mi)=6
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245         1420    2000       578       811   0.71   0.71    4
+ip-172-31-16-198        1960    2000       362       811   0.98   0.45    4
+ip-172-31-19-34          220    2000       530       811   0.11   0.65    2
+ip-172-31-3-39           100    2000        50       811   0.05   0.06    0
+ip-172-31-31-146        1680    2000       689       811   0.84   0.85    3
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.1119, "H_balanced": 24, "H_skewed": 6}
+scenario:            s4
+timestamp:           20260607-100424-rdc2-k3
+per_pass_evictions:  4 1 0
+total_evictions(E):  5
+converged:           1   (1 = a pass evicted 0)
+passes_run:          3 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s4/20260607-100424-rdc2-k3
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s4 workloads in ns/defrag-exp ...
+deployment.apps "s4-cpu-198" deleted from defrag-exp namespace
+deployment.apps "s4-cpu-245" deleted from defrag-exp namespace
+deployment.apps "s4-jumbo-146" deleted from defrag-exp namespace
+deployment.apps "s4-mem-34" deleted from defrag-exp namespace
+deployment.apps "s4-mem-39" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s4 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+============================================================
+### s5 / rdc2 / seed 1   (10:05:39)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s5-cpu-245 : 1 x (cpu=400m mem=20Mi) on ip-172-31-1-245
+  -> s5-mem-245 : 1 x (cpu=40m mem=160Mi) on ip-172-31-1-245
+  -> s5-bal-245 : 1 x (cpu=160m mem=80Mi) on ip-172-31-1-245
+  -> s5-cpuskew-198 : 1 x (cpu=1300m mem=40Mi) on ip-172-31-16-198
+  -> s5-memskew-34 : 1 x (cpu=60m mem=560Mi) on ip-172-31-19-34
+  -> s5-full-39 : 2 x (cpu=650m mem=250Mi) on ip-172-31-3-39
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s5:
+NAME                              READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s5-bal-245-7f97dc5789-qq7vp       1/1     Running   0          6s    10.244.0.133   ip-172-31-1-245    <none>           <none>
+s5-cpu-245-7cc476ccfd-sp8d5       1/1     Running   0          9s    10.244.0.131   ip-172-31-1-245    <none>           <none>
+s5-mem-245-76b5b55d77-qrqrm       1/1     Running   0          8s    10.244.0.132   ip-172-31-1-245    <none>           <none>
+s5-cpuskew-198-856c6d9f7c-k6gdr   1/1     Running   0          4s    10.244.5.22    ip-172-31-16-198   <none>           <none>
+s5-memskew-34-765f6f88c9-hb22z    1/1     Running   0          3s    10.244.7.248   ip-172-31-19-34    <none>           <none>
+s5-full-39-56f45f46d8-kbxnq       1/1     Running   0          2s    10.244.1.85    ip-172-31-3-39     <none>           <none>
+s5-full-39-56f45f46d8-t588x       1/1     Running   0          2s    10.244.1.86    ip-172-31-3-39     <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s5/20260607-100549-rdc2-k1
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.338
+H_balanced(200m/80Mi)=32   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245          700    2000       310       811   0.35   0.38    3
+ip-172-31-16-198        1400    2000        90       811   0.70   0.11    1
+ip-172-31-19-34          160    2000       610       811   0.08   0.75    1
+ip-172-31-3-39          1400    2000       550       811   0.70   0.68    2
+ip-172-31-31-146         100    2000        50       811   0.05   0.06    0
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.3384, "H_balanced": 32, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 3 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=3  N_empty=3
+S (stranding, sum|cpuFrac-memFrac|) = 0.443
+H_balanced(200m/80Mi)=36   H_skewed(700m/20Mi)=8
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245          500    2000        70       811   0.25   0.09    1
+ip-172-31-16-198        1460    2000       650       811   0.73   0.80    2
+ip-172-31-19-34          100    2000        50       811   0.05   0.06    0
+ip-172-31-3-39          1600    2000       790       811   0.80   0.97    4
+ip-172-31-31-146         100    2000        50       811   0.05   0.06    0
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 3, "N_empty": 3, "S": 0.4433, "H_balanced": 36, "H_skewed": 8}
+scenario:            s5
+timestamp:           20260607-100549-rdc2-k1
+per_pass_evictions:  3 0
+total_evictions(E):  3
+converged:           1   (1 = a pass evicted 0)
+passes_run:          2 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s5/20260607-100549-rdc2-k1
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s5 workloads in ns/defrag-exp ...
+deployment.apps "s5-bal-245" deleted from defrag-exp namespace
+deployment.apps "s5-cpu-245" deleted from defrag-exp namespace
+deployment.apps "s5-cpuskew-198" deleted from defrag-exp namespace
+deployment.apps "s5-full-39" deleted from defrag-exp namespace
+deployment.apps "s5-mem-245" deleted from defrag-exp namespace
+deployment.apps "s5-memskew-34" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s5 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+============================================================
+### s5 / rdc2 / seed 2   (10:06:39)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s5-cpu-245 : 1 x (cpu=400m mem=20Mi) on ip-172-31-1-245
+  -> s5-mem-245 : 1 x (cpu=40m mem=160Mi) on ip-172-31-1-245
+  -> s5-bal-245 : 1 x (cpu=160m mem=80Mi) on ip-172-31-1-245
+  -> s5-cpuskew-198 : 1 x (cpu=1300m mem=40Mi) on ip-172-31-16-198
+  -> s5-memskew-34 : 1 x (cpu=60m mem=560Mi) on ip-172-31-19-34
+  -> s5-full-39 : 2 x (cpu=650m mem=250Mi) on ip-172-31-3-39
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s5:
+NAME                              READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s5-bal-245-7f97dc5789-2rb4c       1/1     Running   0          5s    10.244.0.136   ip-172-31-1-245    <none>           <none>
+s5-cpu-245-7cc476ccfd-p7rlf       1/1     Running   0          8s    10.244.0.134   ip-172-31-1-245    <none>           <none>
+s5-mem-245-76b5b55d77-7x7gl       1/1     Running   0          7s    10.244.0.135   ip-172-31-1-245    <none>           <none>
+s5-cpuskew-198-856c6d9f7c-zppnx   1/1     Running   0          4s    10.244.5.24    ip-172-31-16-198   <none>           <none>
+s5-memskew-34-765f6f88c9-x9chs    1/1     Running   0          3s    10.244.7.249   ip-172-31-19-34    <none>           <none>
+s5-full-39-56f45f46d8-b8mpl       1/1     Running   0          1s    10.244.1.92    ip-172-31-3-39     <none>           <none>
+s5-full-39-56f45f46d8-jjbqc       1/1     Running   0          1s    10.244.1.91    ip-172-31-3-39     <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s5/20260607-100648-rdc2-k2
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.338
+H_balanced(200m/80Mi)=32   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245          700    2000       310       811   0.35   0.38    3
+ip-172-31-16-198        1400    2000        90       811   0.70   0.11    1
+ip-172-31-19-34          160    2000       610       811   0.08   0.75    1
+ip-172-31-3-39          1400    2000       550       811   0.70   0.68    2
+ip-172-31-31-146         100    2000        50       811   0.05   0.06    0
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.3384, "H_balanced": 32, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 3 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=3  N_empty=3
+S (stranding, sum|cpuFrac-memFrac|) = 0.443
+H_balanced(200m/80Mi)=36   H_skewed(700m/20Mi)=8
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245          500    2000        70       811   0.25   0.09    1
+ip-172-31-16-198        1460    2000       650       811   0.73   0.80    2
+ip-172-31-19-34          100    2000        50       811   0.05   0.06    0
+ip-172-31-3-39          1600    2000       790       811   0.80   0.97    4
+ip-172-31-31-146         100    2000        50       811   0.05   0.06    0
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 3, "N_empty": 3, "S": 0.4433, "H_balanced": 36, "H_skewed": 8}
+scenario:            s5
+timestamp:           20260607-100648-rdc2-k2
+per_pass_evictions:  3 0
+total_evictions(E):  3
+converged:           1   (1 = a pass evicted 0)
+passes_run:          2 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s5/20260607-100648-rdc2-k2
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s5 workloads in ns/defrag-exp ...
+deployment.apps "s5-bal-245" deleted from defrag-exp namespace
+deployment.apps "s5-cpu-245" deleted from defrag-exp namespace
+deployment.apps "s5-cpuskew-198" deleted from defrag-exp namespace
+deployment.apps "s5-full-39" deleted from defrag-exp namespace
+deployment.apps "s5-mem-245" deleted from defrag-exp namespace
+deployment.apps "s5-memskew-34" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s5 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+============================================================
+### s5 / rdc2 / seed 3   (10:07:38)
+============================================================
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Cordoning all workers so initial placement is controlled...
+  -> s5-cpu-245 : 1 x (cpu=400m mem=20Mi) on ip-172-31-1-245
+  -> s5-mem-245 : 1 x (cpu=40m mem=160Mi) on ip-172-31-1-245
+  -> s5-bal-245 : 1 x (cpu=160m mem=80Mi) on ip-172-31-1-245
+  -> s5-cpuskew-198 : 1 x (cpu=1300m mem=40Mi) on ip-172-31-16-198
+  -> s5-memskew-34 : 1 x (cpu=60m mem=560Mi) on ip-172-31-19-34
+  -> s5-full-39 : 2 x (cpu=650m mem=250Mi) on ip-172-31-3-39
+Uncordoning all workers (cluster ready for descheduler)...
+
+Initial layout for s5:
+NAME                              READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s5-bal-245-7f97dc5789-5r8jv       1/1     Running   0          5s    10.244.0.139   ip-172-31-1-245    <none>           <none>
+s5-cpu-245-7cc476ccfd-8pxjq       1/1     Running   0          9s    10.244.0.137   ip-172-31-1-245    <none>           <none>
+s5-mem-245-76b5b55d77-k98sv       1/1     Running   0          8s    10.244.0.138   ip-172-31-1-245    <none>           <none>
+s5-cpuskew-198-856c6d9f7c-l6sx6   1/1     Running   0          4s    10.244.5.26    ip-172-31-16-198   <none>           <none>
+s5-memskew-34-765f6f88c9-6rskz    1/1     Running   0          3s    10.244.7.250   ip-172-31-19-34    <none>           <none>
+s5-full-39-56f45f46d8-5qc68       1/1     Running   0          2s    10.244.1.98    ip-172-31-3-39     <none>           <none>
+s5-full-39-56f45f46d8-kl4f7       1/1     Running   0          2s    10.244.1.97    ip-172-31-3-39     <none>           <none>
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Results -> /home/ubuntu/experiment/results/s5/20260607-100748-rdc2-k3
+== BEFORE ==
+== METRICS (before) ==
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.338
+H_balanced(200m/80Mi)=32   H_skewed(700m/20Mi)=7
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245          700    2000       310       811   0.35   0.38    3
+ip-172-31-16-198        1400    2000        90       811   0.70   0.11    1
+ip-172-31-19-34          160    2000       610       811   0.08   0.75    1
+ip-172-31-3-39          1400    2000       550       811   0.70   0.68    2
+ip-172-31-31-146         100    2000        50       811   0.05   0.06    0
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.3384, "H_balanced": 32, "H_skewed": 7}
+  pass 1: running descheduler job...
+  pass 1: 3 eviction decision(s)
+  pass 2: running descheduler job...
+  pass 2: 0 eviction decision(s)
+== AFTER ==
+== METRICS (after) ==
+workers=6  N_active=3  N_empty=3
+S (stranding, sum|cpuFrac-memFrac|) = 0.443
+H_balanced(200m/80Mi)=36   H_skewed(700m/20Mi)=8
+node                  cpuReq  /alloc  memReqMi  /allocMi   cpuF   memF  exp
+ip-172-31-1-245          500    2000        70       811   0.25   0.09    1
+ip-172-31-16-198        1460    2000       650       811   0.73   0.80    2
+ip-172-31-19-34          100    2000        50       811   0.05   0.06    0
+ip-172-31-3-39          1600    2000       790       811   0.80   0.97    4
+ip-172-31-31-146         100    2000        50       811   0.05   0.06    0
+ip-172-31-6-144          100    2000        50       811   0.05   0.06    0
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 3, "N_empty": 3, "S": 0.4433, "H_balanced": 36, "H_skewed": 8}
+scenario:            s5
+timestamp:           20260607-100748-rdc2-k3
+per_pass_evictions:  3 0
+total_evictions(E):  3
+converged:           1   (1 = a pass evicted 0)
+passes_run:          2 (max 5)
+Done. Raw json, per-pass logs, metrics and summary in: /home/ubuntu/experiment/results/s5/20260607-100748-rdc2-k3
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+Deleting s5 workloads in ns/defrag-exp ...
+deployment.apps "s5-bal-245" deleted from defrag-exp namespace
+deployment.apps "s5-cpu-245" deleted from defrag-exp namespace
+deployment.apps "s5-cpuskew-198" deleted from defrag-exp namespace
+deployment.apps "s5-full-39" deleted from defrag-exp namespace
+deployment.apps "s5-mem-245" deleted from defrag-exp namespace
+deployment.apps "s5-memskew-34" deleted from defrag-exp namespace
+Uncordoning all workers (in case setup was interrupted) ...
+Removing descheduler job ...
+Cleanup for s5 done. (namespace 'defrag-exp' kept; 'kubectl delete ns defrag-exp' to remove entirely.)
+### ALL S1-S5 COMPARE RUNS DONE (10:08:39)

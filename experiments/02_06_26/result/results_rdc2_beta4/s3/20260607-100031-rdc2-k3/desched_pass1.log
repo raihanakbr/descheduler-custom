@@ -1,0 +1,37 @@
+I0607 10:00:33.347699       1 feature_gate.go:466] feature gates: {map[]}
+I0607 10:00:33.504639       1 secure_serving.go:57] Forcing use of http/1.1 only
+I0607 10:00:33.505145       1 named_certificates.go:53] "Loaded SNI cert" index=0 certName="self-signed loopback" certDetail="\"apiserver-loopback-client@1780826433\" [serving] validServingFor=[apiserver-loopback-client] issuer=\"apiserver-loopback-client-ca@1780826433\" (2026-06-07 09:00:33 +0000 UTC to 2029-06-07 09:00:33 +0000 UTC (now=2026-06-07 10:00:33.505106947 +0000 UTC))"
+I0607 10:00:33.505181       1 secure_serving.go:211] Serving securely on [::]:10258
+I0607 10:00:33.505312       1 tlsconfig.go:243] "Starting DynamicServingCertificateController"
+I0607 10:00:33.505492       1 tracing.go:88] Did not find a trace collector endpoint defined. Switching to NoopTraceProvider
+I0607 10:00:33.505873       1 envvar.go:172] "Feature gate default state" feature="WatchListClient" enabled=true
+I0607 10:00:33.505894       1 envvar.go:172] "Feature gate default state" feature="ClientsAllowCBOR" enabled=false
+I0607 10:00:33.505902       1 envvar.go:172] "Feature gate default state" feature="ClientsPreferCBOR" enabled=false
+I0607 10:00:33.505908       1 envvar.go:172] "Feature gate default state" feature="InOrderInformers" enabled=true
+I0607 10:00:33.505914       1 envvar.go:172] "Feature gate default state" feature="InOrderInformersBatchProcess" enabled=true
+I0607 10:00:33.505921       1 envvar.go:172] "Feature gate default state" feature="InformerResourceVersion" enabled=true
+W0607 10:00:33.514549       1 descheduler.go:333] failed to convert Descheduler minor version '' to float: strconv.ParseFloat: parsing "": invalid syntax
+I0607 10:00:33.523369       1 reflector.go:367] "Starting reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 10:00:33.523471       1 reflector.go:411] "Listing and watching" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 10:00:33.523362       1 reflector.go:367] "Starting reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 10:00:33.523513       1 reflector.go:411] "Listing and watching" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 10:00:33.523455       1 reflector.go:367] "Starting reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 10:00:33.523737       1 reflector.go:411] "Listing and watching" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 10:00:33.528192       1 reflector.go:446] "Caches populated" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 10:00:33.532127       1 reflector.go:446] "Caches populated" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 10:00:33.538217       1 reflector.go:446] "Caches populated" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 10:00:33.624364       1 descheduler.go:235] Resetting pod evictor counters
+I0607 10:00:33.624470       1 resourcedefragmentationc2.go:131] "Starting ResourceDefragmentationC2 balance pass" plugin="ResourceDefragmentationC2" ExtensionPoint="Balance" nodeCount=7
+I0607 10:00:33.624659       1 resourcedefragmentationc2.go:207] "Eviction decision" plugin="ResourceDefragmentationC2" ExtensionPoint="Balance" pod="defrag-exp/s3-cpu-39-694f845c9f-rg5ls" originNode="ip-172-31-3-39" predictedTarget="ip-172-31-1-245"
+I0607 10:00:33.654912       1 evictions.go:558] "Evicted pod" pod="defrag-exp/s3-cpu-39-694f845c9f-rg5ls" reason="" strategy="ResourceDefragmentationC2" node="ip-172-31-3-39" profile="default"
+I0607 10:00:33.654984       1 resourcedefragmentationc2.go:207] "Eviction decision" plugin="ResourceDefragmentationC2" ExtensionPoint="Balance" pod="defrag-exp/s3-cpu-39-694f845c9f-zxq4k" originNode="ip-172-31-3-39" predictedTarget="ip-172-31-16-198"
+E0607 10:00:33.659305       1 event_broadcaster.go:270] "Server rejected event (will not retry!)" err="events.events.k8s.io is forbidden: User \"system:serviceaccount:kube-system:descheduler\" cannot create resource \"events\" in API group \"events.k8s.io\" in the namespace \"defrag-exp\"" event="&Event{ObjectMeta:{s3-cpu-39-694f845c9f-rg5ls.18b6c434c8a0eb1d  defrag-exp    0 0001-01-01 00:00:00 +0000 UTC <nil> <nil> map[] map[] [] [] []},EventTime:2026-06-07 10:00:33.654928584 +0000 UTC m=+0.339339130,Series:nil,ReportingController:sigs.k8s.io.descheduler,ReportingInstance:sigs.k8s.io.descheduler-descheduler-job-rnmwr,Action:Descheduled,Reason:ResourceDefragmentationC2,Regarding:{Pod defrag-exp s3-cpu-39-694f845c9f-rg5ls 5103f5dd-24a6-4396-8956-d567e2231b14 v1 422776 },Related:nil,Note:pod eviction from ip-172-31-3-39 node by sigs.k8s.io/descheduler,Type:Normal,DeprecatedSource:{ },DeprecatedFirstTimestamp:0001-01-01 00:00:00 +0000 UTC,DeprecatedLastTimestamp:0001-01-01 00:00:00 +0000 UTC,DeprecatedCount:0,}"
+I0607 10:00:33.755659       1 evictions.go:558] "Evicted pod" pod="defrag-exp/s3-cpu-39-694f845c9f-zxq4k" reason="" strategy="ResourceDefragmentationC2" node="ip-172-31-3-39" profile="default"
+I0607 10:00:33.755773       1 profile.go:425] "Total number of evictions/requests" extension point="Balance" evictedPods=2 evictionRequests=0
+I0607 10:00:33.755820       1 descheduler.go:252] "Number of evictions/requests" totalEvicted=2 evictionRequests=0
+E0607 10:00:33.758481       1 event_broadcaster.go:279] "Unable to write event (may retry after sleeping)" err="client rate limiter Wait returned an error: context canceled"
+I0607 10:00:33.758527       1 reflector.go:373] "Stopping reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 10:00:33.758554       1 reflector.go:373] "Stopping reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 10:00:33.758586       1 reflector.go:373] "Stopping reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 10:00:33.758941       1 tlsconfig.go:258] "Shutting down DynamicServingCertificateController"
+I0607 10:00:33.759093       1 secure_serving.go:259] Stopped listening on [::]:10258

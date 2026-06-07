@@ -1,0 +1,83 @@
+# S1-S5 x {HighNodeUtilization, ResourceDefrag, ResourceDefragC2}
+# mean +/- 95% CI across seeds.  requests signal, threshold 0.40.
+
+runs collected (scenario x strategy = n seeds):
+  s1: hnu=3  rd=3  rdc2=3
+  s2: hnu=3  rd=3  rdc2=3
+  s3: hnu=3  rd=3  rdc2=3
+  s4: hnu=3  rd=3  rdc2=3
+  s5: hnu=3  rd=3  rdc2=3
+
+== N_active_before ==
+scenario     HighNodeUtilization        ResourceDefrag      ResourceDefragC2
+s1                    6.000                 6.000                 6.000     
+s2                    6.000                 6.000                 6.000     
+s3                    6.000                 6.000                 6.000     
+s4                    5.000                 5.000                 5.000     
+s5                    4.000                 4.000                 4.000     
+
+== N_active_after ==
+scenario     HighNodeUtilization        ResourceDefrag      ResourceDefragC2
+s1                    6.000                 2.000                 2.000     
+s2                    6.000                 3.000                 3.000     
+s3                    4.000                 5.000                 5.000     
+s4                    5.000                 4.000                 4.000     
+s5                    3.000                 3.000                 3.000     
+
+== N_empty_after ==
+scenario     HighNodeUtilization        ResourceDefrag      ResourceDefragC2
+s1                    0.000                 4.000                 4.000     
+s2                    0.000                 3.000                 3.000     
+s3                    2.000                 1.000                 1.000     
+s4                    1.000                 2.000                 2.000     
+s5                    3.000                 3.000                 3.000     
+
+== S_before ==
+scenario     HighNodeUtilization        ResourceDefrag      ResourceDefragC2
+s1                    0.049                 0.049                 0.049     
+s2                    3.727                 3.727                 3.727     
+s3                    1.395                 1.395                 1.395     
+s4                    3.243                 3.243                 3.243     
+s5                    1.338                 1.338                 1.338     
+
+== S_after ==
+scenario     HighNodeUtilization        ResourceDefrag      ResourceDefragC2
+s1                    0.049                 0.050                 0.050     
+s2                    3.727                 0.971                 0.971     
+s3                    1.407                 1.401                 1.386     
+s4                    3.243                 1.112                 1.112     
+s5                    1.298                 0.443                 0.123     
+
+== H_balanced_after ==
+scenario     HighNodeUtilization        ResourceDefrag      ResourceDefragC2
+s1                   42.000                39.000                39.000     
+s2                   15.000                29.000                29.000     
+s3                   18.000                20.000                19.000     
+s4                   13.000                24.000                24.000     
+s5                   32.000                36.000                38.000     
+
+== H_skewed_after ==
+scenario     HighNodeUtilization        ResourceDefrag      ResourceDefragC2
+s1                   12.000                 8.000                 8.000     
+s2                    6.000                 6.000                 6.000     
+s3                    4.000                 4.000                 2.000     
+s4                    7.000                 6.000                 6.000     
+s5                    8.000                 8.000                 8.000     
+
+== total_evictions E  (and dN_active reclaimed) ==
+scenario     HighNodeUtilization        ResourceDefrag      ResourceDefragC2
+s1                  E=0.0 dN=0.0         E=10.0 dN=4.0         E=10.0 dN=4.0
+s2                  E=0.0 dN=0.0          E=6.0 dN=3.0          E=6.0 dN=3.0
+s3                  E=4.0 dN=2.0          E=2.0 dN=1.0          E=2.0 dN=1.0
+s4                  E=0.0 dN=0.0          E=5.0 dN=1.0          E=5.0 dN=1.0
+s5                  E=3.0 dN=1.0          E=3.0 dN=1.0          E=2.0 dN=1.0
+
+== HEADLINE: nodes reclaimed (dN_active up=better) | S_after (down=better) ==
+scenario     HighNodeUtilization        ResourceDefrag      ResourceDefragC2
+s1                 +0.0n S=0.049         +4.0n S=0.050         +4.0n S=0.050
+s2                 +0.0n S=3.727         +3.0n S=0.971         +3.0n S=0.971
+s3                 +2.0n S=1.407         +1.0n S=1.401         +1.0n S=1.386
+s4                 +0.0n S=3.243         +1.0n S=1.112         +1.0n S=1.112
+s5                 +1.0n S=1.298         +1.0n S=0.443         +1.0n S=0.123
+
+AGG_JSON {"s1": {"hnu": {"n": 3, "N_active_before": 6.0, "N_active_after": 6.0, "N_empty_after": 0.0, "S_before": 0.0488, "S_after": 0.0488, "S_after_ci": 0.0, "H_balanced_after": 42.0, "H_skewed_after": 12.0, "E": 0.0, "dN_active": 0.0}, "rd": {"n": 3, "N_active_before": 6.0, "N_active_after": 2.0, "N_empty_after": 4.0, "S_before": 0.0488, "S_after": 0.0499, "S_after_ci": 0.0, "H_balanced_after": 39.0, "H_skewed_after": 8.0, "E": 10.0, "dN_active": 4.0}, "rdc2": {"n": 3, "N_active_before": 6.0, "N_active_after": 2.0, "N_empty_after": 4.0, "S_before": 0.0488, "S_after": 0.0499, "S_after_ci": 0.0, "H_balanced_after": 39.0, "H_skewed_after": 8.0, "E": 10.0, "dN_active": 4.0}}, "s2": {"hnu": {"n": 3, "N_active_before": 6.0, "N_active_after": 6.0, "N_empty_after": 0.0, "S_before": 3.7269, "S_after": 3.7269, "S_after_ci": 0.0, "H_balanced_after": 15.0, "H_skewed_after": 6.0, "E": 0.0, "dN_active": 0.0}, "rd": {"n": 3, "N_active_before": 6.0, "N_active_after": 3.0, "N_empty_after": 3.0, "S_before": 3.7269, "S_after": 0.9707, "S_after_ci": 0.0, "H_balanced_after": 29.0, "H_skewed_after": 6.0, "E": 6.0, "dN_active": 3.0}, "rdc2": {"n": 3, "N_active_before": 6.0, "N_active_after": 3.0, "N_empty_after": 3.0, "S_before": 3.7269, "S_after": 0.9707, "S_after_ci": 0.0, "H_balanced_after": 29.0, "H_skewed_after": 6.0, "E": 6.0, "dN_active": 3.0}}, "s3": {"hnu": {"n": 3, "N_active_before": 6.0, "N_active_after": 4.0, "N_empty_after": 2.0, "S_before": 1.3953, "S_after": 1.4075, "S_after_ci": 0.0, "H_balanced_after": 18.0, "H_skewed_after": 4.0, "E": 4.0, "dN_active": 2.0}, "rd": {"n": 3, "N_active_before": 6.0, "N_active_after": 5.0, "N_empty_after": 1.0, "S_before": 1.3953, "S_after": 1.4005, "S_after_ci": 0.0, "H_balanced_after": 20.0, "H_skewed_after": 4.0, "E": 2.0, "dN_active": 1.0}, "rdc2": {"n": 3, "N_active_before": 6.0, "N_active_after": 5.0, "N_empty_after": 1.0, "S_before": 1.3953, "S_after": 1.386, "S_after_ci": 0.0, "H_balanced_after": 19.0, "H_skewed_after": 2.0, "E": 2.0, "dN_active": 1.0}}, "s4": {"hnu": {"n": 3, "N_active_before": 5.0, "N_active_after": 5.0, "N_empty_after": 1.0, "S_before": 3.2426, "S_after": 3.2426, "S_after_ci": 0.0, "H_balanced_after": 13.0, "H_skewed_after": 7.0, "E": 0.0, "dN_active": 0.0}, "rd": {"n": 3, "N_active_before": 5.0, "N_active_after": 4.0, "N_empty_after": 2.0, "S_before": 3.2426, "S_after": 1.1119, "S_after_ci": 0.0, "H_balanced_after": 24.0, "H_skewed_after": 6.0, "E": 5.0, "dN_active": 1.0}, "rdc2": {"n": 3, "N_active_before": 5.0, "N_active_after": 4.0, "N_empty_after": 2.0, "S_before": 3.2426, "S_after": 1.1119, "S_after_ci": 0.0, "H_balanced_after": 24.0, "H_skewed_after": 6.0, "E": 5.0, "dN_active": 1.0}}, "s5": {"hnu": {"n": 3, "N_active_before": 4.0, "N_active_after": 3.0, "N_empty_after": 3.0, "S_before": 1.3384, "S_after": 1.2975, "S_after_ci": 0.0, "H_balanced_after": 32.0, "H_skewed_after": 8.0, "E": 3.0, "dN_active": 1.0}, "rd": {"n": 3, "N_active_before": 4.0, "N_active_after": 3.0, "N_empty_after": 3.0, "S_before": 1.3384, "S_after": 0.4433, "S_after_ci": 0.0, "H_balanced_after": 36.0, "H_skewed_after": 8.0, "E": 3.0, "dN_active": 1.0}, "rdc2": {"n": 3, "N_active_before": 4.0, "N_active_after": 3.0, "N_empty_after": 3.0, "S_before": 1.3384, "S_after": 0.123, "S_after_ci": 0.0, "H_balanced_after": 38.0, "H_skewed_after": 8.0, "E": 2.0, "dN_active": 1.0}}}

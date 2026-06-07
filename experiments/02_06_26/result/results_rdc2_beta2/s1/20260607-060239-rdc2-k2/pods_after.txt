@@ -1,0 +1,13 @@
+NAME                           READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s1-fill-144-75b6ddcffc-5hcjg   1/1     Running   0          74s   10.244.0.119   ip-172-31-1-245    <none>           <none>
+s1-fill-144-75b6ddcffc-77bh7   1/1     Running   0          74s   10.244.0.120   ip-172-31-1-245    <none>           <none>
+s1-fill-198-6f65649bd4-j6gst   1/1     Running   0          73s   10.244.0.121   ip-172-31-1-245    <none>           <none>
+s1-fill-198-6f65649bd4-s878x   1/1     Running   0          73s   10.244.0.122   ip-172-31-1-245    <none>           <none>
+s1-fill-245-7659c95b6c-66pf7   1/1     Running   0          74s   10.244.0.117   ip-172-31-1-245    <none>           <none>
+s1-fill-245-7659c95b6c-79b6h   1/1     Running   0          74s   10.244.0.118   ip-172-31-1-245    <none>           <none>
+s1-fill-34-65d8fd768c-d92cc    1/1     Running   0          73s   10.244.0.123   ip-172-31-1-245    <none>           <none>
+s1-fill-146-f9dd78d6c-24jd2    1/1     Running   0          78s   10.244.4.65    ip-172-31-31-146   <none>           <none>
+s1-fill-146-f9dd78d6c-qpk4k    1/1     Running   0          78s   10.244.4.66    ip-172-31-31-146   <none>           <none>
+s1-fill-34-65d8fd768c-jf755    1/1     Running   0          73s   10.244.4.67    ip-172-31-31-146   <none>           <none>
+s1-fill-39-7d47c6f544-kxpfk    1/1     Running   0          48s   10.244.4.69    ip-172-31-31-146   <none>           <none>
+s1-fill-39-7d47c6f544-tcmr7    1/1     Running   0          48s   10.244.4.68    ip-172-31-31-146   <none>           <none>
