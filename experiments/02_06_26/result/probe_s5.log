@@ -1,0 +1,97 @@
+################ PROBE policy=topsis (13:16:58) ################
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+  pass 1: running descheduler job...
+  pass 2: running descheduler job...
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.338
+H_balanced(200m/80Mi)=32   H_skewed(700m/20Mi)=7
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.3384, "H_balanced": 32, "H_skewed": 7}
+  pass 1: 3 eviction decision(s)
+  pass 2: 0 eviction decision(s)
+== METRICS (after) ==
+workers=6  N_active=3  N_empty=3
+S (stranding, sum|cpuFrac-memFrac|) = 0.443
+H_balanced(200m/80Mi)=36   H_skewed(700m/20Mi)=8
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 3, "N_empty": 3, "S": 0.4433, "H_balanced": 36, "H_skewed": 8}
+total_evictions(E):  3
+################ PROBE policy=just-c1 (13:17:58) ################
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+  pass 1: running descheduler job...
+  pass 2: running descheduler job...
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.338
+H_balanced(200m/80Mi)=32   H_skewed(700m/20Mi)=7
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.3384, "H_balanced": 32, "H_skewed": 7}
+  pass 1: 3 eviction decision(s)
+  pass 2: 0 eviction decision(s)
+== METRICS (after) ==
+workers=6  N_active=3  N_empty=3
+S (stranding, sum|cpuFrac-memFrac|) = 0.443
+H_balanced(200m/80Mi)=36   H_skewed(700m/20Mi)=8
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 3, "N_empty": 3, "S": 0.4433, "H_balanced": 36, "H_skewed": 8}
+total_evictions(E):  3
+################ PROBE policy=just-c2 (13:19:00) ################
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+  pass 1: running descheduler job...
+  pass 2: running descheduler job...
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.338
+H_balanced(200m/80Mi)=32   H_skewed(700m/20Mi)=7
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.3384, "H_balanced": 32, "H_skewed": 7}
+  pass 1: 2 eviction decision(s)
+  pass 2: 0 eviction decision(s)
+== METRICS (after) ==
+workers=6  N_active=3  N_empty=3
+S (stranding, sum|cpuFrac-memFrac|) = 0.123
+H_balanced(200m/80Mi)=38   H_skewed(700m/20Mi)=8
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 3, "N_empty": 3, "S": 0.123, "H_balanced": 38, "H_skewed": 8}
+total_evictions(E):  2
+################ PROBE policy=just-c3 (13:20:02) ################
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+  pass 1: running descheduler job...
+  pass 2: running descheduler job...
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.338
+H_balanced(200m/80Mi)=32   H_skewed(700m/20Mi)=7
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.3384, "H_balanced": 32, "H_skewed": 7}
+  pass 1: 3 eviction decision(s)
+  pass 2: 0 eviction decision(s)
+== METRICS (after) ==
+workers=6  N_active=3  N_empty=3
+S (stranding, sum|cpuFrac-memFrac|) = 0.332
+H_balanced(200m/80Mi)=36   H_skewed(700m/20Mi)=8
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 3, "N_empty": 3, "S": 0.3316, "H_balanced": 36, "H_skewed": 8}
+total_evictions(E):  3
+################ PROBE policy=random (13:21:05) ################
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+  pass 1: running descheduler job...
+  pass 2: running descheduler job...
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.338
+H_balanced(200m/80Mi)=32   H_skewed(700m/20Mi)=7
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.3384, "H_balanced": 32, "H_skewed": 7}
+  pass 1: 3 eviction decision(s)
+  pass 2: 0 eviction decision(s)
+== METRICS (after) ==
+workers=6  N_active=3  N_empty=3
+S (stranding, sum|cpuFrac-memFrac|) = 0.332
+H_balanced(200m/80Mi)=36   H_skewed(700m/20Mi)=8
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 3, "N_empty": 3, "S": 0.3316, "H_balanced": 36, "H_skewed": 8}
+total_evictions(E):  3
+################ PROBE policy=largest (13:22:04) ################
+Using workers: ip-172-31-1-245 ip-172-31-16-198 ip-172-31-19-34 ip-172-31-3-39 ip-172-31-31-146 ip-172-31-6-144
+  pass 1: running descheduler job...
+  pass 2: running descheduler job...
+workers=6  N_active=4  N_empty=2
+S (stranding, sum|cpuFrac-memFrac|) = 1.338
+H_balanced(200m/80Mi)=32   H_skewed(700m/20Mi)=7
+METRICS_JSON {"label": "before", "workers": 6, "N_active": 4, "N_empty": 2, "S": 1.3384, "H_balanced": 32, "H_skewed": 7}
+  pass 1: 3 eviction decision(s)
+  pass 2: 0 eviction decision(s)
+== METRICS (after) ==
+workers=6  N_active=3  N_empty=3
+S (stranding, sum|cpuFrac-memFrac|) = 0.332
+H_balanced(200m/80Mi)=36   H_skewed(700m/20Mi)=8
+METRICS_JSON {"label": "after", "workers": 6, "N_active": 3, "N_empty": 3, "S": 0.3316, "H_balanced": 36, "H_skewed": 8}
+total_evictions(E):  3
+### PROBE DONE (13:23:04)

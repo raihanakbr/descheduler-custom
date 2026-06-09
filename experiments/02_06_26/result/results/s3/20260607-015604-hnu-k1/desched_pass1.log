@@ -1,0 +1,62 @@
+I0607 01:56:07.070864       1 feature_gate.go:466] feature gates: {map[]}
+I0607 01:56:07.205393       1 secure_serving.go:57] Forcing use of http/1.1 only
+I0607 01:56:07.207483       1 named_certificates.go:53] "Loaded SNI cert" index=0 certName="self-signed loopback" certDetail="\"apiserver-loopback-client@1780797367\" [serving] validServingFor=[apiserver-loopback-client] issuer=\"apiserver-loopback-client-ca@1780797367\" (2026-06-07 00:56:07 +0000 UTC to 2029-06-07 00:56:07 +0000 UTC (now=2026-06-07 01:56:07.205764504 +0000 UTC))"
+I0607 01:56:07.207705       1 tlsconfig.go:243] "Starting DynamicServingCertificateController"
+I0607 01:56:07.208306       1 secure_serving.go:211] Serving securely on [::]:10258
+I0607 01:56:07.209248       1 tracing.go:88] Did not find a trace collector endpoint defined. Switching to NoopTraceProvider
+I0607 01:56:07.214518       1 envvar.go:172] "Feature gate default state" feature="InOrderInformers" enabled=true
+I0607 01:56:07.214548       1 envvar.go:172] "Feature gate default state" feature="InOrderInformersBatchProcess" enabled=true
+I0607 01:56:07.214560       1 envvar.go:172] "Feature gate default state" feature="InformerResourceVersion" enabled=true
+I0607 01:56:07.214567       1 envvar.go:172] "Feature gate default state" feature="WatchListClient" enabled=true
+I0607 01:56:07.214573       1 envvar.go:172] "Feature gate default state" feature="ClientsAllowCBOR" enabled=false
+I0607 01:56:07.214578       1 envvar.go:172] "Feature gate default state" feature="ClientsPreferCBOR" enabled=false
+W0607 01:56:07.259914       1 descheduler.go:333] failed to convert Descheduler minor version '' to float: strconv.ParseFloat: parsing "": invalid syntax
+I0607 01:56:07.274162       1 reflector.go:367] "Starting reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:56:07.274198       1 reflector.go:411] "Listing and watching" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:56:07.274260       1 reflector.go:367] "Starting reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:56:07.274271       1 reflector.go:411] "Listing and watching" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:56:07.274162       1 reflector.go:367] "Starting reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:56:07.276298       1 reflector.go:411] "Listing and watching" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:56:07.285688       1 reflector.go:446] "Caches populated" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:56:07.290463       1 reflector.go:446] "Caches populated" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:56:07.297191       1 reflector.go:446] "Caches populated" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:56:07.374280       1 descheduler.go:235] Resetting pod evictor counters
+I0607 01:56:07.374720       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="underutilized" node="ip-172-31-1-245" usage={"cpu":"600m","memory":"250Mi","pods":"4"} usagePercentage={"cpu":30,"memory":31,"pods":4}
+I0607 01:56:07.374816       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="underutilized" node="ip-172-31-16-198" usage={"cpu":"600m","memory":"250Mi","pods":"4"} usagePercentage={"cpu":30,"memory":31,"pods":4}
+I0607 01:56:07.374838       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="overutilized" node="ip-172-31-6-144" usage={"cpu":"1700m","memory":"690Mi","pods":"4"} usagePercentage={"cpu":85,"memory":85,"pods":4}
+I0607 01:56:07.374860       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="overutilized" node="ip-172-31-84-108" usage={"cpu":"850m","memory":"220Mi","pods":"7"} usagePercentage={"cpu":43,"memory":6,"pods":6}
+I0607 01:56:07.374880       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="overutilized" node="ip-172-31-19-34" usage={"cpu":"1600m","memory":"90Mi","pods":"4"} usagePercentage={"cpu":80,"memory":11,"pods":4}
+I0607 01:56:07.374901       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="overutilized" node="ip-172-31-3-39" usage={"cpu":"1600m","memory":"90Mi","pods":"4"} usagePercentage={"cpu":80,"memory":11,"pods":4}
+I0607 01:56:07.374955       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="overutilized" node="ip-172-31-31-146" usage={"cpu":"1700m","memory":"690Mi","pods":"5"} usagePercentage={"cpu":85,"memory":85,"pods":5}
+I0607 01:56:07.374977       1 highnodeutilization.go:217] "Criteria for a node below target utilization" plugin="HighNodeUtilization" ExtensionPoint="Balance" cpu="40.00%" memory="40.00%"
+I0607 01:56:07.375926       1 highnodeutilization.go:218] "Number of underutilized nodes" plugin="HighNodeUtilization" ExtensionPoint="Balance" totalNumber=2
+I0607 01:56:07.375961       1 nodeutilization.go:186] "Total capacity to be moved" CPU=2550 Mem=5531213824 Pods=526
+I0607 01:56:07.375991       1 nodeutilization.go:194] "Evicting pods from node" node="ip-172-31-1-245" usage={"cpu":"600m","memory":"250Mi","pods":"4"}
+I0607 01:56:07.376158       1 nodeutilization.go:201] "Pods on node" node="ip-172-31-1-245" allPods=4 nonRemovablePods=2 removablePods=2
+I0607 01:56:07.376190       1 nodeutilization.go:217] "Evicting pods based on priority, if they have same priority, they'll be evicted based on QoS tiers"
+I0607 01:56:07.402115       1 evictions.go:558] "Evicted pod" pod="defrag-exp/s3-under-245-574b8b4b46-6tc7w" reason="" strategy="HighNodeUtilization" node="ip-172-31-1-245" profile="default"
+I0607 01:56:07.402826       1 nodeutilization.go:347] "Evicted pods" pod="defrag-exp/s3-under-245-574b8b4b46-6tc7w"
+I0607 01:56:07.402918       1 nodeutilization.go:356] "Updated node usage" node="ip-172-31-1-245" CPU=350 Mem=157286400 Pods=3
+E0607 01:56:07.409208       1 event_broadcaster.go:270] "Server rejected event (will not retry!)" err="events.events.k8s.io is forbidden: User \"system:serviceaccount:kube-system:descheduler\" cannot create resource \"events\" in API group \"events.k8s.io\" in the namespace \"defrag-exp\"" event="&Event{ObjectMeta:{s3-under-245-574b8b4b46-6tc7w.18b6a9c544fe868d  defrag-exp    0 0001-01-01 00:00:00 +0000 UTC <nil> <nil> map[] map[] [] [] []},EventTime:2026-06-07 01:56:07.402134016 +0000 UTC m=+0.741196045,Series:nil,ReportingController:sigs.k8s.io.descheduler,ReportingInstance:sigs.k8s.io.descheduler-descheduler-job-cp8jn,Action:Descheduled,Reason:HighNodeUtilization,Regarding:{Pod defrag-exp s3-under-245-574b8b4b46-6tc7w d6a909c5-0049-4036-af4a-a6b8b2d03e42 v1 342522 },Related:nil,Note:pod eviction from ip-172-31-1-245 node by sigs.k8s.io/descheduler,Type:Normal,DeprecatedSource:{ },DeprecatedFirstTimestamp:0001-01-01 00:00:00 +0000 UTC,DeprecatedLastTimestamp:0001-01-01 00:00:00 +0000 UTC,DeprecatedCount:0,}"
+I0607 01:56:07.452895       1 evictions.go:558] "Evicted pod" pod="defrag-exp/s3-under-245-574b8b4b46-9kkkl" reason="" strategy="HighNodeUtilization" node="ip-172-31-1-245" profile="default"
+I0607 01:56:07.452955       1 nodeutilization.go:347] "Evicted pods" pod="defrag-exp/s3-under-245-574b8b4b46-9kkkl"
+I0607 01:56:07.452967       1 nodeutilization.go:356] "Updated node usage" node="ip-172-31-1-245" CPU=100 Mem=52428800 Pods=2
+I0607 01:56:07.452984       1 nodeutilization.go:194] "Evicting pods from node" node="ip-172-31-16-198" usage={"cpu":"600m","memory":"250Mi","pods":"4"}
+I0607 01:56:07.453061       1 nodeutilization.go:201] "Pods on node" node="ip-172-31-16-198" allPods=4 nonRemovablePods=2 removablePods=2
+I0607 01:56:07.453096       1 nodeutilization.go:217] "Evicting pods based on priority, if they have same priority, they'll be evicted based on QoS tiers"
+E0607 01:56:07.459949       1 event_broadcaster.go:270] "Server rejected event (will not retry!)" err="events.events.k8s.io is forbidden: User \"system:serviceaccount:kube-system:descheduler\" cannot create resource \"events\" in API group \"events.k8s.io\" in the namespace \"defrag-exp\"" event="&Event{ObjectMeta:{s3-under-245-574b8b4b46-9kkkl.18b6a9c547fb723c  defrag-exp    0 0001-01-01 00:00:00 +0000 UTC <nil> <nil> map[] map[] [] [] []},EventTime:2026-06-07 01:56:07.452913608 +0000 UTC m=+0.791975634,Series:nil,ReportingController:sigs.k8s.io.descheduler,ReportingInstance:sigs.k8s.io.descheduler-descheduler-job-cp8jn,Action:Descheduled,Reason:HighNodeUtilization,Regarding:{Pod defrag-exp s3-under-245-574b8b4b46-9kkkl b7c44256-1d8a-48c7-81df-2fb38ad1bf67 v1 342525 },Related:nil,Note:pod eviction from ip-172-31-1-245 node by sigs.k8s.io/descheduler,Type:Normal,DeprecatedSource:{ },DeprecatedFirstTimestamp:0001-01-01 00:00:00 +0000 UTC,DeprecatedLastTimestamp:0001-01-01 00:00:00 +0000 UTC,DeprecatedCount:0,}"
+I0607 01:56:07.529438       1 evictions.go:558] "Evicted pod" pod="defrag-exp/s3-under-198-c45f6ffd9-jb67m" reason="" strategy="HighNodeUtilization" node="ip-172-31-16-198" profile="default"
+I0607 01:56:07.529510       1 nodeutilization.go:347] "Evicted pods" pod="defrag-exp/s3-under-198-c45f6ffd9-jb67m"
+I0607 01:56:07.529524       1 nodeutilization.go:356] "Updated node usage" node="ip-172-31-16-198" CPU=350 Mem=157286400 Pods=3
+E0607 01:56:07.531709       1 event_broadcaster.go:270] "Server rejected event (will not retry!)" err="events.events.k8s.io is forbidden: User \"system:serviceaccount:kube-system:descheduler\" cannot create resource \"events\" in API group \"events.k8s.io\" in the namespace \"defrag-exp\"" event="&Event{ObjectMeta:{s3-under-198-c45f6ffd9-jb67m.18b6a9c54c8ba370  defrag-exp    0 0001-01-01 00:00:00 +0000 UTC <nil> <nil> map[] map[] [] [] []},EventTime:2026-06-07 01:56:07.529470288 +0000 UTC m=+0.868532313,Series:nil,ReportingController:sigs.k8s.io.descheduler,ReportingInstance:sigs.k8s.io.descheduler-descheduler-job-cp8jn,Action:Descheduled,Reason:HighNodeUtilization,Regarding:{Pod defrag-exp s3-under-198-c45f6ffd9-jb67m 29aa0a5f-9a58-4d92-8b28-f8d932519929 v1 342559 },Related:nil,Note:pod eviction from ip-172-31-16-198 node by sigs.k8s.io/descheduler,Type:Normal,DeprecatedSource:{ },DeprecatedFirstTimestamp:0001-01-01 00:00:00 +0000 UTC,DeprecatedLastTimestamp:0001-01-01 00:00:00 +0000 UTC,DeprecatedCount:0,}"
+I0607 01:56:07.629876       1 evictions.go:558] "Evicted pod" pod="defrag-exp/s3-under-198-c45f6ffd9-xqk6r" reason="" strategy="HighNodeUtilization" node="ip-172-31-16-198" profile="default"
+I0607 01:56:07.631086       1 nodeutilization.go:347] "Evicted pods" pod="defrag-exp/s3-under-198-c45f6ffd9-xqk6r"
+I0607 01:56:07.631136       1 nodeutilization.go:356] "Updated node usage" node="ip-172-31-16-198" CPU=100 Mem=52428800 Pods=2
+I0607 01:56:07.631294       1 profile.go:425] "Total number of evictions/requests" extension point="Balance" evictedPods=4 evictionRequests=0
+I0607 01:56:07.631425       1 descheduler.go:252] "Number of evictions/requests" totalEvicted=4 evictionRequests=0
+E0607 01:56:07.631564       1 event_broadcaster.go:279] "Unable to write event (may retry after sleeping)" err="Post \"https://10.96.0.1:443/apis/events.k8s.io/v1/namespaces/defrag-exp/events\": context canceled"
+I0607 01:56:07.631696       1 reflector.go:373] "Stopping reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:56:07.631722       1 reflector.go:373] "Stopping reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:56:07.631749       1 reflector.go:373] "Stopping reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:56:07.634683       1 tlsconfig.go:258] "Shutting down DynamicServingCertificateController"
+I0607 01:56:07.635180       1 secure_serving.go:259] Stopped listening on [::]:10258

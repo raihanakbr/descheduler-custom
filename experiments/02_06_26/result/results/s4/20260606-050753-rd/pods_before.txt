@@ -1,0 +1,14 @@
+NAME                            READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s4-cpu-245-cccd9967b-k6csx      1/1     Running   0          8s    10.244.0.196   ip-172-31-1-245    <none>           <none>
+s4-cpu-245-cccd9967b-tfjpk      1/1     Running   0          8s    10.244.0.198   ip-172-31-1-245    <none>           <none>
+s4-cpu-245-cccd9967b-tjkb9      1/1     Running   0          8s    10.244.0.197   ip-172-31-1-245    <none>           <none>
+s4-cpu-198-c8bbfc967-52ql8      1/1     Running   0          7s    10.244.5.114   ip-172-31-16-198   <none>           <none>
+s4-cpu-198-c8bbfc967-9pmfj      1/1     Running   0          7s    10.244.5.113   ip-172-31-16-198   <none>           <none>
+s4-cpu-198-c8bbfc967-hdghw      1/1     Running   0          7s    10.244.5.112   ip-172-31-16-198   <none>           <none>
+s4-mem-34-67b57f4875-r42tz      1/1     Running   0          6s    10.244.7.120   ip-172-31-19-34    <none>           <none>
+s4-mem-34-67b57f4875-bv278      1/1     Running   0          6s    10.244.7.122   ip-172-31-19-34    <none>           <none>
+s4-mem-34-67b57f4875-p28r9      1/1     Running   0          6s    10.244.7.121   ip-172-31-19-34    <none>           <none>
+s4-mem-39-5d5899dbd4-2bm5n      1/1     Running   0          4s    10.244.1.69    ip-172-31-3-39     <none>           <none>
+s4-mem-39-5d5899dbd4-mlmcj      1/1     Running   0          4s    10.244.1.67    ip-172-31-3-39     <none>           <none>
+s4-mem-39-5d5899dbd4-s4zs5      1/1     Running   0          4s    10.244.1.68    ip-172-31-3-39     <none>           <none>
+s4-jumbo-146-6b466bd845-njzsg   1/1     Running   0          2s    10.244.4.137   ip-172-31-31-146   <none>           <none>

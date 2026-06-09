@@ -1,0 +1,13 @@
+NAME                            READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s3-cpu-34-848456d98d-4sdxn      1/1     Running   0          56s   10.244.7.96    ip-172-31-19-34    <none>           <none>
+s3-cpu-34-848456d98d-4vkkn      1/1     Running   0          56s   10.244.7.95    ip-172-31-19-34    <none>           <none>
+s3-under-198-c45f6ffd9-v5gvl    1/1     Running   0          49s   10.244.7.97    ip-172-31-19-34    <none>           <none>
+s3-cpu-39-694f845c9f-cg77b      1/1     Running   0          55s   10.244.1.42    ip-172-31-3-39     <none>           <none>
+s3-cpu-39-694f845c9f-mqs9n      1/1     Running   0          55s   10.244.1.41    ip-172-31-3-39     <none>           <none>
+s3-under-198-c45f6ffd9-kbrpx    1/1     Running   0          49s   10.244.1.43    ip-172-31-3-39     <none>           <none>
+s3-full-146-5bdc7c699-dd74d     1/1     Running   0          54s   10.244.4.112   ip-172-31-31-146   <none>           <none>
+s3-full-146-5bdc7c699-sh6mc     1/1     Running   0          54s   10.244.4.111   ip-172-31-31-146   <none>           <none>
+s3-under-245-574b8b4b46-4cjj4   1/1     Running   0          49s   10.244.4.114   ip-172-31-31-146   <none>           <none>
+s3-full-144-569b4d6597-8bxn7    1/1     Running   0          53s   10.244.2.61    ip-172-31-6-144    <none>           <none>
+s3-full-144-569b4d6597-wbsww    1/1     Running   0          53s   10.244.2.60    ip-172-31-6-144    <none>           <none>
+s3-under-245-574b8b4b46-rsstv   1/1     Running   0          49s   10.244.2.62    ip-172-31-6-144    <none>           <none>

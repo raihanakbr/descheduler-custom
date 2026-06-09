@@ -1,0 +1,6 @@
+scenario:            s1
+timestamp:           20260607-014636-rdc2-k3
+per_pass_evictions:  8 2 0
+total_evictions(E):  10
+converged:           1   (1 = a pass evicted 0)
+passes_run:          3 (max 5)

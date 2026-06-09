@@ -1,0 +1,109 @@
+---
+# B1 baseline: upstream HighNodeUtilization plugin, run on the SAME custom image
+# (keegou/descheduler-custom:alpha-8) so the only changed variable vs
+# rd-current.yaml is the consolidation STRATEGY, not the binary/scheduler/workload.
+#
+# Fairness alignment with rd-current.yaml:
+#   - same image alpha-8
+#   - threshold cpu:40 / memory:40  ==  RD consolidationThreshold 0.40
+#   - same eviction scope: only defrag-exp pods are evictable
+#     (kube-system + kube-flannel excluded; their pods are DaemonSet-owned and
+#      non-evictable anyway, so this matches RD's exclude: kube-system in effect)
+#   - requests mode: HighNodeUtilization computes node usage from pod requests by
+#     default, matching usageMode: requests on the RD side.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: descheduler
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: descheduler-role
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "pods", "persistentvolumeclaims", "persistentvolumes"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: [""]
+  resources: ["pods/eviction"]
+  verbs: ["create"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "update"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: descheduler-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: descheduler-role
+subjects:
+- kind: ServiceAccount
+  name: descheduler
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: descheduler-policy
+  namespace: kube-system
+data:
+  policy.yaml: |
+    apiVersion: "descheduler/v1alpha2"
+    kind: "DeschedulerPolicy"
+    profiles:
+      - name: default
+        pluginConfig:
+        - name: "DefaultEvictor"
+          args:
+            evictSystemCriticalPods: false
+            evictLocalStoragePods: false
+            evictFailedBarePods: false
+        - name: "HighNodeUtilization"
+          args:
+            thresholds:
+              cpu: 40
+              memory: 40
+            evictableNamespaces:
+              exclude:
+                - kube-system
+                - kube-flannel
+        plugins:
+          balance:
+            enabled:
+              - "HighNodeUtilization"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: descheduler-job
+  namespace: kube-system
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: descheduler
+    spec:
+      serviceAccountName: descheduler
+      containers:
+      - name: descheduler
+        image: keegou/descheduler-custom:alpha-8
+        command:
+        - "/bin/descheduler"
+        args:
+        - "--policy-config-file=/policy-dir/policy.yaml"
+        - "--v=3"
+        volumeMounts:
+        - mountPath: /policy-dir
+          name: policy-volume
+      restartPolicy: Never
+      volumes:
+      - name: policy-volume
+        configMap:
+          name: descheduler-policy

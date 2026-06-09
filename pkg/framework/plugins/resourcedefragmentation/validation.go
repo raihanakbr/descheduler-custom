@@ -35,5 +35,21 @@ func ValidateResourceDefragmentationArgs(obj runtime.Object) error {
 	default:
 		allErrs = append(allErrs, fmt.Errorf("unsupported usageMode %q, must be one of %q, %q, %q, %q, %q", args.UsageMode, UsageModeRequests, UsageModeActualRaw, UsageModeActualEWMA, UsageModeActualEWMAPersisted, UsageModePublishedEWMA))
 	}
+	if args.ConsolidationThreshold < 0 || args.ConsolidationThreshold > 1 {
+		allErrs = append(allErrs, fmt.Errorf("consolidationThreshold must be in range [0, 1], got %v", args.ConsolidationThreshold))
+	}
+	if args.ConsolidationTarget < 0 || args.ConsolidationTarget > 1 {
+		allErrs = append(allErrs, fmt.Errorf("consolidationTarget must be in range [0, 1], got %v", args.ConsolidationTarget))
+	}
+	if args.BalancePenaltyWeight < 0 || args.BalancePenaltyWeight > 1 {
+		allErrs = append(allErrs, fmt.Errorf("balancePenaltyWeight must be in range [0, 1], got %v", args.BalancePenaltyWeight))
+	}
+	switch args.SelectionPolicy {
+	case "", SelectionTOPSIS, SelectionJustC1, SelectionJustC2, SelectionJustC3, SelectionJustC4,
+		SelectionNoC1, SelectionNoC2, SelectionNoC3, SelectionNoC4,
+		SelectionRandom, SelectionLargest, SelectionLowestPriority:
+	default:
+		allErrs = append(allErrs, fmt.Errorf("unsupported selectionPolicy %q", args.SelectionPolicy))
+	}
 	return utilerrors.NewAggregate(allErrs)
 }

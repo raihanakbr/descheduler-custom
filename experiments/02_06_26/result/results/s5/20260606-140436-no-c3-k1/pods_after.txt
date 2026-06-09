@@ -1,0 +1,8 @@
+NAME                              READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s5-cpu-245-7cc476ccfd-9hw8b       1/1     Running   0          58s   10.244.0.166   ip-172-31-1-245    <none>           <none>
+s5-cpuskew-198-856c6d9f7c-pts4j   1/1     Running   0          54s   10.244.5.34    ip-172-31-16-198   <none>           <none>
+s5-memskew-34-765f6f88c9-phzrv    1/1     Running   0          48s   10.244.5.35    ip-172-31-16-198   <none>           <none>
+s5-bal-245-7f97dc5789-kwtmc       1/1     Running   0          48s   10.244.1.106   ip-172-31-3-39     <none>           <none>
+s5-full-39-56f45f46d8-jn7fx       1/1     Running   0          51s   10.244.1.103   ip-172-31-3-39     <none>           <none>
+s5-full-39-56f45f46d8-k94rf       1/1     Running   0          51s   10.244.1.102   ip-172-31-3-39     <none>           <none>
+s5-mem-245-76b5b55d77-ds5fr       1/1     Running   0          48s   10.244.1.105   ip-172-31-3-39     <none>           <none>

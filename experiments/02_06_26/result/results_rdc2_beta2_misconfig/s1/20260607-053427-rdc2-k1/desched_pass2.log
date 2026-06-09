@@ -1,0 +1,48 @@
+I0607 05:34:59.516997       1 feature_gate.go:466] feature gates: {map[]}
+I0607 05:34:59.697881       1 secure_serving.go:57] Forcing use of http/1.1 only
+I0607 05:34:59.698440       1 named_certificates.go:53] "Loaded SNI cert" index=0 certName="self-signed loopback" certDetail="\"apiserver-loopback-client@1780810499\" [serving] validServingFor=[apiserver-loopback-client] issuer=\"apiserver-loopback-client-ca@1780810499\" (2026-06-07 04:34:59 +0000 UTC to 2029-06-07 04:34:59 +0000 UTC (now=2026-06-07 05:34:59.698403316 +0000 UTC))"
+I0607 05:34:59.698478       1 secure_serving.go:211] Serving securely on [::]:10258
+I0607 05:34:59.698570       1 tlsconfig.go:243] "Starting DynamicServingCertificateController"
+I0607 05:34:59.698674       1 tracing.go:88] Did not find a trace collector endpoint defined. Switching to NoopTraceProvider
+I0607 05:34:59.699043       1 envvar.go:172] "Feature gate default state" feature="InformerResourceVersion" enabled=true
+I0607 05:34:59.699069       1 envvar.go:172] "Feature gate default state" feature="WatchListClient" enabled=true
+I0607 05:34:59.699077       1 envvar.go:172] "Feature gate default state" feature="ClientsAllowCBOR" enabled=false
+I0607 05:34:59.699083       1 envvar.go:172] "Feature gate default state" feature="ClientsPreferCBOR" enabled=false
+I0607 05:34:59.699089       1 envvar.go:172] "Feature gate default state" feature="InOrderInformers" enabled=true
+I0607 05:34:59.699094       1 envvar.go:172] "Feature gate default state" feature="InOrderInformersBatchProcess" enabled=true
+W0607 05:34:59.708063       1 descheduler.go:333] failed to convert Descheduler minor version '' to float: strconv.ParseFloat: parsing "": invalid syntax
+I0607 05:34:59.718801       1 reflector.go:367] "Starting reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 05:34:59.718831       1 reflector.go:411] "Listing and watching" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 05:34:59.718851       1 reflector.go:367] "Starting reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 05:34:59.718860       1 reflector.go:411] "Listing and watching" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 05:34:59.718810       1 reflector.go:367] "Starting reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 05:34:59.718990       1 reflector.go:411] "Listing and watching" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 05:34:59.725074       1 reflector.go:446] "Caches populated" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 05:34:59.728094       1 reflector.go:446] "Caches populated" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 05:34:59.732996       1 reflector.go:446] "Caches populated" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 05:34:59.818855       1 descheduler.go:235] Resetting pod evictor counters
+I0607 05:34:59.818936       1 resourcedefragmentation.go:178] "Starting resource defragmentation balance pass" plugin="ResourceDefragmentation" ExtensionPoint="Balance" nodeCount=7
+I0607 05:34:59.819017       1 resourcedefragmentation.go:219] "Node state" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-19-34" avgUtilization=0.4281759853455871 minUtilization=0.425 binScore=0.7109120073272065 usageSource="requests"
+I0607 05:34:59.819055       1 resourcedefragmentation.go:219] "Node state" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-3-39" avgUtilization=0.05581115171122249 minUtilization=0.05 binScore=0.5220944241443888 usageSource="requests"
+I0607 05:34:59.819076       1 resourcedefragmentation.go:219] "Node state" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-31-146" avgUtilization=0.3040542752468479 minUtilization=0.3 binScore=0.6479728623765761 usageSource="requests"
+I0607 05:34:59.819101       1 resourcedefragmentation.go:219] "Node state" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-6-144" avgUtilization=0.055816047456713085 minUtilization=0.05 binScore=0.5220919762716434 usageSource="requests"
+I0607 05:34:59.819128       1 resourcedefragmentation.go:185] "Skipping control-plane node" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-84-108"
+I0607 05:34:59.819156       1 resourcedefragmentation.go:219] "Node state" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-1-245" avgUtilization=0.9247429375538682 minUtilization=0.9244858751077363 binScore=0.9621144063308023 usageSource="requests"
+I0607 05:34:59.819170       1 resourcedefragmentation.go:219] "Node state" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-16-198" avgUtilization=0.05581115171122249 minUtilization=0.05 binScore=0.5220944241443888 usageSource="requests"
+I0607 05:34:59.819784       1 resourcedefragmentation.go:257] "Node is a drain candidate" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-31-146" avgUtilization=0.3040542752468479 binScore=0.6479728623765761 imbalanceIndex=-0.008108550493695799 freeSpaceIndex=0.48432401465441294 priority=1.036421006542499
+I0607 05:34:59.820049       1 resourcedefragmentation.go:280] "Draining under-utilized node" plugin="ResourceDefragmentation" ExtensionPoint="Balance" node="ip-172-31-31-146" priority=1.036421006542499
+I0607 05:34:59.820204       1 resourcedefragmentation.go:867] "Candidate score inputs" plugin="ResourceDefragmentation" pod="defrag-exp/s1-fill-146-f9dd78d6c-m468r" originNode="ip-172-31-31-146" c1=-0.000001780414503119157 c2=0.7738511522778369 c3=0.18816225285120763 c4=0
+I0607 05:34:59.820336       1 resourcedefragmentation.go:867] "Candidate score inputs" plugin="ResourceDefragmentation" pod="defrag-exp/s1-fill-146-f9dd78d6c-wg7qm" originNode="ip-172-31-31-146" c1=-0.000001780414503119157 c2=0.7738511522778369 c3=0.18816225285120763 c4=0
+I0607 05:34:59.820484       1 resourcedefragmentation.go:298] "Eviction decision" plugin="ResourceDefragmentation" ExtensionPoint="Balance" pod="defrag-exp/s1-fill-146-f9dd78d6c-m468r" originNode="ip-172-31-31-146" predictedTarget="ip-172-31-19-34"
+I0607 05:34:59.850309       1 evictions.go:558] "Evicted pod" pod="defrag-exp/s1-fill-146-f9dd78d6c-m468r" reason="" strategy="ResourceDefragmentation" node="ip-172-31-31-146" profile="default"
+I0607 05:34:59.850392       1 resourcedefragmentation.go:867] "Candidate score inputs" plugin="ResourceDefragmentation" pod="defrag-exp/s1-fill-146-f9dd78d6c-wg7qm" originNode="ip-172-31-31-146" c1=-0.000002166111078447549 c2=0.8367902972284673 c3=0.2189731079005772 c4=0
+I0607 05:34:59.850423       1 resourcedefragmentation.go:298] "Eviction decision" plugin="ResourceDefragmentation" ExtensionPoint="Balance" pod="defrag-exp/s1-fill-146-f9dd78d6c-wg7qm" originNode="ip-172-31-31-146" predictedTarget="ip-172-31-19-34"
+E0607 05:34:59.852329       1 event_broadcaster.go:270] "Server rejected event (will not retry!)" err="events.events.k8s.io is forbidden: User \"system:serviceaccount:kube-system:descheduler\" cannot create resource \"events\" in API group \"events.k8s.io\" in the namespace \"defrag-exp\"" event="&Event{ObjectMeta:{s1-fill-146-f9dd78d6c-m468r.18b6b5b6e7dd9a6a  defrag-exp    0 0001-01-01 00:00:00 +0000 UTC <nil> <nil> map[] map[] [] [] []},EventTime:2026-06-07 05:34:59.850331519 +0000 UTC m=+0.443246974,Series:nil,ReportingController:sigs.k8s.io.descheduler,ReportingInstance:sigs.k8s.io.descheduler-descheduler-job-z77cj,Action:Descheduled,Reason:ResourceDefragmentation,Regarding:{Pod defrag-exp s1-fill-146-f9dd78d6c-m468r 893d6f23-0060-4086-8410-e11ed7c583ea v1 365021 },Related:nil,Note:pod eviction from ip-172-31-31-146 node by sigs.k8s.io/descheduler,Type:Normal,DeprecatedSource:{ },DeprecatedFirstTimestamp:0001-01-01 00:00:00 +0000 UTC,DeprecatedLastTimestamp:0001-01-01 00:00:00 +0000 UTC,DeprecatedCount:0,}"
+I0607 05:34:59.948205       1 evictions.go:558] "Evicted pod" pod="defrag-exp/s1-fill-146-f9dd78d6c-wg7qm" reason="" strategy="ResourceDefragmentation" node="ip-172-31-31-146" profile="default"
+I0607 05:34:59.948302       1 profile.go:425] "Total number of evictions/requests" extension point="Balance" evictedPods=2 evictionRequests=0
+I0607 05:34:59.948332       1 descheduler.go:252] "Number of evictions/requests" totalEvicted=2 evictionRequests=0
+E0607 05:34:59.948727       1 event_broadcaster.go:279] "Unable to write event (may retry after sleeping)" err="client rate limiter Wait returned an error: context canceled"
+I0607 05:34:59.948892       1 reflector.go:373] "Stopping reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 05:34:59.948994       1 reflector.go:373] "Stopping reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 05:34:59.949083       1 reflector.go:373] "Stopping reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 05:34:59.949567       1 secure_serving.go:259] Stopped listening on [::]:10258
