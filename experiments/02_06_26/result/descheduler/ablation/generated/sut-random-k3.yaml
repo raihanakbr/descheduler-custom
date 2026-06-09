@@ -1,0 +1,106 @@
+---
+# Selector-ablation SUT manifest TEMPLATE (alpha-9 customizable image).
+#
+# Generated per variant by run_s5_ablation.sh: random and 3 are
+# substituted; EVERYTHING else (image, threshold, target, scope) is held
+# constant so a metric difference isolates selectionPolicy.
+#
+#   selectionPolicy: ""/topsis  -> full TOPSIS C1-C4 (default)
+#                    just-cN    -> TOPSIS with only criterion N (argmax cN)
+#                    no-cN      -> TOPSIS with criterion N's weight zeroed
+#                    random     -> uniform random pod (reproducible via selectionSeed)
+#                    largest    -> largest footprint max(cpu,mem)/alloc
+#                    lowest-priority -> lowest-priority pod (== just-c4)
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: descheduler
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: descheduler-role
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "pods", "persistentvolumeclaims", "persistentvolumes"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: [""]
+  resources: ["pods/eviction"]
+  verbs: ["create"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "update"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: descheduler-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: descheduler-role
+subjects:
+- kind: ServiceAccount
+  name: descheduler
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: descheduler-policy
+  namespace: kube-system
+data:
+  policy.yaml: |
+    apiVersion: "descheduler/v1alpha2"
+    kind: "DeschedulerPolicy"
+    profiles:
+      - name: default
+        pluginConfig:
+        - name: "ResourceDefragmentation"
+          args:
+            namespaces:
+              include:
+                - defrag-exp
+            maxEvictions: 50
+            usageMode: "requests"
+            consolidationThreshold: 0.40
+            consolidationTarget: 0.90
+            selectionPolicy: "random"
+            selectionSeed: 3
+        plugins:
+          balance:
+            enabled:
+              - "ResourceDefragmentation"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: descheduler-job
+  namespace: kube-system
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: descheduler
+    spec:
+      serviceAccountName: descheduler
+      containers:
+      - name: descheduler
+        image: keegou/descheduler-custom:alpha-9
+        command:
+        - "/bin/descheduler"
+        args:
+        - "--policy-config-file=/policy-dir/policy.yaml"
+        - "--v=4"
+        volumeMounts:
+        - mountPath: /policy-dir
+          name: policy-volume
+      restartPolicy: Never
+      volumes:
+      - name: policy-volume
+        configMap:
+          name: descheduler-policy

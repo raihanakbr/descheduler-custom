@@ -1,0 +1,43 @@
+# Reference KubeSchedulerConfiguration for the experiment.
+#
+# The ResourceDefragmentation plugin ASSUMES the cluster scheduler packs with
+# MostAllocated + BalancedAllocation. If the scheduler spreads (the kube-scheduler
+# default is NodeResourcesFit/LeastAllocated), evicted pods scatter straight back
+# and NOTHING consolidates -> the whole experiment is invalid for every system.
+#
+# This cluster already runs the scheduler with:
+#     --config=/etc/kubernetes/scheduler-config.yaml
+# Verify that file on the control-plane (ip-172-31-84-108) matches the scoring
+# strategy below. It must be IDENTICAL for B0/B1/B2/SUT (fairness control: same
+# scheduler profile for all systems). To inspect / edit on a kubeadm cluster:
+#
+#     sudo cat /etc/kubernetes/scheduler-config.yaml
+#     sudo vi  /etc/kubernetes/scheduler-config.yaml   # then the static pod restarts
+#
+apiVersion: kubescheduler.config.k8s.io/v1
+kind: KubeSchedulerConfiguration
+profiles:
+- schedulerName: default-scheduler
+  pluginConfig:
+  - name: NodeResourcesFit
+    args:
+      scoringStrategy:
+        # MostAllocated => prefer the fullest feasible node (consolidation).
+        type: MostAllocated
+        resources:
+        - name: cpu
+          weight: 1
+        - name: memory
+          weight: 1
+  - name: NodeResourcesBalancedAllocation
+    args:
+      resources:
+      - name: cpu
+        weight: 1
+      - name: memory
+        weight: 1
+  plugins:
+    score:
+      enabled:
+      - name: NodeResourcesFit
+      - name: NodeResourcesBalancedAllocation

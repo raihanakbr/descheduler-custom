@@ -1,0 +1,13 @@
+NAME                          READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s2-cpu-245-846fcd67f4-mdzwd   1/1     Running   0          10s   10.244.0.17    ip-172-31-1-245    <none>           <none>
+s2-cpu-245-846fcd67f4-nmp8c   1/1     Running   0          10s   10.244.0.16    ip-172-31-1-245    <none>           <none>
+s2-cpu-198-7f87654f6f-h6ptm   1/1     Running   0          9s    10.244.5.164   ip-172-31-16-198   <none>           <none>
+s2-cpu-198-7f87654f6f-lcwgl   1/1     Running   0          9s    10.244.5.165   ip-172-31-16-198   <none>           <none>
+s2-cpu-34-6694c57846-tccxt    1/1     Running   0          8s    10.244.7.162   ip-172-31-19-34    <none>           <none>
+s2-cpu-34-6694c57846-vwt25    1/1     Running   0          8s    10.244.7.161   ip-172-31-19-34    <none>           <none>
+s2-mem-39-6c9ff4fc6d-dr2cl    1/1     Running   0          7s    10.244.1.105   ip-172-31-3-39     <none>           <none>
+s2-mem-39-6c9ff4fc6d-hclvg    1/1     Running   0          7s    10.244.1.106   ip-172-31-3-39     <none>           <none>
+s2-mem-146-7ff7c4f86f-dmtnc   1/1     Running   0          4s    10.244.4.163   ip-172-31-31-146   <none>           <none>
+s2-mem-146-7ff7c4f86f-lnbrd   1/1     Running   0          4s    10.244.4.164   ip-172-31-31-146   <none>           <none>
+s2-mem-144-769fd78487-npfwr   1/1     Running   0          2s    10.244.2.75    ip-172-31-6-144    <none>           <none>
+s2-mem-144-769fd78487-xsjb5   1/1     Running   0          2s    10.244.2.74    ip-172-31-6-144    <none>           <none>

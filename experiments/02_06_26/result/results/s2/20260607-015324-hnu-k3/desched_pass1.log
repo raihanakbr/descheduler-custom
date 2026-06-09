@@ -1,0 +1,40 @@
+I0607 01:53:26.423101       1 feature_gate.go:466] feature gates: {map[]}
+I0607 01:53:26.763254       1 secure_serving.go:57] Forcing use of http/1.1 only
+I0607 01:53:26.763688       1 named_certificates.go:53] "Loaded SNI cert" index=0 certName="self-signed loopback" certDetail="\"apiserver-loopback-client@1780797206\" [serving] validServingFor=[apiserver-loopback-client] issuer=\"apiserver-loopback-client-ca@1780797206\" (2026-06-07 00:53:26 +0000 UTC to 2029-06-07 00:53:26 +0000 UTC (now=2026-06-07 01:53:26.763643657 +0000 UTC))"
+I0607 01:53:26.763737       1 secure_serving.go:211] Serving securely on [::]:10258
+I0607 01:53:26.763749       1 tracing.go:88] Did not find a trace collector endpoint defined. Switching to NoopTraceProvider
+I0607 01:53:26.763762       1 tlsconfig.go:243] "Starting DynamicServingCertificateController"
+I0607 01:53:26.764137       1 envvar.go:172] "Feature gate default state" feature="WatchListClient" enabled=true
+I0607 01:53:26.764166       1 envvar.go:172] "Feature gate default state" feature="ClientsAllowCBOR" enabled=false
+I0607 01:53:26.764173       1 envvar.go:172] "Feature gate default state" feature="ClientsPreferCBOR" enabled=false
+I0607 01:53:26.764180       1 envvar.go:172] "Feature gate default state" feature="InOrderInformers" enabled=true
+I0607 01:53:26.764187       1 envvar.go:172] "Feature gate default state" feature="InOrderInformersBatchProcess" enabled=true
+I0607 01:53:26.764194       1 envvar.go:172] "Feature gate default state" feature="InformerResourceVersion" enabled=true
+W0607 01:53:26.772528       1 descheduler.go:333] failed to convert Descheduler minor version '' to float: strconv.ParseFloat: parsing "": invalid syntax
+I0607 01:53:26.783175       1 reflector.go:367] "Starting reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:53:26.783202       1 reflector.go:411] "Listing and watching" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:53:26.783270       1 reflector.go:367] "Starting reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:53:26.783281       1 reflector.go:411] "Listing and watching" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:53:26.783182       1 reflector.go:367] "Starting reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:53:26.783396       1 reflector.go:411] "Listing and watching" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:53:26.790310       1 reflector.go:446] "Caches populated" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:53:26.790576       1 reflector.go:446] "Caches populated" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:53:26.795240       1 reflector.go:446] "Caches populated" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:53:26.883879       1 descheduler.go:235] Resetting pod evictor counters
+I0607 01:53:26.885065       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="overutilized" node="ip-172-31-1-245" usage={"cpu":"1600m","memory":"90Mi","pods":"5"} usagePercentage={"cpu":80,"memory":11,"pods":5}
+I0607 01:53:26.885145       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="overutilized" node="ip-172-31-16-198" usage={"cpu":"1600m","memory":"90Mi","pods":"4"} usagePercentage={"cpu":80,"memory":11,"pods":4}
+I0607 01:53:26.885168       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="overutilized" node="ip-172-31-19-34" usage={"cpu":"1600m","memory":"90Mi","pods":"4"} usagePercentage={"cpu":80,"memory":11,"pods":4}
+I0607 01:53:26.885189       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="overutilized" node="ip-172-31-3-39" usage={"cpu":"200m","memory":"530Mi","pods":"4"} usagePercentage={"cpu":10,"memory":65,"pods":4}
+I0607 01:53:26.885209       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="overutilized" node="ip-172-31-31-146" usage={"cpu":"200m","memory":"530Mi","pods":"4"} usagePercentage={"cpu":10,"memory":65,"pods":4}
+I0607 01:53:26.885226       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="overutilized" node="ip-172-31-6-144" usage={"cpu":"200m","memory":"530Mi","pods":"4"} usagePercentage={"cpu":10,"memory":65,"pods":4}
+I0607 01:53:26.885244       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="overutilized" node="ip-172-31-84-108" usage={"cpu":"850m","memory":"220Mi","pods":"7"} usagePercentage={"cpu":43,"memory":6,"pods":6}
+I0607 01:53:26.885263       1 highnodeutilization.go:217] "Criteria for a node below target utilization" plugin="HighNodeUtilization" ExtensionPoint="Balance" cpu="40.00%" memory="40.00%"
+I0607 01:53:26.886178       1 highnodeutilization.go:218] "Number of underutilized nodes" plugin="HighNodeUtilization" ExtensionPoint="Balance" totalNumber=0
+I0607 01:53:26.886194       1 highnodeutilization.go:221] "No node is underutilized, nothing to do here, you might tune your thresholds further" plugin="HighNodeUtilization" ExtensionPoint="Balance"
+I0607 01:53:26.886240       1 profile.go:425] "Total number of evictions/requests" extension point="Balance" evictedPods=0 evictionRequests=0
+I0607 01:53:26.886264       1 descheduler.go:252] "Number of evictions/requests" totalEvicted=0 evictionRequests=0
+I0607 01:53:26.886633       1 reflector.go:373] "Stopping reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:53:26.886670       1 reflector.go:373] "Stopping reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:53:26.886695       1 reflector.go:373] "Stopping reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 01:53:26.886971       1 tlsconfig.go:258] "Shutting down DynamicServingCertificateController"
+I0607 01:53:26.887080       1 secure_serving.go:259] Stopped listening on [::]:10258

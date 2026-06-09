@@ -1,0 +1,13 @@
+NAME                            READY   STATUS    RESTARTS   AGE    IP             NODE               NOMINATED NODE   READINESS GATES
+s3-under-198-c45f6ffd9-446kc    1/1     Running   0          2m5s   10.244.5.40    ip-172-31-16-198   <none>           <none>
+s3-under-198-c45f6ffd9-5l6zx    1/1     Running   0          2m5s   10.244.5.39    ip-172-31-16-198   <none>           <none>
+s3-cpu-34-848456d98d-kkb5w      1/1     Running   0          2m4s   10.244.7.32    ip-172-31-19-34    <none>           <none>
+s3-cpu-34-848456d98d-r8kbc      1/1     Running   0          2m4s   10.244.7.31    ip-172-31-19-34    <none>           <none>
+s3-cpu-39-694f845c9f-55nzn      1/1     Running   0          2m2s   10.244.1.245   ip-172-31-3-39     <none>           <none>
+s3-cpu-39-694f845c9f-cgs4g      1/1     Running   0          2m2s   10.244.1.244   ip-172-31-3-39     <none>           <none>
+s3-full-146-5bdc7c699-29nn5     1/1     Running   0          2m1s   10.244.4.30    ip-172-31-31-146   <none>           <none>
+s3-full-146-5bdc7c699-nrtwf     1/1     Running   0          2m1s   10.244.4.31    ip-172-31-31-146   <none>           <none>
+s3-under-245-574b8b4b46-ldw6n   1/1     Running   0          49s    10.244.4.33    ip-172-31-31-146   <none>           <none>
+s3-full-144-569b4d6597-5vqmk    1/1     Running   0          2m     10.244.2.3     ip-172-31-6-144    <none>           <none>
+s3-full-144-569b4d6597-vwqkz    1/1     Running   0          2m     10.244.2.2     ip-172-31-6-144    <none>           <none>
+s3-under-245-574b8b4b46-s79v7   1/1     Running   0          49s    10.244.2.4     ip-172-31-6-144    <none>           <none>

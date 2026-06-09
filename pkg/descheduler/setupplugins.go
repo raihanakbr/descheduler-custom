@@ -30,6 +30,7 @@ import (
 	"sigs.k8s.io/descheduler/pkg/framework/plugins/removepodsviolatingnodetaints"
 	"sigs.k8s.io/descheduler/pkg/framework/plugins/removepodsviolatingtopologyspreadconstraint"
 	"sigs.k8s.io/descheduler/pkg/framework/plugins/resourcedefragmentation"
+	"sigs.k8s.io/descheduler/pkg/framework/plugins/resourcedefragmentationc2"
 )
 
 func SetupPlugins() {
@@ -51,4 +52,5 @@ func RegisterDefaultPlugins(registry pluginregistry.Registry) {
 	pluginregistry.Register(removepodsviolatingnodetaints.PluginName, removepodsviolatingnodetaints.New, &removepodsviolatingnodetaints.RemovePodsViolatingNodeTaints{}, &removepodsviolatingnodetaints.RemovePodsViolatingNodeTaintsArgs{}, removepodsviolatingnodetaints.ValidateRemovePodsViolatingNodeTaintsArgs, removepodsviolatingnodetaints.SetDefaults_RemovePodsViolatingNodeTaintsArgs, registry)
 	pluginregistry.Register(removepodsviolatingtopologyspreadconstraint.PluginName, removepodsviolatingtopologyspreadconstraint.New, &removepodsviolatingtopologyspreadconstraint.RemovePodsViolatingTopologySpreadConstraint{}, &removepodsviolatingtopologyspreadconstraint.RemovePodsViolatingTopologySpreadConstraintArgs{}, removepodsviolatingtopologyspreadconstraint.ValidateRemovePodsViolatingTopologySpreadConstraintArgs, removepodsviolatingtopologyspreadconstraint.SetDefaults_RemovePodsViolatingTopologySpreadConstraintArgs, registry)
 	pluginregistry.Register(resourcedefragmentation.PluginName, resourcedefragmentation.New, &resourcedefragmentation.ResourceDefragmentation{}, &resourcedefragmentation.ResourceDefragmentationArgs{}, resourcedefragmentation.ValidateResourceDefragmentationArgs, resourcedefragmentation.SetDefaults_ResourceDefragmentationArgs, registry)
+	pluginregistry.Register(resourcedefragmentationc2.PluginName, resourcedefragmentationc2.New, &resourcedefragmentationc2.ResourceDefragmentationC2{}, &resourcedefragmentationc2.ResourceDefragmentationC2Args{}, resourcedefragmentationc2.ValidateResourceDefragmentationC2Args, resourcedefragmentationc2.SetDefaults_ResourceDefragmentationC2Args, registry)
 }

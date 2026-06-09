@@ -1,0 +1,9 @@
+NAME                                READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s6mix-bal-245-6b7b5f58fb-94rvq      1/1     Running   0          57s   10.244.0.25    ip-172-31-1-245    <none>           <none>
+s6mix-cpu-245-7b4c6b8997-qwz6k      1/1     Running   0          60s   10.244.0.23    ip-172-31-1-245    <none>           <none>
+s6mix-mem-245-c6df5bbb-mthxv        1/1     Running   0          59s   10.244.0.24    ip-172-31-1-245    <none>           <none>
+s6mix-sml-245-699856f66f-7cn7f      1/1     Running   0          56s   10.244.0.26    ip-172-31-1-245    <none>           <none>
+s6mix-cpuskew-198-68945c786-px657   1/1     Running   0          54s   10.244.5.130   ip-172-31-16-198   <none>           <none>
+s6mix-memskew-34-7bffd49d94-8rdvl   1/1     Running   0          48s   10.244.5.131   ip-172-31-16-198   <none>           <none>
+s6mix-full-39-65bff7d9cf-khxht      1/1     Running   0          51s   10.244.1.6     ip-172-31-3-39     <none>           <none>
+s6mix-full-39-65bff7d9cf-rl5xn      1/1     Running   0          51s   10.244.1.7     ip-172-31-3-39     <none>           <none>

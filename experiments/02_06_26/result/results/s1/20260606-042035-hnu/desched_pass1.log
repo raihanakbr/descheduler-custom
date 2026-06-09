@@ -1,0 +1,71 @@
+I0606 04:20:36.730674       1 feature_gate.go:466] feature gates: {map[]}
+I0606 04:20:36.960368       1 secure_serving.go:57] Forcing use of http/1.1 only
+I0606 04:20:36.960872       1 named_certificates.go:53] "Loaded SNI cert" index=0 certName="self-signed loopback" certDetail="\"apiserver-loopback-client@1780719636\" [serving] validServingFor=[apiserver-loopback-client] issuer=\"apiserver-loopback-client-ca@1780719636\" (2026-06-06 03:20:36 +0000 UTC to 2029-06-06 03:20:36 +0000 UTC (now=2026-06-06 04:20:36.960839838 +0000 UTC))"
+I0606 04:20:36.960949       1 secure_serving.go:211] Serving securely on [::]:10258
+I0606 04:20:36.960977       1 tracing.go:88] Did not find a trace collector endpoint defined. Switching to NoopTraceProvider
+I0606 04:20:36.961041       1 tlsconfig.go:243] "Starting DynamicServingCertificateController"
+I0606 04:20:36.961573       1 envvar.go:172] "Feature gate default state" feature="InOrderInformersBatchProcess" enabled=true
+I0606 04:20:36.961594       1 envvar.go:172] "Feature gate default state" feature="InformerResourceVersion" enabled=true
+I0606 04:20:36.961608       1 envvar.go:172] "Feature gate default state" feature="WatchListClient" enabled=true
+I0606 04:20:36.961613       1 envvar.go:172] "Feature gate default state" feature="ClientsAllowCBOR" enabled=false
+I0606 04:20:36.961619       1 envvar.go:172] "Feature gate default state" feature="ClientsPreferCBOR" enabled=false
+I0606 04:20:36.961625       1 envvar.go:172] "Feature gate default state" feature="InOrderInformers" enabled=true
+W0606 04:20:36.971095       1 descheduler.go:333] failed to convert Descheduler minor version '' to float: strconv.ParseFloat: parsing "": invalid syntax
+I0606 04:20:36.984950       1 reflector.go:367] "Starting reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 04:20:36.985101       1 reflector.go:411] "Listing and watching" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 04:20:36.985769       1 reflector.go:367] "Starting reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 04:20:36.985847       1 reflector.go:411] "Listing and watching" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 04:20:36.986991       1 reflector.go:367] "Starting reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 04:20:36.987056       1 reflector.go:411] "Listing and watching" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 04:20:36.989940       1 reflector.go:446] "Caches populated" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 04:20:36.994010       1 reflector.go:446] "Caches populated" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 04:20:36.994014       1 reflector.go:446] "Caches populated" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 04:20:37.084558       1 descheduler.go:235] Resetting pod evictor counters
+I0606 04:20:37.084822       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="underutilized" node="ip-172-31-6-144" usage={"cpu":"600m","memory":"250Mi","pods":"4"} usagePercentage={"cpu":30,"memory":31,"pods":4}
+I0606 04:20:37.084937       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="underutilized" node="ip-172-31-1-245" usage={"cpu":"600m","memory":"250Mi","pods":"5"} usagePercentage={"cpu":30,"memory":31,"pods":5}
+I0606 04:20:37.084975       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="underutilized" node="ip-172-31-16-198" usage={"cpu":"600m","memory":"250Mi","pods":"4"} usagePercentage={"cpu":30,"memory":31,"pods":4}
+I0606 04:20:37.084999       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="underutilized" node="ip-172-31-19-34" usage={"cpu":"600m","memory":"250Mi","pods":"4"} usagePercentage={"cpu":30,"memory":31,"pods":4}
+I0606 04:20:37.085017       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="underutilized" node="ip-172-31-3-39" usage={"cpu":"600m","memory":"250Mi","pods":"4"} usagePercentage={"cpu":30,"memory":31,"pods":4}
+I0606 04:20:37.085042       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="underutilized" node="ip-172-31-31-146" usage={"cpu":"600m","memory":"250Mi","pods":"4"} usagePercentage={"cpu":30,"memory":31,"pods":4}
+I0606 04:20:37.085066       1 highnodeutilization.go:193] "Node has been classified" plugin="HighNodeUtilization" ExtensionPoint="Balance" category="overutilized" node="ip-172-31-84-108" usage={"cpu":"850m","memory":"220Mi","pods":"7"} usagePercentage={"cpu":43,"memory":6,"pods":6}
+I0606 04:20:37.085093       1 highnodeutilization.go:217] "Criteria for a node below target utilization" plugin="HighNodeUtilization" ExtensionPoint="Balance" memory="40.00%" cpu="40.00%"
+I0606 04:20:37.085130       1 highnodeutilization.go:218] "Number of underutilized nodes" plugin="HighNodeUtilization" ExtensionPoint="Balance" totalNumber=6
+I0606 04:20:37.085163       1 nodeutilization.go:186] "Total capacity to be moved" CPU=1150 Mem=3763863552 Pods=103
+I0606 04:20:37.085204       1 nodeutilization.go:194] "Evicting pods from node" node="ip-172-31-6-144" usage={"cpu":"600m","memory":"250Mi","pods":"4"}
+I0606 04:20:37.085266       1 nodeutilization.go:201] "Pods on node" node="ip-172-31-6-144" allPods=4 nonRemovablePods=2 removablePods=2
+I0606 04:20:37.085283       1 nodeutilization.go:217] "Evicting pods based on priority, if they have same priority, they'll be evicted based on QoS tiers"
+I0606 04:20:37.085304       1 nodeutilization.go:289] "Skipping eviction for pod, doesn't tolerate node taint" pod="defrag-exp/s1-fill-144-75b6ddcffc-7xf8q"
+I0606 04:20:37.085317       1 nodeutilization.go:289] "Skipping eviction for pod, doesn't tolerate node taint" pod="defrag-exp/s1-fill-144-75b6ddcffc-84k7t"
+I0606 04:20:37.085325       1 nodeutilization.go:194] "Evicting pods from node" node="ip-172-31-16-198" usage={"cpu":"600m","memory":"250Mi","pods":"4"}
+I0606 04:20:37.085364       1 nodeutilization.go:201] "Pods on node" node="ip-172-31-16-198" allPods=4 nonRemovablePods=2 removablePods=2
+I0606 04:20:37.085376       1 nodeutilization.go:217] "Evicting pods based on priority, if they have same priority, they'll be evicted based on QoS tiers"
+I0606 04:20:37.085388       1 nodeutilization.go:289] "Skipping eviction for pod, doesn't tolerate node taint" pod="defrag-exp/s1-fill-198-6f65649bd4-tz5jf"
+I0606 04:20:37.085398       1 nodeutilization.go:289] "Skipping eviction for pod, doesn't tolerate node taint" pod="defrag-exp/s1-fill-198-6f65649bd4-4f7fk"
+I0606 04:20:37.085408       1 nodeutilization.go:194] "Evicting pods from node" node="ip-172-31-19-34" usage={"cpu":"600m","memory":"250Mi","pods":"4"}
+I0606 04:20:37.085449       1 nodeutilization.go:201] "Pods on node" node="ip-172-31-19-34" allPods=4 nonRemovablePods=2 removablePods=2
+I0606 04:20:37.085460       1 nodeutilization.go:217] "Evicting pods based on priority, if they have same priority, they'll be evicted based on QoS tiers"
+I0606 04:20:37.085472       1 nodeutilization.go:289] "Skipping eviction for pod, doesn't tolerate node taint" pod="defrag-exp/s1-fill-34-65d8fd768c-8hxjk"
+I0606 04:20:37.085481       1 nodeutilization.go:289] "Skipping eviction for pod, doesn't tolerate node taint" pod="defrag-exp/s1-fill-34-65d8fd768c-q9wc7"
+I0606 04:20:37.085488       1 nodeutilization.go:194] "Evicting pods from node" node="ip-172-31-3-39" usage={"cpu":"600m","memory":"250Mi","pods":"4"}
+I0606 04:20:37.085524       1 nodeutilization.go:201] "Pods on node" node="ip-172-31-3-39" allPods=4 nonRemovablePods=2 removablePods=2
+I0606 04:20:37.085543       1 nodeutilization.go:217] "Evicting pods based on priority, if they have same priority, they'll be evicted based on QoS tiers"
+I0606 04:20:37.085556       1 nodeutilization.go:289] "Skipping eviction for pod, doesn't tolerate node taint" pod="defrag-exp/s1-fill-39-7d47c6f544-4x6wt"
+I0606 04:20:37.085566       1 nodeutilization.go:289] "Skipping eviction for pod, doesn't tolerate node taint" pod="defrag-exp/s1-fill-39-7d47c6f544-kmjqf"
+I0606 04:20:37.085573       1 nodeutilization.go:194] "Evicting pods from node" node="ip-172-31-31-146" usage={"cpu":"600m","memory":"250Mi","pods":"4"}
+I0606 04:20:37.085623       1 nodeutilization.go:201] "Pods on node" node="ip-172-31-31-146" allPods=4 nonRemovablePods=2 removablePods=2
+I0606 04:20:37.085634       1 nodeutilization.go:217] "Evicting pods based on priority, if they have same priority, they'll be evicted based on QoS tiers"
+I0606 04:20:37.085645       1 nodeutilization.go:289] "Skipping eviction for pod, doesn't tolerate node taint" pod="defrag-exp/s1-fill-146-f9dd78d6c-pdzsf"
+I0606 04:20:37.085657       1 nodeutilization.go:289] "Skipping eviction for pod, doesn't tolerate node taint" pod="defrag-exp/s1-fill-146-f9dd78d6c-vbdzr"
+I0606 04:20:37.085665       1 nodeutilization.go:194] "Evicting pods from node" node="ip-172-31-1-245" usage={"cpu":"600m","memory":"250Mi","pods":"5"}
+I0606 04:20:37.085700       1 nodeutilization.go:201] "Pods on node" node="ip-172-31-1-245" allPods=5 nonRemovablePods=2 removablePods=3
+I0606 04:20:37.085712       1 nodeutilization.go:217] "Evicting pods based on priority, if they have same priority, they'll be evicted based on QoS tiers"
+I0606 04:20:37.085723       1 nodeutilization.go:289] "Skipping eviction for pod, doesn't tolerate node taint" pod="kube-system/descheduler-job-7jrrt"
+I0606 04:20:37.085732       1 nodeutilization.go:289] "Skipping eviction for pod, doesn't tolerate node taint" pod="defrag-exp/s1-fill-245-7659c95b6c-bz68m"
+I0606 04:20:37.085738       1 nodeutilization.go:289] "Skipping eviction for pod, doesn't tolerate node taint" pod="defrag-exp/s1-fill-245-7659c95b6c-nmpnb"
+I0606 04:20:37.085776       1 profile.go:425] "Total number of evictions/requests" extension point="Balance" evictedPods=0 evictionRequests=0
+I0606 04:20:37.085807       1 descheduler.go:252] "Number of evictions/requests" totalEvicted=0 evictionRequests=0
+I0606 04:20:37.085964       1 reflector.go:373] "Stopping reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 04:20:37.086046       1 reflector.go:373] "Stopping reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 04:20:37.086087       1 reflector.go:373] "Stopping reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0606 04:20:37.086331       1 tlsconfig.go:258] "Shutting down DynamicServingCertificateController"
+I0606 04:20:37.086465       1 secure_serving.go:259] Stopped listening on [::]:10258

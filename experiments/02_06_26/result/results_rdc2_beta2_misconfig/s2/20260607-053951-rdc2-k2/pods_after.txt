@@ -1,0 +1,13 @@
+NAME                          READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s2-cpu-245-846fcd67f4-5x49v   1/1     Running   0          62s   10.244.0.52    ip-172-31-1-245    <none>           <none>
+s2-cpu-245-846fcd67f4-rx7rp   1/1     Running   0          62s   10.244.0.53    ip-172-31-1-245    <none>           <none>
+s2-mem-144-769fd78487-4b5tl   1/1     Running   0          49s   10.244.0.55    ip-172-31-1-245    <none>           <none>
+s2-mem-144-769fd78487-wnqwc   1/1     Running   0          48s   10.244.0.56    ip-172-31-1-245    <none>           <none>
+s2-mem-39-6c9ff4fc6d-wcfp2    1/1     Running   0          48s   10.244.0.57    ip-172-31-1-245    <none>           <none>
+s2-cpu-198-7f87654f6f-fbdt2   1/1     Running   0          61s   10.244.5.52    ip-172-31-16-198   <none>           <none>
+s2-cpu-198-7f87654f6f-qtmkn   1/1     Running   0          61s   10.244.5.51    ip-172-31-16-198   <none>           <none>
+s2-mem-146-7ff7c4f86f-dxjgn   1/1     Running   0          48s   10.244.5.55    ip-172-31-16-198   <none>           <none>
+s2-mem-146-7ff7c4f86f-v2bzm   1/1     Running   0          48s   10.244.5.54    ip-172-31-16-198   <none>           <none>
+s2-mem-39-6c9ff4fc6d-tvjnz    1/1     Running   0          48s   10.244.5.53    ip-172-31-16-198   <none>           <none>
+s2-cpu-34-6694c57846-8kktg    1/1     Running   0          58s   10.244.7.119   ip-172-31-19-34    <none>           <none>
+s2-cpu-34-6694c57846-sftml    1/1     Running   0          58s   10.244.7.118   ip-172-31-19-34    <none>           <none>

@@ -1,0 +1,13 @@
+NAME                          READY   STATUS    RESTARTS   AGE   IP             NODE               NOMINATED NODE   READINESS GATES
+s2-cpu-245-846fcd67f4-9kq5m   1/1     Running   0          61s   10.244.0.145   ip-172-31-1-245    <none>           <none>
+s2-cpu-245-846fcd67f4-s5hdj   1/1     Running   0          61s   10.244.0.146   ip-172-31-1-245    <none>           <none>
+s2-mem-144-769fd78487-bh9qf   1/1     Running   0          49s   10.244.0.148   ip-172-31-1-245    <none>           <none>
+s2-mem-144-769fd78487-mnpj2   1/1     Running   0          49s   10.244.0.149   ip-172-31-1-245    <none>           <none>
+s2-mem-39-6c9ff4fc6d-8qdl7    1/1     Running   0          49s   10.244.0.150   ip-172-31-1-245    <none>           <none>
+s2-cpu-198-7f87654f6f-m9tzw   1/1     Running   0          60s   10.244.5.113   ip-172-31-16-198   <none>           <none>
+s2-cpu-198-7f87654f6f-xtvsx   1/1     Running   0          60s   10.244.5.112   ip-172-31-16-198   <none>           <none>
+s2-mem-146-7ff7c4f86f-7zrv9   1/1     Running   0          49s   10.244.5.115   ip-172-31-16-198   <none>           <none>
+s2-mem-146-7ff7c4f86f-wgcr4   1/1     Running   0          48s   10.244.5.116   ip-172-31-16-198   <none>           <none>
+s2-mem-39-6c9ff4fc6d-hrvkb    1/1     Running   0          49s   10.244.5.114   ip-172-31-16-198   <none>           <none>
+s2-cpu-34-6694c57846-vbm6g    1/1     Running   0          58s   10.244.7.150   ip-172-31-19-34    <none>           <none>
+s2-cpu-34-6694c57846-z6rjj    1/1     Running   0          58s   10.244.7.149   ip-172-31-19-34    <none>           <none>

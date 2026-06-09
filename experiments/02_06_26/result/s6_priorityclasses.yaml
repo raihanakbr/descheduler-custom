@@ -1,0 +1,31 @@
+# Pod priorities for the S6 necessity suite — activates the selector's C4 cost
+# criterion (C4 = pod.Spec.Priority; 0 unless a PriorityClass is set). Values are
+# small and well below system-cluster-critical (2000000000), so the descheduler's
+# DefaultEvictor still evicts pods carrying any of these classes. preemptionPolicy
+# Never keeps these from disrupting unrelated scheduling during setup.
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: defrag-low
+value: 100
+preemptionPolicy: Never
+globalDefault: false
+description: "S6 experiment: low-priority pod (preferred eviction by C4)"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: defrag-med
+value: 1000
+preemptionPolicy: Never
+globalDefault: false
+description: "S6 experiment: medium-priority pod"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: defrag-high
+value: 10000
+preemptionPolicy: Never
+globalDefault: false
+description: "S6 experiment: high-priority pod (last to be evicted by C4)"

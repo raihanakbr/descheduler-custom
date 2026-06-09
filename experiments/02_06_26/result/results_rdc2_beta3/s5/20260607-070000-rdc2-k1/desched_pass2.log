@@ -1,0 +1,30 @@
+I0607 07:00:28.005213       1 feature_gate.go:466] feature gates: {map[]}
+I0607 07:00:28.133983       1 secure_serving.go:57] Forcing use of http/1.1 only
+I0607 07:00:28.134478       1 named_certificates.go:53] "Loaded SNI cert" index=0 certName="self-signed loopback" certDetail="\"apiserver-loopback-client@1780815628\" [serving] validServingFor=[apiserver-loopback-client] issuer=\"apiserver-loopback-client-ca@1780815628\" (2026-06-07 06:00:28 +0000 UTC to 2029-06-07 06:00:28 +0000 UTC (now=2026-06-07 07:00:28.134445731 +0000 UTC))"
+I0607 07:00:28.134517       1 secure_serving.go:211] Serving securely on [::]:10258
+I0607 07:00:28.134536       1 tracing.go:88] Did not find a trace collector endpoint defined. Switching to NoopTraceProvider
+I0607 07:00:28.134551       1 tlsconfig.go:243] "Starting DynamicServingCertificateController"
+I0607 07:00:28.134893       1 envvar.go:172] "Feature gate default state" feature="InformerResourceVersion" enabled=true
+I0607 07:00:28.134921       1 envvar.go:172] "Feature gate default state" feature="WatchListClient" enabled=true
+I0607 07:00:28.134928       1 envvar.go:172] "Feature gate default state" feature="ClientsAllowCBOR" enabled=false
+I0607 07:00:28.134935       1 envvar.go:172] "Feature gate default state" feature="ClientsPreferCBOR" enabled=false
+I0607 07:00:28.134942       1 envvar.go:172] "Feature gate default state" feature="InOrderInformers" enabled=true
+I0607 07:00:28.134949       1 envvar.go:172] "Feature gate default state" feature="InOrderInformersBatchProcess" enabled=true
+W0607 07:00:28.144893       1 descheduler.go:333] failed to convert Descheduler minor version '' to float: strconv.ParseFloat: parsing "": invalid syntax
+I0607 07:00:28.154199       1 reflector.go:367] "Starting reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 07:00:28.154289       1 reflector.go:411] "Listing and watching" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 07:00:28.154303       1 reflector.go:367] "Starting reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 07:00:28.154313       1 reflector.go:411] "Listing and watching" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 07:00:28.154199       1 reflector.go:367] "Starting reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 07:00:28.155452       1 reflector.go:411] "Listing and watching" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 07:00:28.162107       1 reflector.go:446] "Caches populated" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 07:00:28.163402       1 reflector.go:446] "Caches populated" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 07:00:28.165381       1 reflector.go:446] "Caches populated" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 07:00:28.254452       1 descheduler.go:235] Resetting pod evictor counters
+I0607 07:00:28.254554       1 resourcedefragmentationc2.go:131] "Starting ResourceDefragmentationC2 balance pass" plugin="ResourceDefragmentationC2" ExtensionPoint="Balance" nodeCount=7
+I0607 07:00:28.254751       1 profile.go:425] "Total number of evictions/requests" extension point="Balance" evictedPods=0 evictionRequests=0
+I0607 07:00:28.254876       1 descheduler.go:252] "Number of evictions/requests" totalEvicted=0 evictionRequests=0
+I0607 07:00:28.255046       1 reflector.go:373] "Stopping reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 07:00:28.256694       1 reflector.go:373] "Stopping reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 07:00:28.256739       1 reflector.go:373] "Stopping reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0607 07:00:28.257092       1 secure_serving.go:259] Stopped listening on [::]:10258

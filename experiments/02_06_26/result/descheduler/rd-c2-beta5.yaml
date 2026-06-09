@@ -1,0 +1,109 @@
+---
+# ResourceDefragmentationC2 (SUT, C2) — the NEW single-criterion plugin shipped
+# in the beta-5 binary (image: keegou/descheduler-custom:beta-5). This enables
+# the actual `ResourceDefragmentationC2` plugin (PluginName), NOT the multi-
+# criteria `ResourceDefragmentation` plugin: it keeps the same consolidation /
+# drain-candidate pipeline but selects the victim pod by the C2 signal ALONE
+# (no TOPSIS, no balance penalty) — i.e. evict the pod whose predicted scheduler
+# landing node scores highest. This matches the `just-c2` selector in the S5
+# ablation. Same scope / threshold / target / requests signal as RD so the only
+# variable vs ResourceDefragmentation is the selector (TOPSIS C1-C4 -> C2-only).
+#
+# Note: ResourceDefragmentationC2Args has NO balancePenaltyWeight / selectionPolicy
+# (there is no multi-criteria scoring to weight), so those fields are omitted.
+#
+# usageMode is pinned to "requests" on purpose: beta-5 defaults an empty
+# UsageMode to actual-ewma when a metrics collector is present. This cluster has
+# no metrics-server and we want the requests signal, so we set it explicitly to
+# keep C2 on the same requests-based signal as RD/HNU.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: descheduler
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: descheduler-role
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "pods", "persistentvolumeclaims", "persistentvolumes"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: [""]
+  resources: ["pods/eviction"]
+  verbs: ["create"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "update"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: descheduler-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: descheduler-role
+subjects:
+- kind: ServiceAccount
+  name: descheduler
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: descheduler-policy
+  namespace: kube-system
+data:
+  policy.yaml: |
+    apiVersion: "descheduler/v1alpha2"
+    kind: "DeschedulerPolicy"
+    profiles:
+      - name: default
+        pluginConfig:
+        - name: "ResourceDefragmentationC2"
+          args:
+            namespaces:
+              exclude:
+                - kube-system
+            maxEvictions: 50
+            usageMode: "requests"
+            consolidationThreshold: 0.4
+            consolidationTarget: 0.9
+        plugins:
+          balance:
+            enabled:
+              - "ResourceDefragmentationC2"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: descheduler-job
+  namespace: kube-system
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      name: descheduler
+    spec:
+      serviceAccountName: descheduler
+      containers:
+      - name: descheduler
+        image: keegou/descheduler-custom:beta-5
+        command:
+        - "/bin/descheduler"
+        args:
+        - "--policy-config-file=/policy-dir/policy.yaml"
+        - "--v=3"
+        volumeMounts:
+        - mountPath: /policy-dir
+          name: policy-volume
+      restartPolicy: Never
+      volumes:
+      - name: policy-volume
+        configMap:
+          name: descheduler-policy
