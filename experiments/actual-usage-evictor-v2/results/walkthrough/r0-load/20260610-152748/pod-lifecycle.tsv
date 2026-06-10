@@ -1,0 +1,19 @@
+timestamp	pod	uid	owner	node	phase	ready	deletionTimestamp
+2026-06-10T15:28:37.267063+00:00	workload-api-5c9bf65f57-8cdq5	becf5cc1-1478-4764-b712-62a2a0efd8ef	workload-api-5c9bf65f57	worker-6	Running	true	
+2026-06-10T15:28:37.267063+00:00	workload-cpu-1-6d58864d46-s29g8	9dc34b0a-a7b2-44a0-aacd-177520239c1a	workload-cpu-1-6d58864d46	worker-1	Running	true	
+2026-06-10T15:28:37.267063+00:00	workload-cpu-1-6d58864d46-x5t8d	45e522f1-4025-4d80-a095-ff50471aa947	workload-cpu-1-6d58864d46	worker-1	Running	true	
+2026-06-10T15:28:37.267063+00:00	workload-cpu-2-679766cbf5-nq2v6	e9d50b63-c798-4e2d-bdef-4abf645f910b	workload-cpu-2-679766cbf5	worker-2	Running	true	
+2026-06-10T15:28:37.267063+00:00	workload-cpu-2-679766cbf5-vss8l	af342a72-1e35-4107-b1db-fbbcf218e54c	workload-cpu-2-679766cbf5	worker-2	Running	true	
+2026-06-10T15:28:37.267063+00:00	workload-cpu-3-7c59447b64-kz9c5	8d2d741e-fa37-4e70-98e5-a81cba384fc9	workload-cpu-3-7c59447b64	worker-3	Running	true	
+2026-06-10T15:28:37.267063+00:00	workload-cpu-3-7c59447b64-smvj5	1ee76b64-5b94-4254-bd40-ac6f9ecf5f0f	workload-cpu-3-7c59447b64	worker-3	Running	true	
+2026-06-10T15:28:37.267063+00:00	workload-mem-4-9bf84d8bb-qkmtk	b1b4ce62-e3b7-463b-b9ff-5f5ea694bedc	workload-mem-4-9bf84d8bb	worker-4	Running	true	
+2026-06-10T15:28:37.267063+00:00	workload-mem-4-9bf84d8bb-tfdfj	96151b1c-8847-498a-adfb-904404f57869	workload-mem-4-9bf84d8bb	worker-4	Running	true	
+2026-06-10T15:28:37.267063+00:00	workload-mem-5-859c899f5f-gfrmh	ef41c12b-a7c1-4e79-b3c2-bf800b66199d	workload-mem-5-859c899f5f	worker-5	Running	true	
+2026-06-10T15:28:37.267063+00:00	workload-mem-5-859c899f5f-x4nx6	6cea225a-2ba7-4d94-a05e-33968c972970	workload-mem-5-859c899f5f	worker-5	Running	true	
+2026-06-10T15:28:37.267063+00:00	workload-mem-6-6649876fdf-8fm9n	74ab1b4b-d33a-49a2-8804-0339df725fad	workload-mem-6-6649876fdf	worker-6	Running	true	
+2026-06-10T15:29:20.344993+00:00	workload-api-5c9bf65f57-42ssv	6046dcbd-2087-4953-9c4e-45b40ca4d2f6	workload-api-5c9bf65f57	worker-2	Pending	false	
+2026-06-10T15:29:20.344993+00:00	workload-api-5c9bf65f57-8cdq5	becf5cc1-1478-4764-b712-62a2a0efd8ef	workload-api-5c9bf65f57	worker-6	Running	true	2026-06-10T15:29:54Z
+2026-06-10T15:29:21.449603+00:00	workload-api-5c9bf65f57-42ssv	6046dcbd-2087-4953-9c4e-45b40ca4d2f6	workload-api-5c9bf65f57	worker-2	Running	false	
+2026-06-10T15:29:21.449603+00:00	workload-api-5c9bf65f57-8cdq5	becf5cc1-1478-4764-b712-62a2a0efd8ef	workload-api-5c9bf65f57	worker-6	Running	false	2026-06-10T15:29:54Z
+2026-06-10T15:29:22.565306+00:00	workload-api-5c9bf65f57-42ssv	6046dcbd-2087-4953-9c4e-45b40ca4d2f6	workload-api-5c9bf65f57	worker-2	Running	true	
+2026-06-10T15:29:24.778337+00:00	workload-api-5c9bf65f57-8cdq5	becf5cc1-1478-4764-b712-62a2a0efd8ef	workload-api-5c9bf65f57	worker-6	Succeeded	false	2026-06-10T15:29:54Z

@@ -1,0 +1,90 @@
+I0610 15:47:50.013908       1 feature_gate.go:466] feature gates: {map[]}
+I0610 15:47:50.080551       1 secure_serving.go:57] Forcing use of http/1.1 only
+I0610 15:47:50.081050       1 named_certificates.go:53] "Loaded SNI cert" index=0 certName="self-signed loopback" certDetail="\"apiserver-loopback-client@1781106470\" [serving] validServingFor=[apiserver-loopback-client] issuer=\"apiserver-loopback-client-ca@1781106470\" (2026-06-10 14:47:50 +0000 UTC to 2029-06-10 14:47:50 +0000 UTC (now=2026-06-10 15:47:50.081015831 +0000 UTC))"
+I0610 15:47:50.081111       1 secure_serving.go:211] Serving securely on [::]:10258
+I0610 15:47:50.081184       1 tlsconfig.go:243] "Starting DynamicServingCertificateController"
+I0610 15:47:50.081238       1 tracing.go:88] Did not find a trace collector endpoint defined. Switching to NoopTraceProvider
+I0610 15:47:50.081782       1 envvar.go:172] "Feature gate default state" feature="ClientsPreferCBOR" enabled=false
+I0610 15:47:50.081809       1 envvar.go:172] "Feature gate default state" feature="InOrderInformers" enabled=true
+I0610 15:47:50.081817       1 envvar.go:172] "Feature gate default state" feature="InOrderInformersBatchProcess" enabled=true
+I0610 15:47:50.081822       1 envvar.go:172] "Feature gate default state" feature="InformerResourceVersion" enabled=true
+I0610 15:47:50.081828       1 envvar.go:172] "Feature gate default state" feature="WatchListClient" enabled=true
+I0610 15:47:50.081869       1 envvar.go:172] "Feature gate default state" feature="ClientsAllowCBOR" enabled=false
+W0610 15:47:50.094000       1 descheduler.go:333] failed to convert Descheduler minor version '' to float: strconv.ParseFloat: parsing "": invalid syntax
+I0610 15:47:50.105284       1 reflector.go:367] "Starting reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:47:50.105305       1 reflector.go:411] "Listing and watching" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:47:50.105628       1 reflector.go:367] "Starting reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:47:50.105648       1 reflector.go:411] "Listing and watching" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:47:50.105866       1 reflector.go:367] "Starting reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:47:50.105883       1 reflector.go:411] "Listing and watching" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:47:50.112137       1 reflector.go:978] "Exiting watch because received the bookmark that marks the end of initial events stream" reflector="k8s.io/client-go/informers/factory.go:161" totalItems=1 duration="6.459587ms"
+I0610 15:47:50.112178       1 reflector.go:446] "Caches populated" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:47:50.112437       1 reflector.go:978] "Exiting watch because received the bookmark that marks the end of initial events stream" reflector="k8s.io/client-go/informers/factory.go:161" totalItems=8 duration="6.526559ms"
+I0610 15:47:50.112461       1 reflector.go:446] "Caches populated" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:47:50.116629       1 reflector.go:978] "Exiting watch because received the bookmark that marks the end of initial events stream" reflector="k8s.io/client-go/informers/factory.go:161" totalItems=35 duration="11.279625ms"
+I0610 15:47:50.116722       1 reflector.go:446] "Caches populated" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:47:50.205659       1 descheduler.go:466] Waiting for metrics collector to sync
+I0610 15:47:50.205704       1 descheduler.go:462] Starting metrics collector
+I0610 15:47:51.206326       1 descheduler.go:235] Resetting pod evictor counters
+I0610 15:47:51.206405       1 resourcedefragmentationc2.go:121] "Starting ResourceDefragmentationC2 balance pass" plugin="ResourceDefragmentationC2" ExtensionPoint="Balance" nodeCount=7
+I0610 15:47:51.206617       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-3-7c59447b64-pmbpf" node="worker-4"
+I0610 15:47:51.211961       1 actual_usage_evictor.go:133] "Pod usage is below eviction thresholds, allowing eviction" plugin="ActualUsageEvictor" pod="actual-usage-exp/workload-cpu-3-7c59447b64-pmbpf" cpuRatio=0.0013333333333333333 cpuThreshold=0.8 memoryRatio=0.07640625 memoryThreshold=0.8
+I0610 15:47:51.212097       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-3-7c59447b64-52pv5" node="worker-4"
+I0610 15:47:51.212259       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-3-7c59447b64-52pv5" node="worker-5"
+I0610 15:47:51.212313       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-3-7c59447b64-52pv5" node="worker-6"
+I0610 15:47:51.212328       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-3-7c59447b64-52pv5" node="controlplane" err="pod does not tolerate taints on the node"
+I0610 15:47:51.212387       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-3-7c59447b64-52pv5" node="worker-1" err="insufficient cpu"
+I0610 15:47:51.212430       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-3-7c59447b64-52pv5" node="worker-2" err="insufficient cpu"
+I0610 15:47:51.217307       1 actual_usage_evictor.go:133] "Pod usage is below eviction thresholds, allowing eviction" plugin="ActualUsageEvictor" pod="actual-usage-exp/workload-cpu-3-7c59447b64-52pv5" cpuRatio=0.0013333333333333333 cpuThreshold=0.8 memoryRatio=0.0809375 memoryThreshold=0.8
+I0610 15:47:51.217559       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-mem-4-9bf84d8bb-72gnq" node="worker-5"
+I0610 15:47:51.217703       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-mem-4-9bf84d8bb-72gnq" node="worker-3"
+I0610 15:47:51.222082       1 actual_usage_evictor.go:133] "Pod usage is below eviction thresholds, allowing eviction" plugin="ActualUsageEvictor" pod="actual-usage-exp/workload-mem-4-9bf84d8bb-72gnq" cpuRatio=0.02 cpuThreshold=0.8 memoryRatio=0.006852213541666667 memoryThreshold=0.8
+I0610 15:47:51.222290       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-mem-4-9bf84d8bb-5m7kx" node="worker-1"
+I0610 15:47:51.226617       1 actual_usage_evictor.go:133] "Pod usage is below eviction thresholds, allowing eviction" plugin="ActualUsageEvictor" pod="actual-usage-exp/workload-mem-4-9bf84d8bb-5m7kx" cpuRatio=0.02 cpuThreshold=0.8 memoryRatio=0.007080078125 memoryThreshold=0.8
+I0610 15:47:51.226773       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-mem-5-859c899f5f-6bwm2" node="worker-3"
+I0610 15:47:51.230878       1 actual_usage_evictor.go:133] "Pod usage is below eviction thresholds, allowing eviction" plugin="ActualUsageEvictor" pod="actual-usage-exp/workload-mem-5-859c899f5f-6bwm2" cpuRatio=0.02 cpuThreshold=0.8 memoryRatio=0.007958984375 memoryThreshold=0.8
+I0610 15:47:51.231019       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-mem-5-859c899f5f-csz6s" node="worker-2"
+I0610 15:47:51.234976       1 actual_usage_evictor.go:133] "Pod usage is below eviction thresholds, allowing eviction" plugin="ActualUsageEvictor" pod="actual-usage-exp/workload-mem-5-859c899f5f-csz6s" cpuRatio=0.02 cpuThreshold=0.8 memoryRatio=0.00712890625 memoryThreshold=0.8
+I0610 15:47:51.235069       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-mem-6-6649876fdf-82g2k" node="controlplane" err="pod does not tolerate taints on the node"
+I0610 15:47:51.235263       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-mem-6-6649876fdf-82g2k" node="worker-2"
+I0610 15:47:51.235315       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-mem-6-6649876fdf-82g2k" node="worker-1"
+I0610 15:47:51.239682       1 actual_usage_evictor.go:133] "Pod usage is below eviction thresholds, allowing eviction" plugin="ActualUsageEvictor" pod="actual-usage-exp/workload-mem-6-6649876fdf-82g2k" cpuRatio=0.06 cpuThreshold=0.8 memoryRatio=0.007625 memoryThreshold=0.8
+I0610 15:47:51.239945       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-api-5c9bf65f57-zt78p" node="worker-2"
+I0610 15:47:51.244268       1 actual_usage_evictor.go:133] "Pod usage is below eviction thresholds, allowing eviction" plugin="ActualUsageEvictor" pod="actual-usage-exp/workload-api-5c9bf65f57-zt78p" cpuRatio=0.04 cpuThreshold=0.8 memoryRatio=0.005502232142857143 memoryThreshold=0.8
+I0610 15:47:51.244521       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-1-6d58864d46-2nx84" node="worker-6"
+I0610 15:47:51.244542       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-1-6d58864d46-2nx84" node="worker-5"
+I0610 15:47:51.244561       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-1-6d58864d46-2nx84" node="controlplane" err="pod does not tolerate taints on the node"
+I0610 15:47:51.244649       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-1-6d58864d46-2nx84" node="worker-2" err="insufficient cpu"
+I0610 15:47:51.406281       1 request.go:683] "Waited before sending request" delay="161.421318ms" reason="client-side throttling, not priority and fairness" verb="GET" URL="https://10.96.0.1:443/apis/metrics.k8s.io/v1beta1/namespaces/actual-usage-exp/pods/workload-cpu-1-6d58864d46-2nx84"
+I0610 15:47:51.411752       1 actual_usage_evictor.go:133] "Pod usage is below eviction thresholds, allowing eviction" plugin="ActualUsageEvictor" pod="actual-usage-exp/workload-cpu-1-6d58864d46-2nx84" cpuRatio=0.0013333333333333333 cpuThreshold=0.8 memoryRatio=0.078125 memoryThreshold=0.8
+I0610 15:47:51.412039       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-1-6d58864d46-xl998" node="worker-6"
+I0610 15:47:51.412056       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-1-6d58864d46-xl998" node="worker-5"
+I0610 15:47:51.412071       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-1-6d58864d46-xl998" node="controlplane" err="pod does not tolerate taints on the node"
+I0610 15:47:51.412265       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-1-6d58864d46-xl998" node="worker-2" err="insufficient cpu"
+I0610 15:47:51.606330       1 request.go:683] "Waited before sending request" delay="193.928006ms" reason="client-side throttling, not priority and fairness" verb="GET" URL="https://10.96.0.1:443/apis/metrics.k8s.io/v1beta1/namespaces/actual-usage-exp/pods/workload-cpu-1-6d58864d46-xl998"
+I0610 15:47:51.611853       1 actual_usage_evictor.go:133] "Pod usage is below eviction thresholds, allowing eviction" plugin="ActualUsageEvictor" pod="actual-usage-exp/workload-cpu-1-6d58864d46-xl998" cpuRatio=0.0013333333333333333 cpuThreshold=0.8 memoryRatio=0.0784375 memoryThreshold=0.8
+I0610 15:47:51.612130       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-2-679766cbf5-vrb7x" node="worker-3" err="insufficient cpu"
+I0610 15:47:51.612206       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-2-679766cbf5-vrb7x" node="worker-5"
+I0610 15:47:51.612260       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-2-679766cbf5-vrb7x" node="worker-6"
+I0610 15:47:51.612146       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-2-679766cbf5-vrb7x" node="worker-4"
+I0610 15:47:51.806766       1 request.go:683] "Waited before sending request" delay="194.402731ms" reason="client-side throttling, not priority and fairness" verb="GET" URL="https://10.96.0.1:443/apis/metrics.k8s.io/v1beta1/namespaces/actual-usage-exp/pods/workload-cpu-2-679766cbf5-vrb7x"
+I0610 15:47:51.812012       1 actual_usage_evictor.go:133] "Pod usage is below eviction thresholds, allowing eviction" plugin="ActualUsageEvictor" pod="actual-usage-exp/workload-cpu-2-679766cbf5-vrb7x" cpuRatio=0.0013333333333333333 cpuThreshold=0.8 memoryRatio=0.0778125 memoryThreshold=0.8
+I0610 15:47:51.812177       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-2-679766cbf5-7hppw" node="worker-1" err="insufficient cpu"
+I0610 15:47:51.812327       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-2-679766cbf5-7hppw" node="worker-3" err="insufficient cpu"
+I0610 15:47:51.812367       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-2-679766cbf5-7hppw" node="worker-4"
+I0610 15:47:51.812414       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-2-679766cbf5-7hppw" node="worker-5"
+I0610 15:47:51.812455       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-2-679766cbf5-7hppw" node="controlplane" err="pod does not tolerate taints on the node"
+I0610 15:47:51.812510       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-2-679766cbf5-7hppw" node="worker-6"
+I0610 15:47:52.006056       1 request.go:683] "Waited before sending request" delay="193.169623ms" reason="client-side throttling, not priority and fairness" verb="GET" URL="https://10.96.0.1:443/apis/metrics.k8s.io/v1beta1/namespaces/actual-usage-exp/pods/workload-cpu-2-679766cbf5-7hppw"
+I0610 15:47:52.011653       1 actual_usage_evictor.go:133] "Pod usage is below eviction thresholds, allowing eviction" plugin="ActualUsageEvictor" pod="actual-usage-exp/workload-cpu-2-679766cbf5-7hppw" cpuRatio=0.0013333333333333333 cpuThreshold=0.8 memoryRatio=0.0790625 memoryThreshold=0.8
+I0610 15:47:52.011719       1 resourcedefragmentationc2.go:196] "Eviction decision" plugin="ResourceDefragmentationC2" ExtensionPoint="Balance" pod="actual-usage-exp/workload-api-5c9bf65f57-zt78p" originNode="worker-6" predictedTarget="worker-3"
+I0610 15:47:52.036131       1 evictions.go:558] "Evicted pod" pod="actual-usage-exp/workload-api-5c9bf65f57-zt78p" reason="" strategy="ResourceDefragmentationC2" node="worker-6" profile="actual-usage-r1"
+I0610 15:47:52.036275       1 profile.go:425] "Total number of evictions/requests" extension point="Balance" evictedPods=1 evictionRequests=0
+I0610 15:47:52.036333       1 descheduler.go:252] "Number of evictions/requests" totalEvicted=1 evictionRequests=0
+E0610 15:47:52.036592       1 event_broadcaster.go:279] "Unable to write event (may retry after sleeping)" err="client rate limiter Wait returned an error: context canceled"
+I0610 15:47:52.036663       1 reflector.go:373] "Stopping reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:47:52.036679       1 descheduler.go:464] Stopped metrics collector
+I0610 15:47:52.036698       1 reflector.go:373] "Stopping reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:47:52.036724       1 reflector.go:373] "Stopping reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:47:52.036965       1 tlsconfig.go:258] "Shutting down DynamicServingCertificateController"
+I0610 15:47:52.037096       1 secure_serving.go:259] Stopped listening on [::]:10258

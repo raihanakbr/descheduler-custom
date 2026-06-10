@@ -1,0 +1,19 @@
+timestamp	pod	uid	owner	node	phase	ready	deletionTimestamp
+2026-06-10T15:33:55.951896+00:00	workload-api-5c9bf65f57-6h82g	f303a461-d7da-4b94-ba61-c2d0aa8b1f49	workload-api-5c9bf65f57	worker-6	Running	true	
+2026-06-10T15:33:55.951896+00:00	workload-cpu-1-6d58864d46-hwp9n	869ee787-39d7-46bc-a978-0205c17c43f5	workload-cpu-1-6d58864d46	worker-1	Running	true	
+2026-06-10T15:33:55.951896+00:00	workload-cpu-1-6d58864d46-j5plm	3e73b71c-5b0a-4673-9dd9-5004f4266062	workload-cpu-1-6d58864d46	worker-1	Running	true	
+2026-06-10T15:33:55.951896+00:00	workload-cpu-2-679766cbf5-chrxn	955d3767-379f-46e7-8601-17ff58ffd6f0	workload-cpu-2-679766cbf5	worker-2	Running	true	
+2026-06-10T15:33:55.951896+00:00	workload-cpu-2-679766cbf5-wcprk	945c5d86-2c65-4d71-9839-dbb4c9e40f82	workload-cpu-2-679766cbf5	worker-2	Running	true	
+2026-06-10T15:33:55.951896+00:00	workload-cpu-3-7c59447b64-mtsgr	df834e93-bf64-467d-9d10-1be70e688b86	workload-cpu-3-7c59447b64	worker-3	Running	true	
+2026-06-10T15:33:55.951896+00:00	workload-cpu-3-7c59447b64-nrv5m	f477c1bc-64ac-4aaa-856c-1bb39d625066	workload-cpu-3-7c59447b64	worker-3	Running	true	
+2026-06-10T15:33:55.951896+00:00	workload-mem-4-9bf84d8bb-956kk	2c0ded50-4510-4479-b195-4634850505c8	workload-mem-4-9bf84d8bb	worker-4	Running	true	
+2026-06-10T15:33:55.951896+00:00	workload-mem-4-9bf84d8bb-gmfvk	99535c9c-ca3d-48ac-a80a-b2bf4335ab38	workload-mem-4-9bf84d8bb	worker-4	Running	true	
+2026-06-10T15:33:55.951896+00:00	workload-mem-5-859c899f5f-b2w88	ff720137-c574-4686-96b3-da4def72b1ed	workload-mem-5-859c899f5f	worker-5	Running	true	
+2026-06-10T15:33:55.951896+00:00	workload-mem-5-859c899f5f-h48fw	24c0be62-376d-47a7-8597-d0177657d9be	workload-mem-5-859c899f5f	worker-5	Running	true	
+2026-06-10T15:33:55.951896+00:00	workload-mem-6-6649876fdf-9gs5f	73fb8cc9-911d-4732-b386-17ab98e0a57c	workload-mem-6-6649876fdf	worker-6	Running	true	
+2026-06-10T15:34:41.278183+00:00	workload-mem-6-6649876fdf-9gs5f	73fb8cc9-911d-4732-b386-17ab98e0a57c	workload-mem-6-6649876fdf	worker-6	Running	true	2026-06-10T15:35:15Z
+2026-06-10T15:34:41.278183+00:00	workload-mem-6-6649876fdf-hctrb	ddd5c0dd-b128-4c47-8cff-c63117f20fe8	workload-mem-6-6649876fdf	worker-4	Pending	false	
+2026-06-10T15:34:42.383392+00:00	workload-mem-6-6649876fdf-9gs5f	73fb8cc9-911d-4732-b386-17ab98e0a57c	workload-mem-6-6649876fdf	worker-6	Running	false	2026-06-10T15:35:15Z
+2026-06-10T15:34:42.383392+00:00	workload-mem-6-6649876fdf-hctrb	ddd5c0dd-b128-4c47-8cff-c63117f20fe8	workload-mem-6-6649876fdf	worker-4	Running	false	
+2026-06-10T15:34:44.585126+00:00	workload-mem-6-6649876fdf-hctrb	ddd5c0dd-b128-4c47-8cff-c63117f20fe8	workload-mem-6-6649876fdf	worker-4	Running	true	
+2026-06-10T15:34:45.694874+00:00	workload-mem-6-6649876fdf-9gs5f	73fb8cc9-911d-4732-b386-17ab98e0a57c	workload-mem-6-6649876fdf	worker-6	Succeeded	false	2026-06-10T15:35:15Z

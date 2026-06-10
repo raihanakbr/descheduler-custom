@@ -1,0 +1,65 @@
+I0610 15:44:45.500802       1 feature_gate.go:466] feature gates: {map[]}
+I0610 15:44:45.587100       1 secure_serving.go:57] Forcing use of http/1.1 only
+I0610 15:44:45.587527       1 named_certificates.go:53] "Loaded SNI cert" index=0 certName="self-signed loopback" certDetail="\"apiserver-loopback-client@1781106285\" [serving] validServingFor=[apiserver-loopback-client] issuer=\"apiserver-loopback-client-ca@1781106285\" (2026-06-10 14:44:45 +0000 UTC to 2029-06-10 14:44:45 +0000 UTC (now=2026-06-10 15:44:45.587490364 +0000 UTC))"
+I0610 15:44:45.587572       1 secure_serving.go:211] Serving securely on [::]:10258
+I0610 15:44:45.587591       1 tracing.go:88] Did not find a trace collector endpoint defined. Switching to NoopTraceProvider
+I0610 15:44:45.587616       1 tlsconfig.go:243] "Starting DynamicServingCertificateController"
+I0610 15:44:45.587951       1 envvar.go:172] "Feature gate default state" feature="ClientsPreferCBOR" enabled=false
+I0610 15:44:45.587977       1 envvar.go:172] "Feature gate default state" feature="InOrderInformers" enabled=true
+I0610 15:44:45.587984       1 envvar.go:172] "Feature gate default state" feature="InOrderInformersBatchProcess" enabled=true
+I0610 15:44:45.587990       1 envvar.go:172] "Feature gate default state" feature="InformerResourceVersion" enabled=true
+I0610 15:44:45.587996       1 envvar.go:172] "Feature gate default state" feature="WatchListClient" enabled=true
+I0610 15:44:45.588003       1 envvar.go:172] "Feature gate default state" feature="ClientsAllowCBOR" enabled=false
+W0610 15:44:45.595615       1 descheduler.go:333] failed to convert Descheduler minor version '' to float: strconv.ParseFloat: parsing "": invalid syntax
+I0610 15:44:45.603272       1 reflector.go:367] "Starting reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:44:45.603276       1 reflector.go:367] "Starting reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:44:45.603306       1 reflector.go:411] "Listing and watching" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:44:45.603310       1 reflector.go:411] "Listing and watching" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:44:45.603762       1 reflector.go:367] "Starting reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:44:45.603854       1 reflector.go:411] "Listing and watching" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:44:45.607038       1 reflector.go:978] "Exiting watch because received the bookmark that marks the end of initial events stream" reflector="k8s.io/client-go/informers/factory.go:161" totalItems=1 duration="3.706411ms"
+I0610 15:44:45.607069       1 reflector.go:446] "Caches populated" type="*v1.PersistentVolumeClaim" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:44:45.609555       1 reflector.go:978] "Exiting watch because received the bookmark that marks the end of initial events stream" reflector="k8s.io/client-go/informers/factory.go:161" totalItems=8 duration="6.214693ms"
+I0610 15:44:45.609597       1 reflector.go:446] "Caches populated" type="*v1.Node" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:44:45.616636       1 reflector.go:978] "Exiting watch because received the bookmark that marks the end of initial events stream" reflector="k8s.io/client-go/informers/factory.go:161" totalItems=35 duration="12.681981ms"
+I0610 15:44:45.616743       1 reflector.go:446] "Caches populated" type="*v1.Pod" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:44:45.704293       1 descheduler.go:235] Resetting pod evictor counters
+I0610 15:44:45.704378       1 resourcedefragmentationc2.go:121] "Starting ResourceDefragmentationC2 balance pass" plugin="ResourceDefragmentationC2" ExtensionPoint="Balance" nodeCount=7
+I0610 15:44:45.704622       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-mem-4-9bf84d8bb-msv74" node="controlplane" err="pod does not tolerate taints on the node"
+I0610 15:44:45.704692       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-mem-4-9bf84d8bb-msv74" node="worker-1"
+I0610 15:44:45.704692       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-mem-4-9bf84d8bb-msv74" node="worker-6" err="insufficient memory"
+I0610 15:44:45.704738       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-mem-4-9bf84d8bb-msv74" node="worker-2"
+I0610 15:44:45.704810       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-mem-4-9bf84d8bb-9g8c2" node="worker-3"
+I0610 15:44:45.704880       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-mem-5-859c899f5f-ghjxt" node="controlplane" err="pod does not tolerate taints on the node"
+I0610 15:44:45.704968       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-mem-5-859c899f5f-ghjxt" node="worker-1"
+I0610 15:44:45.705016       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-mem-5-859c899f5f-ghjxt" node="worker-2"
+I0610 15:44:45.704923       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-mem-5-859c899f5f-ghjxt" node="worker-6" err="insufficient memory"
+I0610 15:44:45.705230       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-mem-5-859c899f5f-tx5lm" node="worker-4"
+I0610 15:44:45.705296       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-mem-6-6649876fdf-2qjgs" node="worker-5"
+I0610 15:44:45.705369       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-api-5c9bf65f57-zwp8b" node="worker-5" err="insufficient memory"
+I0610 15:44:45.705482       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-api-5c9bf65f57-zwp8b" node="controlplane" err="pod does not tolerate taints on the node"
+I0610 15:44:45.705515       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-api-5c9bf65f57-zwp8b" node="worker-1"
+I0610 15:44:45.705572       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-1-6d58864d46-5ww7c" node="worker-2" err="insufficient cpu"
+I0610 15:44:45.705596       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-1-6d58864d46-5ww7c" node="worker-3" err="insufficient cpu"
+I0610 15:44:45.705618       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-1-6d58864d46-5ww7c" node="worker-4"
+I0610 15:44:45.705674       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-1-6d58864d46-qrxpf" node="worker-5"
+I0610 15:44:45.705751       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-2-679766cbf5-f7jdd" node="worker-3" err="insufficient cpu"
+I0610 15:44:45.705778       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-2-679766cbf5-f7jdd" node="worker-4"
+I0610 15:44:45.705848       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-2-679766cbf5-qgmzp" node="worker-5"
+I0610 15:44:45.705983       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-3-7c59447b64-r687z" node="controlplane" err="pod does not tolerate taints on the node"
+I0610 15:44:45.706023       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-3-7c59447b64-r687z" node="worker-1" err="insufficient cpu"
+I0610 15:44:45.706089       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-3-7c59447b64-r687z" node="worker-2" err="insufficient cpu"
+I0610 15:44:45.706120       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-3-7c59447b64-r687z" node="worker-4"
+I0610 15:44:45.706175       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-3-7c59447b64-8696m" node="worker-1" err="insufficient cpu"
+I0610 15:44:45.706199       1 node.go:189] "Pod does not fit on node" pod="actual-usage-exp/workload-cpu-3-7c59447b64-8696m" node="worker-2" err="insufficient cpu"
+I0610 15:44:45.706220       1 node.go:185] "Pod fits on node" pod="actual-usage-exp/workload-cpu-3-7c59447b64-8696m" node="worker-4"
+I0610 15:44:45.706256       1 resourcedefragmentationc2.go:196] "Eviction decision" plugin="ResourceDefragmentationC2" ExtensionPoint="Balance" pod="actual-usage-exp/workload-api-5c9bf65f57-zwp8b" originNode="worker-6" predictedTarget="worker-3"
+I0610 15:44:45.731026       1 evictions.go:558] "Evicted pod" pod="actual-usage-exp/workload-api-5c9bf65f57-zwp8b" reason="" strategy="ResourceDefragmentationC2" node="worker-6" profile="actual-usage-r0"
+I0610 15:44:45.731146       1 profile.go:425] "Total number of evictions/requests" extension point="Balance" evictedPods=1 evictionRequests=0
+I0610 15:44:45.731201       1 descheduler.go:252] "Number of evictions/requests" totalEvicted=1 evictionRequests=0
+E0610 15:44:45.731659       1 event_broadcaster.go:279] "Unable to write event (may retry after sleeping)" err="client rate limiter Wait returned an error: context canceled"
+I0610 15:44:45.731711       1 reflector.go:373] "Stopping reflector" type="*v1.Pod" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:44:45.731760       1 reflector.go:373] "Stopping reflector" type="*v1.Node" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:44:45.731838       1 reflector.go:373] "Stopping reflector" type="*v1.PersistentVolumeClaim" resyncPeriod="0s" reflector="k8s.io/client-go/informers/factory.go:161"
+I0610 15:44:45.739528       1 tlsconfig.go:258] "Shutting down DynamicServingCertificateController"
+I0610 15:44:45.739918       1 secure_serving.go:259] Stopped listening on [::]:10258

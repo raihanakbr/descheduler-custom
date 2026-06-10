@@ -1,0 +1,2 @@
+NAME                            CPU(cores)   MEMORY(bytes)   
+workload-api-5c9bf65f57-zwp8b   1m           1Mi             
