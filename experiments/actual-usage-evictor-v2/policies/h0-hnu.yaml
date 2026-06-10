@@ -1,0 +1,24 @@
+apiVersion: descheduler/v1alpha2
+kind: DeschedulerPolicy
+maxNoOfPodsToEvictTotal: 1
+profiles:
+- name: actual-usage-h0
+  pluginConfig:
+  - name: DefaultEvictor
+    args:
+      nodeFit: true
+  - name: HighNodeUtilization
+    args:
+      thresholds:
+        cpu: 40
+        memory: 40
+      evictableNamespaces:
+        exclude:
+        - kube-system
+        - kube-public
+        - kube-node-lease
+        - default
+  plugins:
+    balance:
+      enabled:
+      - HighNodeUtilization
