@@ -38,14 +38,10 @@ Test scenario tanpa traffic (no k6 load) untuk memverifikasi bahwa R0 dan R1 ber
 ### 1. Setup Environment
 
 ```bash
-cd experiments/actual-usage-evictor-v2
+cd descheduler-custom/experiments/actual-usage-evictor-v2
 
-# Set descheduler image (sesuaikan dengan registry Anda)
-export DESCHEDULER_IMAGE="your-registry/descheduler:your-tag"
-
-# Optional: specify workers jika tidak ingin pakai semua
-# export ACTIVE_WORKERS="worker-1 worker-2 worker-3 worker-4 worker-5 worker-6"
-# export SOURCE_NODE="worker-6"
+export WORKLOAD_IMAGE="docker.io/matthewhjt/workload-http:actual-usage-v1"
+export DESCHEDULER_IMAGE="docker.io/matthewhjt/descheduler-custom:actual-usage-v1"
 ```
 
 ### 2. Cleanup Previous State

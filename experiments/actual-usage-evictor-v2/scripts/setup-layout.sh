@@ -140,21 +140,22 @@ EOF
 }
 
 # S2 fragmented/complementary layout (6 workers, 2 pods per worker):
-#   workers 1-3: cpu-skewed  2 x (750m/20Mi)  = 1500m/40Mi   (~0.80 cpu, ~0.11 mem)
-#   workers 4-5: mem-skewed  2 x (50m/240Mi)  =  100m/480Mi  (~0.10 cpu, ~0.65 mem)
-#   worker 6:    source      1 api (50m/240Mi) + 1 mem (50m/200Mi) = 100m/440Mi
+#   workers 1-3: cpu-skewed  2 x (750m/25Mi)  = 1500m/50Mi   (~0.75 cpu, ~0.06 mem)
+#   workers 4-5: mem-skewed  2 x (50m/240Mi)  =  100m/480Mi  (~0.05 cpu, ~0.59 mem)
+#   worker 6:    source      1 api (50m/350Mi) + 1 mem (50m/250Mi) = 100m/600Mi
 #
-# The api pod (240Mi) has larger memory than the idle mem pod (200Mi), so C2
+# The api pod (350Mi) has larger memory than the idle mem pod (250Mi), so C2
 # deterministically selects the api pod first (higher binScore at cpu-skewed target).
+# Worker-6 memory (600Mi) exceeds worker-4/5 (480Mi), giving it higher RDC2 priority.
 i=0
 for node in "${workers[@]}"; do
   if (( i < 3 )); then
-    deploy_workload "workload-cpu-${node##*-}" "$node" 2 750m 20Mi false 800m
+    deploy_workload "workload-cpu-${node##*-}" "$node" 2 750m 25Mi false 800m
   elif (( i < 5 )); then
     deploy_workload "workload-mem-${node##*-}" "$node" 2 50m 240Mi false 1000m
   else
-    deploy_workload workload-api "$node" 1 50m 240Mi true 1000m
-    deploy_workload "workload-mem-${node##*-}" "$node" 1 50m 200Mi false 1000m
+    deploy_workload workload-api "$node" 1 50m 350Mi true 1000m
+    deploy_workload "workload-mem-${node##*-}" "$node" 1 50m 250Mi false 1000m
   fi
   i=$((i + 1))
 done
