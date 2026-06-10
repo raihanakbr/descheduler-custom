@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: workload-foreground
+  namespace: actual-usage-exp
+spec:
+  type: NodePort
+  selector:
+    experiment: actual-usage-evictor
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: workload-hotspot
+  namespace: actual-usage-exp
+spec:
+  type: NodePort
+  externalTrafficPolicy: Local
+  selector:
+    experiment: actual-usage-evictor
+    hotspot: "true"
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: workload
+  namespace: actual-usage-exp
+spec:
+  minAvailable: 4
+  selector:
+    matchLabels:
+      experiment: actual-usage-evictor

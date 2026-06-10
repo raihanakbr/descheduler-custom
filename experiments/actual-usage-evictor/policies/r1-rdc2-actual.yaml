@@ -1,0 +1,36 @@
+apiVersion: descheduler/v1alpha2
+kind: DeschedulerPolicy
+metricsProviders:
+- source: KubernetesMetrics
+maxNoOfPodsToEvictTotal: 1
+profiles:
+- name: actual-usage-r1
+  pluginConfig:
+  - name: DefaultEvictor
+    args:
+      nodeFit: true
+  - name: ActualUsageEvictor
+    args:
+      cpuUsageThreshold: 0.80
+      memoryUsageThreshold: 0.90
+      namespaces:
+        include:
+        - actual-usage-exp
+      labelSelector:
+        matchLabels:
+          experiment: actual-usage-evictor
+  - name: ResourceDefragmentationC2
+    args:
+      namespaces:
+        include:
+        - actual-usage-exp
+      maxEvictions: 1
+      consolidationThreshold: 0.40
+      consolidationTarget: 0.90
+  plugins:
+    preevictionfilter:
+      enabled:
+      - ActualUsageEvictor
+    balance:
+      enabled:
+      - ResourceDefragmentationC2

@@ -1,0 +1,21 @@
+apiVersion: descheduler/v1alpha2
+kind: DeschedulerPolicy
+maxNoOfPodsToEvictTotal: 1
+profiles:
+- name: actual-usage-r0
+  pluginConfig:
+  - name: DefaultEvictor
+    args:
+      nodeFit: true
+  - name: ResourceDefragmentationC2
+    args:
+      namespaces:
+        include:
+        - actual-usage-exp
+      maxEvictions: 1
+      consolidationThreshold: 0.40
+      consolidationTarget: 0.90
+  plugins:
+    balance:
+      enabled:
+      - ResourceDefragmentationC2
