@@ -97,7 +97,7 @@ kubectl -n actual-usage-exp top pod -l app=workload-api
 ### 5. Take Before Snapshot
 
 ```bash
-OUTPUT_DIR="/tmp/actual-usage-layout/noload-test"
+OUTPUT_DIR="results/walkthrough/no-load"
 mkdir -p "$OUTPUT_DIR"
 
 ./scripts/snapshot.sh before "$OUTPUT_DIR"
@@ -152,7 +152,7 @@ kubectl -n actual-usage-exp get pods -o wide --sort-by=.spec.nodeName
 ### 8. Run Descheduler - R1 (Treatment, With ActualUsageEvictor)
 
 ```bash
-OUTPUT_DIR_R1="/tmp/actual-usage-layout/noload-test-r1"
+OUTPUT_DIR_R1="results/walkthrough/no-load-r1"
 mkdir -p "$OUTPUT_DIR_R1"
 
 # Take before snapshot
