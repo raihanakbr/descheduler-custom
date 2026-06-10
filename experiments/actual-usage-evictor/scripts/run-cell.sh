@@ -18,6 +18,14 @@ OUTPUT_DIR="$ROOT/results/$LOAD_PATTERN/$RESOURCE/$SYSTEM/repeat-$REPEAT/$TIMEST
 mkdir -p "$OUTPUT_DIR"
 export OUTPUT_DIR NS
 
+GIT_COMMIT="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || printf 'unknown')"
+GIT_DIRTY=false
+if ! git -C "$ROOT" diff --quiet 2>/dev/null ||
+   ! git -C "$ROOT" diff --cached --quiet 2>/dev/null; then
+  GIT_DIRTY=true
+fi
+LAYOUT_VERSION="s2-split-250-230-v1"
+
 log() {
   printf '[run-cell] %s\n' "$*"
 }
@@ -76,6 +84,9 @@ RESOURCE=$RESOURCE
 SYSTEM=$SYSTEM
 REPEAT=$REPEAT
 LOAD_PATTERN=$LOAD_PATTERN
+GIT_COMMIT=$GIT_COMMIT
+GIT_DIRTY=$GIT_DIRTY
+LAYOUT_VERSION=$LAYOUT_VERSION
 SOURCE_NODE=$source_node
 MEMORY_NODE=$memory_node
 HOTSPOT_POD=$hotspot_pod

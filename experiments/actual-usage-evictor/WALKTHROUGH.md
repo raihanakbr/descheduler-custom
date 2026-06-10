@@ -118,6 +118,8 @@ Preflight does not deploy the experiment.
 Start with one `R1` run before running the full suite:
 
 ```bash
+HOTSPOT_RPS=2 \
+HOTSPOT_CPU_UNITS=250 \
 FOREGROUND_STABILIZE_SECONDS=20 \
 PRE_EVENT_SECONDS=20 \
 POST_EVENT_SECONDS=30 \
@@ -167,6 +169,8 @@ For `R1`, the expected smoke-test evidence is:
 Run the matching RDC2 cell without ActualUsageEvictor:
 
 ```bash
+HOTSPOT_RPS=2 \
+HOTSPOT_CPU_UNITS=250 \
 FOREGROUND_STABILIZE_SECONDS=20 \
 PRE_EVENT_SECONDS=20 \
 POST_EVENT_SECONDS=30 \
@@ -184,6 +188,8 @@ decreases, and balanced headroom increases.
 Run the no-descheduler control:
 
 ```bash
+HOTSPOT_RPS=2 \
+HOTSPOT_CPU_UNITS=250 \
 FOREGROUND_STABILIZE_SECONDS=20 \
 PRE_EVENT_SECONDS=20 \
 POST_EVENT_SECONDS=30 \
@@ -198,6 +204,8 @@ load degradation from additional eviction disruption.
 Run the HNU negative-baseline cells:
 
 ```bash
+HOTSPOT_RPS=2 \
+HOTSPOT_CPU_UNITS=250 \
 FOREGROUND_STABILIZE_SECONDS=20 \
 PRE_EVENT_SECONDS=20 \
 POST_EVENT_SECONDS=30 \
@@ -205,6 +213,8 @@ FOREGROUND_DURATION=5m \
 HOTSPOT_DURATION=4m \
 "$EXP_DIR/scripts/run-cell.sh" cpu H0 1
 
+HOTSPOT_RPS=2 \
+HOTSPOT_CPU_UNITS=250 \
 FOREGROUND_STABILIZE_SECONDS=20 \
 PRE_EVENT_SECONDS=20 \
 POST_EVENT_SECONDS=30 \
@@ -223,28 +233,33 @@ zero evictions.
 
 ## 9. Calibrate CPU load if needed
 
-The defaults are:
+Recommended starting calibration:
 
 ```text
-HOTSPOT_RPS=8
-HOTSPOT_CPU_UNITS=900
-CPU request=100m
+HOTSPOT_RPS=2
+HOTSPOT_CPU_UNITS=250
+CPU request=50m
 CPU threshold=0.80
+Approximate threshold usage=40m
 ```
+
+On the reference worker, this produced consecutive threshold samples near
+`0.88` and `1.34`, followed by a `0.90` ratio when ActualUsageEvictor evaluated
+the Pod. This is the calibrated starting point for the repeated CPU cells.
 
 If `wait-threshold.py` times out, increase load gradually:
 
 ```bash
-export HOTSPOT_RPS=10
-export HOTSPOT_CPU_UNITS=1100
+export HOTSPOT_RPS=3
+export HOTSPOT_CPU_UNITS=300
 ```
 
 If the hotspot produces excessive timeout/429 responses before the event, lower
 one value:
 
 ```bash
-export HOTSPOT_RPS=6
-export HOTSPOT_CPU_UNITS=800
+export HOTSPOT_RPS=1
+export HOTSPOT_CPU_UNITS=200
 ```
 
 Once calibrated, keep the same values for `N0`, `R0`, `R1`, `H0`, and `H1`.
@@ -256,7 +271,7 @@ Run one memory `R1` smoke test:
 
 ```bash
 HOTSPOT_RPS=1 \
-HOTSPOT_MEM_MB=23 \
+HOTSPOT_MEM_MB=9 \
 HOTSPOT_HOLD_MS=9000 \
 FOREGROUND_STABILIZE_SECONDS=20 \
 PRE_EVENT_SECONDS=20 \
@@ -270,26 +285,27 @@ Recommended memory calibration:
 
 ```text
 HOTSPOT_RPS=1
-HOTSPOT_MEM_MB=23
+HOTSPOT_MEM_MB=9
 HOTSPOT_HOLD_MS=9000
 Memory request=250Mi
 Memory threshold=0.80
 Approximate threshold usage=200Mi
+Target calibration range=200-250Mi
 ```
 
 Use the lower-churn memory settings explicitly for the smoke test:
 
 ```bash
 export HOTSPOT_RPS=1
-export HOTSPOT_MEM_MB=23
+export HOTSPOT_MEM_MB=9
 export HOTSPOT_HOLD_MS=9000
 ```
 
-If the ratio does not reach `0.80`, increase `HOTSPOT_MEM_MB` in small steps,
-for example from `23` to `25`, while keeping RPS at `1`. The threshold is based
-on the Pod's `250Mi` memory request, not the node's allocatable memory. Avoid
-increasing load until the Pod is OOMKilled or the node enters `MemoryPressure`.
-Check:
+The `23Mi` setting produced approximately `478Mi` usage on the reference worker,
+so do not reuse it. If the ratio does not reach `0.80`, increase
+`HOTSPOT_MEM_MB` one MiB at a time while keeping RPS at `1`. If usage is above
+`250Mi`, decrease it one MiB at a time. The threshold is based on the Pod's
+`250Mi` memory request, not the node's allocatable memory. Check:
 
 ```bash
 kubectl get pods -n actual-usage-exp
@@ -299,6 +315,20 @@ kubectl get events -n actual-usage-exp --sort-by=.lastTimestamp
 
 After calibration, keep the same memory values across all systems.
 
+Run matching memory baselines with the same calibrated values:
+
+```bash
+HOTSPOT_RPS=1 HOTSPOT_MEM_MB=9 HOTSPOT_HOLD_MS=9000 \
+FOREGROUND_STABILIZE_SECONDS=20 PRE_EVENT_SECONDS=20 \
+POST_EVENT_SECONDS=30 FOREGROUND_DURATION=5m HOTSPOT_DURATION=4m \
+"$EXP_DIR/scripts/run-cell.sh" memory R0 1
+
+HOTSPOT_RPS=1 HOTSPOT_MEM_MB=9 HOTSPOT_HOLD_MS=9000 \
+FOREGROUND_STABILIZE_SECONDS=20 PRE_EVENT_SECONDS=20 \
+POST_EVENT_SECONDS=30 FOREGROUND_DURATION=5m HOTSPOT_DURATION=4m \
+"$EXP_DIR/scripts/run-cell.sh" memory N0 1
+```
+
 ## 11. Run the full sustained CPU suite
 
 Remove smoke-test timing overrides or start a fresh shell with the common
@@ -307,6 +337,8 @@ exports from Steps 4-5.
 Recommended full timing:
 
 ```bash
+export HOTSPOT_RPS=2
+export HOTSPOT_CPU_UNITS=250
 export FOREGROUND_STABILIZE_SECONDS=60
 export PRE_EVENT_SECONDS=60
 export POST_EVENT_SECONDS=120
@@ -335,6 +367,10 @@ descheduler passes.
 Keep the calibrated memory parameters exported:
 
 ```bash
+export HOTSPOT_RPS=1
+export HOTSPOT_MEM_MB=9
+export HOTSPOT_HOLD_MS=9000
+
 REPEATS=5 "$EXP_DIR/scripts/run-suite.sh" memory
 ```
 
@@ -371,7 +407,10 @@ seconds before the event:
 export LOAD_PATTERN=transient
 export TRANSIENT_GAP_SECONDS=5
 
+HOTSPOT_RPS=2 HOTSPOT_CPU_UNITS=250 \
 "$EXP_DIR/scripts/run-cell.sh" cpu R1 1
+
+HOTSPOT_RPS=1 HOTSPOT_MEM_MB=9 HOTSPOT_HOLD_MS=9000 \
 "$EXP_DIR/scripts/run-cell.sh" memory R1 1
 ```
 
@@ -395,6 +434,7 @@ cat "$RUN_DIR/summary.txt"
 Important artifacts:
 
 ```text
+run.env                      run identity, Git SHA, dirty state, layout version
 threshold-samples.tsv        actual/request threshold evidence
 baseline-samples.tsv         pre-hotspot samples below the busy threshold
 layout-validation.json       predicted RDC2 selection and HNU source check
@@ -410,6 +450,15 @@ layout-after.txt             placement after the event
 events.txt                   Kubernetes events
 summary.txt                  pre/post application and lifecycle summary
 ```
+
+Identify the exact code and layout used by a run:
+
+```bash
+grep -E '^(GIT_COMMIT|GIT_DIRTY|LAYOUT_VERSION)=' "$RUN_DIR/run.env"
+```
+
+Reported runs should use `GIT_DIRTY=false`. The current layout identifier is
+`s2-split-250-230-v1`.
 
 `summary.txt` includes the before/event/after cluster metrics. For the primary
 comparison, verify:
