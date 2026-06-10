@@ -19,9 +19,10 @@ def main():
         while True:
             try:
                 data = json.loads(subprocess.check_output(
-                    ["kubectl", "-n", args.namespace, "get", "pods",
+                    ["kubectl", "--request-timeout=10s", "-n", args.namespace, "get", "pods",
                      "-l", "experiment=actual-usage-evictor", "-o", "json"],
                     stderr=subprocess.DEVNULL,
+                    timeout=15,
                 ))
                 timestamp = dt.datetime.now(dt.timezone.utc).isoformat()
                 current = set()
@@ -48,7 +49,11 @@ def main():
                     if row not in seen:
                         output.write(timestamp + "\t" + "\t".join(row) + "\n")
                 seen = current
-            except (subprocess.CalledProcessError, json.JSONDecodeError):
+            except (
+                subprocess.CalledProcessError,
+                subprocess.TimeoutExpired,
+                json.JSONDecodeError,
+            ):
                 pass
             time.sleep(args.interval)
 

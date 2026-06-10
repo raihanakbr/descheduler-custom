@@ -11,7 +11,7 @@ kubectl apply -f "$ROOT/k8s/rbac.yaml" >/dev/null
 kubectl -n kube-system create configmap actual-usage-policy \
   --from-file=policy.yaml="$POLICY" \
   --dry-run=client -o yaml | kubectl apply -f - >/dev/null
-kubectl -n kube-system delete job "$JOB" --ignore-not-found --wait=true >/dev/null
+kubectl -n kube-system delete job "$JOB" --ignore-not-found --wait=true --timeout=180s >/dev/null
 
 kubectl apply -f - <<EOF >/dev/null
 apiVersion: batch/v1

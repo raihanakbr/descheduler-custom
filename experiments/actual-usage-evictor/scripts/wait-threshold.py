@@ -7,7 +7,10 @@ import time
 
 
 def kubectl_json(*args):
-    return json.loads(subprocess.check_output(["kubectl", *args]))
+    return json.loads(subprocess.check_output(
+        ["kubectl", "--request-timeout=10s", *args],
+        timeout=15,
+    ))
 
 
 def parse_cpu(value):
@@ -68,7 +71,12 @@ def main():
                 )
                 if consecutive >= args.consecutive:
                     return
-            except (subprocess.CalledProcessError, KeyError, IndexError) as error:
+            except (
+                subprocess.CalledProcessError,
+                subprocess.TimeoutExpired,
+                KeyError,
+                IndexError,
+            ) as error:
                 output.write(f"{timestamp}\t{args.pod}\t{args.resource}\tERROR:{error}\t-\t-\t{args.threshold:.2f}\tfalse\n")
                 consecutive = 0
             time.sleep(args.interval)

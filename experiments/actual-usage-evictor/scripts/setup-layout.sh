@@ -18,6 +18,17 @@ mapfile -t all_workers < <(kubectl get nodes \
   -l '!node-role.kubernetes.io/control-plane,!node-role.kubernetes.io/master' \
   -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | sort)
 
+workers_cordoned=false
+restore_workers_on_error() {
+  local status=$?
+  trap - EXIT
+  if (( status != 0 )) && [[ "$workers_cordoned" == true ]]; then
+    kubectl uncordon "${all_workers[@]}" >/dev/null 2>&1 || true
+  fi
+  exit "$status"
+}
+trap restore_workers_on_error EXIT
+
 if (( ${#all_workers[@]} < 5 )); then
   echo "ERROR: need at least 5 workers, found ${#all_workers[@]}" >&2
   exit 1
@@ -44,11 +55,12 @@ fi
 printf '%s\n' "${workers[@]}" > "$OUTPUT_DIR/active-workers.txt"
 printf '%s\n' "$source_node" > "$OUTPUT_DIR/source-node.txt"
 
-kubectl delete ns "$NS" "$SYSTEM_NS" --ignore-not-found --wait=true
+kubectl delete ns "$NS" "$SYSTEM_NS" --ignore-not-found --wait=true --timeout=180s
 kubectl create ns "$NS"
 kubectl create ns "$SYSTEM_NS"
 
 kubectl cordon "${all_workers[@]}" >/dev/null
+workers_cordoned=true
 
 deploy_workload() {
   local index="$1" node="$2" hotspot="$3"
