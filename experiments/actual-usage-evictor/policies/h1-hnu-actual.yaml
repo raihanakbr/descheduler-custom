@@ -25,8 +25,11 @@ profiles:
         cpu: 40
         memory: 40
       evictableNamespaces:
-        include:
-        - actual-usage-exp
+        exclude:
+        - kube-system
+        - kube-public
+        - kube-node-lease
+        - default
   plugins:
     preevictionfilter:
       enabled:
