@@ -63,6 +63,7 @@ log "running preflight and preparing layout"
 "$ROOT/scripts/setup-layout.sh" | tee "$OUTPUT_DIR/setup.log"
 
 source_node="$(cat "$OUTPUT_DIR/source-node.txt")"
+memory_node="$(cat "$OUTPUT_DIR/memory-node.txt")"
 hotspot_pod="$(cat "$OUTPUT_DIR/hotspot-pod.txt")"
 source_ip="$(kubectl get node "$source_node" -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}')"
 foreground_port="$(kubectl -n "$NS" get svc workload-foreground -o jsonpath='{.spec.ports[0].nodePort}')"
@@ -76,6 +77,7 @@ SYSTEM=$SYSTEM
 REPEAT=$REPEAT
 LOAD_PATTERN=$LOAD_PATTERN
 SOURCE_NODE=$source_node
+MEMORY_NODE=$memory_node
 HOTSPOT_POD=$hotspot_pod
 FOREGROUND_URL=$foreground_url
 HOTSPOT_URL=$hotspot_url
@@ -97,6 +99,21 @@ FOREGROUND_PID=$!
 log "stabilizing foreground load for ${FOREGROUND_STABILIZE_SECONDS:-60}s"
 sleep "${FOREGROUND_STABILIZE_SECONDS:-60}"
 
+threshold=0.80
+[[ "$RESOURCE" == "memory" ]] && threshold=0.90
+
+log "confirming two pre-hotspot ${RESOURCE} samples below ratio ${threshold}"
+python3 "$ROOT/scripts/wait-threshold.py" \
+  --namespace "$NS" \
+  --pod "$hotspot_pod" \
+  --resource "$RESOURCE" \
+  --threshold "$threshold" \
+  --condition below \
+  --consecutive 2 \
+  --interval "${BASELINE_SAMPLE_INTERVAL_SECONDS:-5}" \
+  --timeout "${BASELINE_SAMPLE_TIMEOUT_SECONDS:-90}" \
+  --output "$OUTPUT_DIR/baseline-samples.tsv"
+
 if [[ "$LOAD_PATTERN" != "idle" ]]; then
   HOTSPOT_URL="$hotspot_url" RESOURCE="$RESOURCE" \
   HOTSPOT_DURATION="${HOTSPOT_DURATION:-10m}" \
@@ -105,9 +122,6 @@ if [[ "$LOAD_PATTERN" != "idle" ]]; then
     "$ROOT/k6/hotspot.js" > "$OUTPUT_DIR/hotspot.log" 2>&1 &
   HOTSPOT_PID=$!
 fi
-
-threshold=0.80
-[[ "$RESOURCE" == "memory" ]] && threshold=0.90
 
 if [[ "$LOAD_PATTERN" == "idle" ]]; then
   log "observing idle load for ${IDLE_OBSERVE_SECONDS:-45}s"

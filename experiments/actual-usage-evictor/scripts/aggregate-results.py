@@ -74,6 +74,15 @@ def main():
             ]),
             "evictions": describe([run.get("evictions") for run in runs]),
             "actual_usage_blocks": describe([run.get("actual_usage_blocks") for run in runs]),
+            "stranding_after": describe([
+                nested(run, "cluster", "after", "S") for run in runs
+            ]),
+            "active_nodes_after": describe([
+                nested(run, "cluster", "after", "N_active") for run in runs
+            ]),
+            "balanced_headroom_after": describe([
+                nested(run, "cluster", "after", "H_balanced") for run in runs
+            ]),
         }
 
     destination = result_root / "aggregate.json"

@@ -34,7 +34,7 @@ metadata:
   name: workload
   namespace: actual-usage-exp
 spec:
-  minAvailable: 4
+  minAvailable: 5
   selector:
     matchLabels:
       experiment: actual-usage-evictor

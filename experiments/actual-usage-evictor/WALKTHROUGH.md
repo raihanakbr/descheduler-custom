@@ -129,15 +129,16 @@ HOTSPOT_DURATION=4m \
 The script automatically:
 
 1. Deletes the previous experiment namespaces.
-2. Places five HTTP Pods on five workers.
-3. Adds ballast to the four destination workers.
+2. Places six HTTP Pods on five workers in a complementary fragmented layout.
+3. Verifies the hotspot Pod is alone on the memory-skewed source worker.
 4. Starts foreground k6.
-5. Starts CPU hotspot k6.
-6. Waits for two CPU samples with `usage/request >= 0.80`.
-7. Records the pre-event window.
-8. Runs one RDC2 pass with ActualUsageEvictor.
-9. Records the post-event window.
-10. Writes a run summary.
+5. Confirms two CPU samples remain below `usage/request = 0.80`.
+6. Starts CPU hotspot k6.
+7. Waits for two CPU samples with `usage/request >= 0.80`.
+8. Records the pre-event window.
+9. Runs one RDC2 pass with ActualUsageEvictor.
+10. Records the post-event window.
+11. Writes a run summary.
 
 Find the newest result:
 
@@ -174,6 +175,10 @@ HOTSPOT_DURATION=4m \
 
 Expected: `R0` evicts the hotspot Pod.
 
+The after snapshot should also show that the replacement lands on a CPU-skewed
+worker, the source becomes empty of experiment Pods, request-space stranding
+decreases, and balanced headroom increases.
+
 Run the no-descheduler control:
 
 ```bash
@@ -188,8 +193,30 @@ HOTSPOT_DURATION=4m \
 Expected: hotspot load exists, but no eviction occurs. This separates natural
 load degradation from additional eviction disruption.
 
-Do not start the full experiment until `R0` evicts the intended Pod and `R1`
-blocks the same Pod.
+Run the HNU negative-baseline cells:
+
+```bash
+FOREGROUND_STABILIZE_SECONDS=20 \
+PRE_EVENT_SECONDS=20 \
+POST_EVENT_SECONDS=30 \
+FOREGROUND_DURATION=5m \
+HOTSPOT_DURATION=4m \
+"$EXP_DIR/scripts/run-cell.sh" cpu H0 1
+
+FOREGROUND_STABILIZE_SECONDS=20 \
+PRE_EVENT_SECONDS=20 \
+POST_EVENT_SECONDS=30 \
+FOREGROUND_DURATION=5m \
+HOTSPOT_DURATION=4m \
+"$EXP_DIR/scripts/run-cell.sh" cpu H1 1
+```
+
+Expected: both HNU cells evict zero Pods because no worker is below `40%` on
+both CPU and memory. `H1` therefore does not reach an eviction decision for
+ActualUsageEvictor to block.
+
+Do not start the full experiment until `R0` evicts the intended Pod, `R1`
+blocks the same Pod, and `H0`/`H1` both report zero evictions.
 
 ## 9. Calibrate CPU load if needed
 
@@ -198,7 +225,7 @@ The defaults are:
 ```text
 HOTSPOT_RPS=8
 HOTSPOT_CPU_UNITS=900
-CPU request=250m
+CPU request=100m
 CPU threshold=0.80
 ```
 
@@ -239,7 +266,7 @@ Memory defaults:
 HOTSPOT_RPS=2
 HOTSPOT_MEM_MB=80
 HOTSPOT_HOLD_MS=3000
-Memory request=128Mi
+Memory request=480Mi
 Memory threshold=0.90
 ```
 
@@ -358,6 +385,8 @@ Important artifacts:
 
 ```text
 threshold-samples.tsv        actual/request threshold evidence
+baseline-samples.tsv         pre-hotspot samples below the busy threshold
+layout-validation.json       predicted RDC2 selection and HNU source check
 descheduler.log              selected, blocked, and evicted Pods
 foreground.json              raw foreground k6 time series
 foreground-summary.json      k6 whole-run summary
@@ -369,6 +398,15 @@ layout-before.txt            initial Pod placement
 layout-after.txt             placement after the event
 events.txt                   Kubernetes events
 summary.txt                  pre/post application and lifecycle summary
+```
+
+`summary.txt` includes the before/event/after cluster metrics. For the primary
+comparison, verify:
+
+```text
+R0: eviction=1, active workers decrease, S decreases, H_balanced increases
+R1: blocked=1, eviction=0, request-space metrics remain unchanged
+H0/H1: eviction=0 (negative HNU baseline)
 ```
 
 Aggregated suite results:
@@ -412,7 +450,7 @@ For the shortest defensible workflow:
 1. Select the prebuilt immutable images
 2. Export fixed worker mapping
 3. Run preflight
-4. CPU smoke: R0, R1, N0
+4. CPU smoke: R0, R1, N0, H0, H1
 5. Memory smoke: R0, R1, N0
 6. Calibrate and freeze load parameters
 7. Full CPU suite, five repeats

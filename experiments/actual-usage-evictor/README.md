@@ -4,13 +4,14 @@ Build images with [`IMAGE_BUILD.md`](IMAGE_BUILD.md). Run the reproducible
 experiment with [`WALKTHROUGH.md`](WALKTHROUGH.md).
 
 This experiment evaluates whether `ActualUsageEvictor` reduces application
-disruption when a consolidation strategy selects a busy HTTP Pod.
+disruption when a requests-based defragmentation strategy selects a busy HTTP
+Pod.
 
 The claim is deliberately narrow:
 
-> A requests-based descheduler can select a Pod that is busy at runtime.
-> Blocking that eviction can reduce request latency and failures, at the cost of
-> foregoing some consolidation or defragmentation benefit.
+> Requests-based defragmentation does not account for the dynamic runtime cost
+> of eviction. Blocking a currently busy Pod can reduce request latency and
+> failures, at the cost of deferring a measurable request-space improvement.
 
 The experiment does not claim to fix request-versus-actual mismatch in the
 scheduler. Replacement Pods are still scheduled from resource requests.
@@ -41,22 +42,31 @@ The current defaults are CPU ratio `0.80` and memory ratio `0.90`.
 
 ## Controlled layout
 
-The active experiment uses five workers, matching the application cardinality
-of the NetworkCostEvictor experiment:
+The active experiment uses five homogeneous workers in an S2-like complementary
+fragmentation layout:
 
 ```text
-source worker:       one HTTP Pod, no ballast
-four target workers: one HTTP Pod + non-evictable ballast
+source worker:       1 hotspot Pod    x 100m CPU / 480Mi memory
+memory peer:         2 regular Pods   x  50m CPU / 220Mi memory
+three target workers:
+                     1 CPU-heavy Pod  x 1550m CPU / 40Mi memory each
 ```
 
-The source is the only under-utilized drain candidate. This makes the baseline
-decision deterministic: `R0` and `H0` must attempt to evict the source Pod.
-Ballast runs in `actual-usage-system`, which is included in node request
-accounting but excluded from eviction.
+Including the reference cluster's approximately `100m/50Mi` daemonset baseline,
+the source and memory peer are memory-skewed while the three targets are
+CPU-skewed. The hotspot fits on a CPU-skewed target and makes it more balanced.
+The CPU-heavy Pods have no valid relocation target. The source is more
+memory-skewed than its peer and contains only the hotspot, making the `R0`
+selection deterministic with `maxEvictions: 1`.
 
-Five one-replica Deployments are used instead of one five-replica Deployment so
-that one Pod can carry the `hotspot=true` label. The normal Service selects all
-five Pods. A separate hotspot Service selects only the source Pod.
+The normal Service selects all six HTTP Pods. A separate hotspot Service selects
+only the source Pod.
+
+`HighNodeUtilization` is retained as a negative strategy baseline. Every worker
+is above its `40%` threshold on either CPU or memory, so `H0` and `H1` are
+expected to perform no eviction. They demonstrate that utilization-threshold
+consolidation does not act on this complementary fragmentation. The direct
+ActualUsageEvictor comparison is `R0` versus `R1`.
 
 ## Load model
 
@@ -73,6 +83,7 @@ The run timeline is:
 deploy and place Pods
   -> start foreground load
   -> wait for foreground stability
+  -> observe two Metrics API samples below the busy threshold
   -> start hotspot load
   -> observe two consecutive Metrics API samples above the threshold
   -> record a 60-second pre-event window
@@ -131,11 +142,16 @@ Cluster trade-off metrics reuse Ian's definitions:
 - balanced and CPU-skewed schedulability headroom
 - total evictions and pending Pod-seconds
 
+For `R0`, the expected request-space result is one fewer active application
+worker, lower `S`, and higher balanced headroom. For `R1`, the busy hotspot is
+blocked, so those values remain at the pre-event layout during that pass.
+
 ## Prerequisites
 
 - `kubectl`, `k6`, `python3`, and a working kubeconfig
 - Metrics Server (`metrics.k8s.io/v1beta1`)
-- five homogeneous workers
+- five homogeneous, reference-sized workers near `2000m` CPU and `811Mi`
+  allocatable memory each
 - the workload image built from
   `experiments/actual-usage-evictor/cmd/workload-http`
 - the slim custom descheduler image described in `IMAGE_BUILD.md`
@@ -177,5 +193,6 @@ After a suite completes, `results/<load-pattern>/<resource>/aggregate.json`
 reports the mean, median, and 95% confidence interval for the main per-system
 metrics.
 
-Do not compare cells unless `preflight.txt` and `threshold-samples.tsv` show the
-same worker set, expected source placement, and valid threshold state.
+Do not compare cells unless `preflight.txt`, `layout-validation.json`, and
+`threshold-samples.tsv` show the same worker set, the hotspot as RDC2's first
+feasible selection, no HNU source, and a valid threshold state.

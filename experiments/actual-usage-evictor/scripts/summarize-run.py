@@ -134,6 +134,15 @@ def load_lifecycle(path, hotspot_pod, event_time):
     }
 
 
+def load_json(path):
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
 def main():
     directory = pathlib.Path(sys.argv[1])
     event_time = parse_time((directory / "event-time.txt").read_text())
@@ -149,6 +158,11 @@ def main():
         "evictions": evictions,
         "actual_usage_blocks": blocks,
         "foreground": load_k6(directory / "foreground.json", event_time, pre_seconds, post_seconds),
+        "cluster": {
+            "before": load_json(directory / "cluster-metrics-before.json"),
+            "event": load_json(directory / "cluster-metrics-event.json"),
+            "after": load_json(directory / "cluster-metrics-after.json"),
+        },
         "lifecycle": load_lifecycle(
             directory / "pod-lifecycle.tsv",
             run_env.get("HOTSPOT_POD", ""),

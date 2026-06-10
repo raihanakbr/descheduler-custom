@@ -39,6 +39,7 @@ def main():
     parser.add_argument("--pod", required=True)
     parser.add_argument("--resource", choices=("cpu", "memory"), required=True)
     parser.add_argument("--threshold", type=float, required=True)
+    parser.add_argument("--condition", choices=("above", "below"), default="above")
     parser.add_argument("--consecutive", type=int, default=2)
     parser.add_argument("--interval", type=int, default=15)
     parser.add_argument("--timeout", type=int, default=240)
@@ -64,7 +65,8 @@ def main():
                 usage = parse_cpu(usage_value) if args.resource == "cpu" else parse_mem(usage_value)
                 ratio = usage / request if request else float("inf")
                 above = ratio >= args.threshold
-                consecutive = consecutive + 1 if above else 0
+                matched = above if args.condition == "above" else not above
+                consecutive = consecutive + 1 if matched else 0
                 output.write(
                     f"{timestamp}\t{args.pod}\t{args.resource}\t{usage_value}\t"
                     f"{requests[args.resource]}\t{ratio:.6f}\t{args.threshold:.2f}\t{str(above).lower()}\n"
@@ -81,7 +83,9 @@ def main():
                 consecutive = 0
             time.sleep(args.interval)
 
-    raise SystemExit(f"threshold not reached within {args.timeout}s")
+    raise SystemExit(
+        f"{args.condition}-threshold condition not reached within {args.timeout}s"
+    )
 
 
 if __name__ == "__main__":

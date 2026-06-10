@@ -3,14 +3,13 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 NS="${NS:-actual-usage-exp}"
-SYSTEM_NS="${SYSTEM_NS:-actual-usage-system}"
 WORKLOAD_IMAGE="${WORKLOAD_IMAGE:-docker.io/matthewhjt/workload-http:actual-usage-v1}"
 OUTPUT_DIR="${OUTPUT_DIR:-/tmp/actual-usage-layout}"
 
 mkdir -p "$OUTPUT_DIR"
 
-if [[ "$NS" != "actual-usage-exp" || "$SYSTEM_NS" != "actual-usage-system" ]]; then
-  echo "ERROR: manifests currently require NS=actual-usage-exp and SYSTEM_NS=actual-usage-system" >&2
+if [[ "$NS" != "actual-usage-exp" ]]; then
+  echo "ERROR: manifests currently require NS=actual-usage-exp" >&2
   exit 1
 fi
 
@@ -55,16 +54,15 @@ fi
 printf '%s\n' "${workers[@]}" > "$OUTPUT_DIR/active-workers.txt"
 printf '%s\n' "$source_node" > "$OUTPUT_DIR/source-node.txt"
 
-kubectl delete ns "$NS" "$SYSTEM_NS" --ignore-not-found --wait=true --timeout=180s
+kubectl delete ns "$NS" actual-usage-system --ignore-not-found --wait=true --timeout=180s
 kubectl create ns "$NS"
-kubectl create ns "$SYSTEM_NS"
 
 kubectl cordon "${all_workers[@]}" >/dev/null
 workers_cordoned=true
 
 deploy_workload() {
-  local index="$1" node="$2" hotspot="$3"
-  local name="workload-${index}"
+  local name="$1" node="$2" replicas="$3" cpu_request="$4" memory_request="$5"
+  local hotspot="$6" cpu_limit="$7"
 
   kubectl uncordon "$node" >/dev/null
   kubectl apply -f - <<EOF
@@ -76,7 +74,7 @@ metadata:
   labels:
     experiment: actual-usage-evictor
 spec:
-  replicas: 1
+  replicas: ${replicas}
   selector:
     matchLabels:
       app: ${name}
@@ -131,59 +129,45 @@ spec:
           periodSeconds: 5
         resources:
           requests:
-            cpu: 250m
-            memory: 128Mi
+            cpu: ${cpu_request}
+            memory: ${memory_request}
           limits:
-            cpu: 1000m
+            cpu: ${cpu_limit}
             memory: 700Mi
 EOF
   kubectl -n "$NS" rollout status "deployment/$name" --timeout=180s >/dev/null
   kubectl cordon "$node" >/dev/null
 }
 
-index=1
-for node in "${workers[@]}"; do
-  if [[ "$node" == "$source_node" ]]; then
-    deploy_workload "$index" "$node" true
-  else
-    deploy_workload "$index" "$node" false
-  fi
-  index=$((index + 1))
-done
+# Five-worker complementary fragmentation:
+#   source: one memory-heavy HTTP Pod that receives the dynamic hotspot
+#   worker 2: two smaller memory-heavy HTTP Pods
+#   workers 3-5: one CPU-heavy HTTP Pod each
+#
+# On the reference 2000m/~811Mi workers, including the ~100m/50Mi daemonset
+# baseline, the nodes are approximately:
+#   source      0.10 CPU / 0.65 memory
+#   memory peer 0.10 CPU / 0.60 memory
+#   CPU targets 0.83 CPU / 0.11 memory
+#
+# CPU-heavy Pods have no valid target: memory nodes have a lower min-utilization
+# than their source and other CPU nodes lack room. The source ranks ahead of the
+# memory peer, so with maxEvictions=1 RDC2 deterministically selects the hotspot.
+deploy_workload workload-hotspot "$source_node" 1 100m 480Mi true 1000m
 
-# The four destination nodes must be above the 40% requests threshold while the
-# source remains below it. Ballast is excluded from eviction by namespace.
+memory_node=""
 for node in "${workers[@]}"; do
   [[ "$node" == "$source_node" ]] && continue
-  kubectl apply -f - <<EOF
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ballast-${node}
-  namespace: ${SYSTEM_NS}
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: ballast-${node}
-  template:
-    metadata:
-      labels:
-        app: ballast-${node}
-    spec:
-      nodeSelector:
-        kubernetes.io/hostname: ${node}
-      containers:
-      - name: pause
-        image: registry.k8s.io/pause:3.9
-        resources:
-          requests:
-            cpu: 650m
-            memory: 250Mi
-          limits:
-            cpu: 650m
-            memory: 250Mi
-EOF
+  memory_node="$node"
+  break
+done
+deploy_workload workload-memory "$memory_node" 2 50m 220Mi false 1000m
+
+cpu_index=1
+for node in "${workers[@]}"; do
+  [[ "$node" == "$source_node" || "$node" == "$memory_node" ]] && continue
+  deploy_workload "workload-cpu-${cpu_index}" "$node" 1 1550m 40Mi false 1700m
+  cpu_index=$((cpu_index + 1))
 done
 
 for node in "${workers[@]}"; do
@@ -192,7 +176,6 @@ done
 
 kubectl apply -f "$ROOT/k8s/services.yaml"
 kubectl -n "$NS" wait --for=condition=available deployment --all --timeout=180s
-kubectl -n "$SYSTEM_NS" wait --for=condition=available deployment --all --timeout=180s
 
 hotspot_pod="$(kubectl -n "$NS" get pod -l hotspot=true -o jsonpath='{.items[0].metadata.name}')"
 hotspot_node="$(kubectl -n "$NS" get pod "$hotspot_pod" -o jsonpath='{.spec.nodeName}')"
@@ -201,6 +184,23 @@ if [[ "$hotspot_node" != "$source_node" ]]; then
   exit 1
 fi
 
+expected_pods=6
+actual_pods="$(kubectl -n "$NS" get pods -l experiment=actual-usage-evictor --no-headers | wc -l)"
+if (( actual_pods != expected_pods )); then
+  echo "ERROR: expected $expected_pods workload Pods, found $actual_pods" >&2
+  exit 1
+fi
+
+kubectl get nodes -o json > "$OUTPUT_DIR/nodes-layout.json"
+kubectl get pods -A -o json > "$OUTPUT_DIR/pods-layout.json"
+python3 "$ROOT/scripts/validate-layout.py" \
+  --nodes "$OUTPUT_DIR/nodes-layout.json" \
+  --pods "$OUTPUT_DIR/pods-layout.json" \
+  --workers "$OUTPUT_DIR/active-workers.txt" \
+  --namespace "$NS" \
+  --hotspot-pod "$hotspot_pod" \
+  | tee "$OUTPUT_DIR/layout-validation.json"
+
 kubectl -n "$NS" get pods -o wide --sort-by=.spec.nodeName | tee "$OUTPUT_DIR/layout.txt"
-kubectl -n "$SYSTEM_NS" get pods -o wide --sort-by=.spec.nodeName | tee "$OUTPUT_DIR/ballast.txt"
 echo "$hotspot_pod" > "$OUTPUT_DIR/hotspot-pod.txt"
+echo "$memory_node" > "$OUTPUT_DIR/memory-node.txt"
