@@ -144,13 +144,13 @@ if [[ -f "$OUTPUT_DIR/api-load-summary.json" ]]; then
 import json, sys
 with open('$OUTPUT_DIR/api-load-summary.json') as f:
     m = json.load(f)['metrics']
-dur = m.get('http_req_duration', {}).get('values', {})
-fail = m.get('http_req_failed', {}).get('values', {})
-reqs = m.get('http_reqs', {}).get('values', {})
+dur = m.get('http_req_duration', {})
+fail = m.get('http_req_failed', {})
+reqs = m.get('http_reqs', {})
 reqs_count = reqs.get('count', '?')
 reqs_rate = reqs.get('rate', None)
 dur_p95 = dur.get('p(95)', None)
-fail_rate = fail.get('rate', None)
+fail_rate = fail.get('value', None)
 print(f\"  requests total : {reqs_count}\")
 print(f\"  request rate   : {reqs_rate:.1f}/s\" if isinstance(reqs_rate, (int, float)) else \"  request rate   : ?\")
 print(f\"  p95 latency    : {dur_p95:.1f}ms\" if isinstance(dur_p95, (int, float)) else \"  p95 latency    : ?\")
