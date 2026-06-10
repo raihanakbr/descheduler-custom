@@ -271,7 +271,7 @@ Run one memory `R1` smoke test:
 
 ```bash
 HOTSPOT_RPS=1 \
-HOTSPOT_MEM_MB=9 \
+HOTSPOT_MEM_MB=10 \
 HOTSPOT_HOLD_MS=9000 \
 FOREGROUND_STABILIZE_SECONDS=20 \
 PRE_EVENT_SECONDS=20 \
@@ -285,7 +285,7 @@ Recommended memory calibration:
 
 ```text
 HOTSPOT_RPS=1
-HOTSPOT_MEM_MB=9
+HOTSPOT_MEM_MB=10
 HOTSPOT_HOLD_MS=9000
 Memory request=250Mi
 Memory threshold=0.80
@@ -293,11 +293,15 @@ Approximate threshold usage=200Mi
 Target calibration range=200-250Mi
 ```
 
+On the reference worker, `10Mi` produced two consecutive samples near
+`209928Ki` and `209924Ki`, with ratios `0.820031` and `0.820016`. The previous
+`9Mi` setting peaked at ratio `0.794141`, just below the threshold.
+
 Use the lower-churn memory settings explicitly for the smoke test:
 
 ```bash
 export HOTSPOT_RPS=1
-export HOTSPOT_MEM_MB=9
+export HOTSPOT_MEM_MB=10
 export HOTSPOT_HOLD_MS=9000
 ```
 
@@ -318,12 +322,12 @@ After calibration, keep the same memory values across all systems.
 Run matching memory baselines with the same calibrated values:
 
 ```bash
-HOTSPOT_RPS=1 HOTSPOT_MEM_MB=9 HOTSPOT_HOLD_MS=9000 \
+HOTSPOT_RPS=1 HOTSPOT_MEM_MB=10 HOTSPOT_HOLD_MS=9000 \
 FOREGROUND_STABILIZE_SECONDS=20 PRE_EVENT_SECONDS=20 \
 POST_EVENT_SECONDS=30 FOREGROUND_DURATION=5m HOTSPOT_DURATION=4m \
 "$EXP_DIR/scripts/run-cell.sh" memory R0 1
 
-HOTSPOT_RPS=1 HOTSPOT_MEM_MB=9 HOTSPOT_HOLD_MS=9000 \
+HOTSPOT_RPS=1 HOTSPOT_MEM_MB=10 HOTSPOT_HOLD_MS=9000 \
 FOREGROUND_STABILIZE_SECONDS=20 PRE_EVENT_SECONDS=20 \
 POST_EVENT_SECONDS=30 FOREGROUND_DURATION=5m HOTSPOT_DURATION=4m \
 "$EXP_DIR/scripts/run-cell.sh" memory N0 1
@@ -368,7 +372,7 @@ Keep the calibrated memory parameters exported:
 
 ```bash
 export HOTSPOT_RPS=1
-export HOTSPOT_MEM_MB=9
+export HOTSPOT_MEM_MB=10
 export HOTSPOT_HOLD_MS=9000
 
 REPEATS=5 "$EXP_DIR/scripts/run-suite.sh" memory
@@ -410,7 +414,7 @@ export TRANSIENT_GAP_SECONDS=5
 HOTSPOT_RPS=2 HOTSPOT_CPU_UNITS=250 \
 "$EXP_DIR/scripts/run-cell.sh" cpu R1 1
 
-HOTSPOT_RPS=1 HOTSPOT_MEM_MB=9 HOTSPOT_HOLD_MS=9000 \
+HOTSPOT_RPS=1 HOTSPOT_MEM_MB=10 HOTSPOT_HOLD_MS=9000 \
 "$EXP_DIR/scripts/run-cell.sh" memory R1 1
 ```
 
