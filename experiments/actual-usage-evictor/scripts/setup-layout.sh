@@ -140,7 +140,7 @@ EOF
 }
 
 # Five-worker complementary fragmentation:
-#   source: one memory-heavy HTTP Pod that receives the dynamic hotspot
+#   source: two memory-heavy HTTP Pods, matching the original S2 granularity
 #   worker 2: two smaller memory-heavy HTTP Pods
 #   workers 3-5: one CPU-heavy HTTP Pod each
 #
@@ -151,9 +151,11 @@ EOF
 #   CPU targets 0.83 CPU / 0.11 memory
 #
 # CPU-heavy Pods have no valid target: memory nodes have a lower min-utilization
-# than their source and other CPU nodes lack room. The source ranks ahead of the
-# memory peer, so with maxEvictions=1 RDC2 deterministically selects the hotspot.
-deploy_workload workload-hotspot "$source_node" 1 100m 480Mi true 1000m
+# than their source and other CPU nodes lack room. The slight 250Mi/230Mi split
+# preserves the 480Mi source total while making the hotspot RDC2's deterministic
+# first choice. R1 removes that busy hotspot from the candidate list.
+deploy_workload workload-hotspot "$source_node" 1 50m 250Mi true 1000m
+deploy_workload workload-companion "$source_node" 1 50m 230Mi false 1000m
 
 memory_node=""
 for node in "${workers[@]}"; do
@@ -184,7 +186,7 @@ if [[ "$hotspot_node" != "$source_node" ]]; then
   exit 1
 fi
 
-expected_pods=6
+expected_pods=7
 actual_pods="$(kubectl -n "$NS" get pods -l experiment=actual-usage-evictor --no-headers | wc -l)"
 if (( actual_pods != expected_pods )); then
   echo "ERROR: expected $expected_pods workload Pods, found $actual_pods" >&2

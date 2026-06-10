@@ -46,7 +46,8 @@ The active experiment uses five homogeneous workers in an S2-like complementary
 fragmentation layout:
 
 ```text
-source worker:       1 hotspot Pod    x 100m CPU / 480Mi memory
+source worker:       1 hotspot Pod    x  50m CPU / 250Mi memory
+                     1 companion Pod  x  50m CPU / 230Mi memory
 memory peer:         2 regular Pods   x  50m CPU / 220Mi memory
 three target workers:
                      1 CPU-heavy Pod  x 1550m CPU / 40Mi memory each
@@ -56,11 +57,12 @@ Including the reference cluster's approximately `100m/50Mi` daemonset baseline,
 the source and memory peer are memory-skewed while the three targets are
 CPU-skewed. The hotspot fits on a CPU-skewed target and makes it more balanced.
 The CPU-heavy Pods have no valid relocation target. The source is more
-memory-skewed than its peer and contains only the hotspot, making the `R0`
-selection deterministic with `maxEvictions: 1`.
+memory-skewed than its peer. The slight `250Mi/230Mi` split preserves S2's
+`480Mi` source total while making the hotspot RDC2's deterministic first choice
+with `maxEvictions: 1`.
 
-The normal Service selects all six HTTP Pods. A separate hotspot Service selects
-only the source Pod.
+The normal Service selects all seven HTTP Pods. A separate hotspot Service
+selects only the hotspot Pod.
 
 `HighNodeUtilization` is retained as a negative strategy baseline. Every worker
 is above its `40%` threshold on either CPU or memory, so `H0` and `H1` are
@@ -143,11 +145,12 @@ Cluster trade-off metrics reuse Ian's definitions:
 - total evictions and pending Pod-seconds
 
 For `R0`, the expected request-space result is eviction of the busy hotspot,
-one fewer active application worker, lower `S`, and higher balanced headroom.
-For `R1`, the busy hotspot must be blocked. `ResourceDefragmentationC2` may then
-continue to another feasible Pod; that fallback eviction is acceptable only when
-the fallback Pod is below the actual-usage thresholds. The primary R1 evidence is
-therefore hotspot protection, not necessarily zero total evictions.
+lower request-space stranding, and higher balanced headroom. The companion
+remains on the source, matching S2's one-memory-Pod-at-a-time relocation.
+For `R1`, the busy hotspot must be excluded by `ActualUsageEvictor`.
+`ResourceDefragmentationC2` may then select the below-threshold companion. The
+primary R1 evidence is therefore hotspot protection, not necessarily zero total
+evictions.
 
 ## Prerequisites
 

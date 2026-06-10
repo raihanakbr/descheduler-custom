@@ -129,8 +129,8 @@ HOTSPOT_DURATION=4m \
 The script automatically:
 
 1. Deletes the previous experiment namespaces.
-2. Places six HTTP Pods on five workers in a complementary fragmented layout.
-3. Verifies the hotspot Pod is alone on the memory-skewed source worker.
+2. Places seven HTTP Pods on five workers in a complementary fragmented layout.
+3. Verifies the hotspot and companion are on the memory-skewed source.
 4. Starts foreground k6.
 5. Confirms two CPU samples remain below `usage/request = 0.80`.
 6. Starts CPU hotspot k6.
@@ -178,7 +178,7 @@ HOTSPOT_DURATION=4m \
 Expected: `R0` evicts the hotspot Pod.
 
 The after snapshot should also show that the replacement lands on a CPU-skewed
-worker, the source becomes empty of experiment Pods, request-space stranding
+worker, the companion remains on the source, request-space stranding
 decreases, and balanced headroom increases.
 
 Run the no-descheduler control:
@@ -255,6 +255,9 @@ Record the exported values in the paper's experiment configuration.
 Run one memory `R1` smoke test:
 
 ```bash
+HOTSPOT_RPS=1 \
+HOTSPOT_MEM_MB=23 \
+HOTSPOT_HOLD_MS=9000 \
 FOREGROUND_STABILIZE_SECONDS=20 \
 PRE_EVENT_SECONDS=20 \
 POST_EVENT_SECONDS=30 \
@@ -263,28 +266,28 @@ HOTSPOT_DURATION=4m \
 "$EXP_DIR/scripts/run-cell.sh" memory R1 1
 ```
 
-Memory defaults:
+Recommended memory calibration:
 
 ```text
 HOTSPOT_RPS=1
-HOTSPOT_MEM_MB=40
+HOTSPOT_MEM_MB=23
 HOTSPOT_HOLD_MS=9000
-Memory request=480Mi
+Memory request=250Mi
 Memory threshold=0.80
-Approximate threshold usage=384Mi
+Approximate threshold usage=200Mi
 ```
 
 Use the lower-churn memory settings explicitly for the smoke test:
 
 ```bash
 export HOTSPOT_RPS=1
-export HOTSPOT_MEM_MB=40
+export HOTSPOT_MEM_MB=23
 export HOTSPOT_HOLD_MS=9000
 ```
 
 If the ratio does not reach `0.80`, increase `HOTSPOT_MEM_MB` in small steps,
-for example from `40` to `45`, while keeping RPS at `1`. The threshold is based
-on the Pod's `480Mi` memory request, not the node's allocatable memory. Avoid
+for example from `23` to `25`, while keeping RPS at `1`. The threshold is based
+on the Pod's `250Mi` memory request, not the node's allocatable memory. Avoid
 increasing load until the Pod is OOMKilled or the node enters `MemoryPressure`.
 Check:
 
@@ -412,7 +415,7 @@ summary.txt                  pre/post application and lifecycle summary
 comparison, verify:
 
 ```text
-R0: eviction=1, active workers decrease, S decreases, H_balanced increases
+R0: eviction=1 for the hotspot, S decreases, H_balanced increases
 R1: blocked>=1 for the hotspot; hotspot deletion is not observed; any eviction
     is a below-threshold fallback Pod, not the hotspot
 H0/H1: eviction=0 (negative HNU baseline)
