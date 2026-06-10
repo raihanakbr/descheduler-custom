@@ -22,14 +22,14 @@ mapfile -t workers < <(kubectl get nodes \
   -l '!node-role.kubernetes.io/control-plane,!node-role.kubernetes.io/master' \
   -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | sort)
 
-if (( ${#workers[@]} < 6 )); then
-  echo "ERROR: need at least 6 workers, found ${#workers[@]}" >&2
+if (( ${#workers[@]} < 5 )); then
+  echo "ERROR: need at least 5 workers, found ${#workers[@]}" >&2
   exit 1
 fi
 
 echo "Context: $(kubectl config current-context)"
 echo "Workers (${#workers[@]}): ${workers[*]}"
-kubectl get nodes "${workers[@]:0:6}" \
+kubectl get nodes "${workers[@]:0:5}" \
   -o custom-columns='NAME:.metadata.name,CPU:.status.allocatable.cpu,MEMORY:.status.allocatable.memory,UNSCHEDULABLE:.spec.unschedulable'
 echo "Metrics API: available"
 echo "Descheduler image: $DESCHEDULER_IMAGE"

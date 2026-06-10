@@ -18,8 +18,8 @@ mapfile -t all_workers < <(kubectl get nodes \
   -l '!node-role.kubernetes.io/control-plane,!node-role.kubernetes.io/master' \
   -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' | sort)
 
-if (( ${#all_workers[@]} < 6 )); then
-  echo "ERROR: need at least 6 workers, found ${#all_workers[@]}" >&2
+if (( ${#all_workers[@]} < 5 )); then
+  echo "ERROR: need at least 5 workers, found ${#all_workers[@]}" >&2
   exit 1
 fi
 
@@ -35,20 +35,14 @@ if (( ${#workers[@]} != 5 )); then
 fi
 
 source_node="${SOURCE_NODE:-${workers[0]}}"
-telemetry_node="${TELEMETRY_NODE:-${all_workers[5]}}"
 
 if [[ ! " ${workers[*]} " =~ " ${source_node} " ]]; then
   echo "ERROR: SOURCE_NODE must be one of ACTIVE_WORKERS" >&2
   exit 1
 fi
-if [[ " ${workers[*]} " =~ " ${telemetry_node} " ]]; then
-  echo "ERROR: TELEMETRY_NODE must not be one of ACTIVE_WORKERS" >&2
-  exit 1
-fi
 
 printf '%s\n' "${workers[@]}" > "$OUTPUT_DIR/active-workers.txt"
 printf '%s\n' "$source_node" > "$OUTPUT_DIR/source-node.txt"
-printf '%s\n' "$telemetry_node" > "$OUTPUT_DIR/telemetry-node.txt"
 
 kubectl delete ns "$NS" "$SYSTEM_NS" --ignore-not-found --wait=true
 kubectl create ns "$NS"
@@ -183,7 +177,6 @@ done
 for node in "${workers[@]}"; do
   kubectl uncordon "$node" >/dev/null
 done
-kubectl cordon "$telemetry_node" >/dev/null
 
 kubectl apply -f "$ROOT/k8s/services.yaml"
 kubectl -n "$NS" wait --for=condition=available deployment --all --timeout=180s

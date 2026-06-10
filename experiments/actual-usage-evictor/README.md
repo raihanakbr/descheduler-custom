@@ -47,7 +47,6 @@ of the NetworkCostEvictor experiment:
 ```text
 source worker:       one HTTP Pod, no ballast
 four target workers: one HTTP Pod + non-evictable ballast
-sixth worker:        excluded/telemetry worker
 ```
 
 The source is the only under-utilized drain candidate. This makes the baseline
@@ -136,7 +135,7 @@ Cluster trade-off metrics reuse Ian's definitions:
 
 - `kubectl`, `k6`, `python3`, and a working kubeconfig
 - Metrics Server (`metrics.k8s.io/v1beta1`)
-- six homogeneous workers
+- five homogeneous workers
 - the workload image built from
   `experiments/actual-usage-evictor/cmd/workload-http`
 - the slim custom descheduler image described in `IMAGE_BUILD.md`

@@ -31,7 +31,7 @@ python3 --version
 docker version
 ```
 
-The experiment needs at least six workers and a functioning Metrics API.
+The experiment needs at least five workers and a functioning Metrics API.
 
 Check it directly:
 
@@ -63,17 +63,14 @@ kubectl get nodes \
   -o custom-columns='NAME:.metadata.name,INTERNAL_IP:.status.addresses[0].address'
 ```
 
-Choose five active workers and one telemetry/excluded worker. Keep this mapping
-unchanged for every cell:
+Choose five active workers. Keep this mapping unchanged for every cell:
 
 ```bash
 export ACTIVE_WORKERS="worker-1 worker-2 worker-3 worker-4 worker-5"
 export SOURCE_NODE="worker-1"
-export TELEMETRY_NODE="worker-6"
 ```
 
 `SOURCE_NODE` receives the hotspot Pod. It must be one of `ACTIVE_WORKERS`.
-`TELEMETRY_NODE` must not be one of them.
 
 If your node names differ, replace the example values.
 
@@ -84,7 +81,6 @@ export WORKLOAD_IMAGE
 export DESCHEDULER_IMAGE
 export ACTIVE_WORKERS
 export SOURCE_NODE
-export TELEMETRY_NODE
 ```
 
 By default, k6 accesses the source worker's InternalIP. This is appropriate when
@@ -110,7 +106,7 @@ The hotspot Service uses `externalTrafficPolicy: Local`, so
 Expected output:
 
 - current Kubernetes context;
-- six or more workers;
+- five or more workers;
 - CPU and memory allocatable values;
 - `Metrics API: available`;
 - the selected descheduler image.
