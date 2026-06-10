@@ -113,7 +113,7 @@ date -Ins > "$OUTPUT_DIR/event-time.txt"
 "$ROOT/scripts/run-descheduler.sh" "$ROOT/policies/r0-rdc2.yaml" "$OUTPUT_DIR"
 
 log "descheduler logs:"
-grep -E "(Evicting pod|pod selected|Processing node|BLOCKED|ALLOWED)" "$OUTPUT_DIR/descheduler.log" || true
+grep -E "(Evicted pod|Eviction decision|pod selected|Processing node|BLOCKED|ALLOWED)" "$OUTPUT_DIR/descheduler.log" || true
 
 log "step 9/10: waiting ${POST_EVENT_SECONDS}s for disruption capture"
 sleep "$POST_EVENT_SECONDS"
@@ -167,14 +167,14 @@ python3 -c "
 import json
 with open('$OUTPUT_DIR/cluster-metrics-before.json') as f:
     d = json.load(f)
-print(f\"  stranding: {d.get('stranding', '?')}\")
+print(f\"  stranding: {d.get('S', '?')}\")
 " 2>/dev/null || echo "  (not available)"
 echo "After:"
 python3 -c "
 import json
 with open('$OUTPUT_DIR/cluster-metrics-after.json') as f:
     d = json.load(f)
-print(f\"  stranding: {d.get('stranding', '?')}\")
+print(f\"  stranding: {d.get('S', '?')}\")
 " 2>/dev/null || echo "  (not available)"
 
 echo ""
