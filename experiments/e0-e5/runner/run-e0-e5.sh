@@ -5,11 +5,8 @@ GROUP="${GROUP:-E0}"
 NAMESPACE="${NAMESPACE:-e0-e5-${GROUP,,}}"
 RESULT_DIR="${RESULT_DIR:-$(pwd)/e0-e5-results/${GROUP}-$(date -u +%Y%m%dT%H%M%SZ)}"
 DESCHEDULER_IMAGE="${DESCHEDULER_IMAGE:-busybox:1.36}"
-AGENT_IMAGE="${AGENT_IMAGE:-busybox:1.36}"
 DESCHEDULER_BIN_HOST_PATH="${DESCHEDULER_BIN_HOST_PATH:-/root/descheduler}"
-AGENT_BIN_HOST_PATH="${AGENT_BIN_HOST_PATH:-/root/actual-usage-agent}"
 DESCHEDULER_NODE_NAME="${DESCHEDULER_NODE_NAME:-}"
-AGENT_NODE_NAME="${AGENT_NODE_NAME:-}"
 STAGES="${STAGES:-low medium high-safe}"
 KUBECTL="${KUBECTL:-kubectl}"
 
@@ -162,59 +159,17 @@ YAML
   $KUBECTL -n kube-system patch cronjob e0-e5-descheduler -p '{"spec":{"suspend":true}}' >/dev/null 2>&1 || true
 }
 
-start_agent_for_e5(){
-  [[ "$GROUP" == "E5" ]] || return 0
-  log "Starting E5 actual-usage-agent publisher"
-  $KUBECTL -n kube-system delete deploy e0-e5-actual-usage-agent --ignore-not-found
-  local agent_node_name_yaml=""
-  if [[ -n "$AGENT_NODE_NAME" ]]; then
-    agent_node_name_yaml="      nodeName: ${AGENT_NODE_NAME}"
-  fi
-  cat <<YAML | $KUBECTL apply -f -
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: e0-e5-actual-usage-agent
-  namespace: kube-system
-spec:
-  replicas: 1
-  selector: {matchLabels: {app: e0-e5-actual-usage-agent}}
-  template:
-    metadata: {labels: {app: e0-e5-actual-usage-agent}}
-    spec:
-${agent_node_name_yaml}
-      serviceAccountName: actual-usage-agent
-      containers:
-      - name: agent
-        image: ${AGENT_IMAGE}
-        command: ["/host/actual-usage-agent"]
-        args: ["--interval=30s", "--namespace=", "--publish-target=node-annotations", "--output-dir=/tmp/actual-usage-agent"]
-        volumeMounts:
-        - name: agent-bin
-          mountPath: /host/actual-usage-agent
-          readOnly: true
-      volumes:
-      - name: agent-bin
-        hostPath:
-          path: ${AGENT_BIN_HOST_PATH}
-          type: File
-YAML
-  sleep 75
-}
-
 case "$GROUP" in
   E0) POLICY="" ;;
   E1) POLICY="$(dirname "$0")/../policies/e1-low-node-utilization.yaml" ;;
   E2) POLICY="$(dirname "$0")/../policies/e2-request-rii-topsis.yaml" ;;
   E3) POLICY="$(dirname "$0")/../policies/e3-actual-raw-rii-topsis.yaml" ;;
   E4) POLICY="$(dirname "$0")/../policies/e4-actual-ewma-tight-persisted.yaml" ;;
-  E5) POLICY="$(dirname "$0")/../policies/e5-published-ewma-loose.yaml" ;;
-  *) echo "GROUP must be E0..E5" >&2; exit 2 ;;
+  *) echo "GROUP must be E0..E4" >&2; exit 2 ;;
 esac
 
 log "Starting group=$GROUP namespace=$NAMESPACE result_dir=$RESULT_DIR"
 $KUBECTL create namespace "$NAMESPACE" --dry-run=client -o yaml | $KUBECTL apply -f -
-start_agent_for_e5
 capture initial
 for stage in $STAGES; do
   read -r c m x b < <(stage_replicas "$stage")

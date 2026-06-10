@@ -14,26 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package resourcedefragmentationc2
+package actualusageevictor
 
 import (
 	"fmt"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 )
 
-func ValidateResourceDefragmentationC2Args(obj runtime.Object) error {
-	args := obj.(*ResourceDefragmentationC2Args)
+// ValidateActualUsageEvictorArgs validates plugin configuration.
+func ValidateActualUsageEvictorArgs(obj runtime.Object) error {
+	args := obj.(*ActualUsageEvictorArgs)
 	var allErrs []error
+
+	if args.CPUUsageThreshold <= 0 {
+		allErrs = append(allErrs, fmt.Errorf("cpuUsageThreshold must be greater than 0, got %v", args.CPUUsageThreshold))
+	}
+	if args.MemoryUsageThreshold <= 0 {
+		allErrs = append(allErrs, fmt.Errorf("memoryUsageThreshold must be greater than 0, got %v", args.MemoryUsageThreshold))
+	}
 	if args.Namespaces != nil && len(args.Namespaces.Include) > 0 && len(args.Namespaces.Exclude) > 0 {
 		allErrs = append(allErrs, fmt.Errorf("only one of Include/Exclude namespaces can be set"))
 	}
-	if args.ConsolidationThreshold < 0 || args.ConsolidationThreshold > 1 {
-		allErrs = append(allErrs, fmt.Errorf("consolidationThreshold must be in range [0, 1], got %v", args.ConsolidationThreshold))
+	if args.LabelSelector != nil {
+		if _, err := metav1.LabelSelectorAsSelector(args.LabelSelector); err != nil {
+			allErrs = append(allErrs, fmt.Errorf("invalid labelSelector: %w", err))
+		}
 	}
-	if args.ConsolidationTarget < 0 || args.ConsolidationTarget > 1 {
-		allErrs = append(allErrs, fmt.Errorf("consolidationTarget must be in range [0, 1], got %v", args.ConsolidationTarget))
-	}
+
 	return utilerrors.NewAggregate(allErrs)
 }

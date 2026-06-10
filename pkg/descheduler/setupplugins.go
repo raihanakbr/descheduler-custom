@@ -1,3 +1,5 @@
+//go:build !experiment_plugins
+
 /*
 Copyright 2017 The Kubernetes Authors.
 
@@ -18,6 +20,7 @@ package descheduler
 
 import (
 	"sigs.k8s.io/descheduler/pkg/framework/pluginregistry"
+	"sigs.k8s.io/descheduler/pkg/framework/plugins/actualusageevictor"
 	"sigs.k8s.io/descheduler/pkg/framework/plugins/defaultevictor"
 	"sigs.k8s.io/descheduler/pkg/framework/plugins/networkcostevictor"
 	"sigs.k8s.io/descheduler/pkg/framework/plugins/nodeutilization"
@@ -39,6 +42,7 @@ func SetupPlugins() {
 }
 
 func RegisterDefaultPlugins(registry pluginregistry.Registry) {
+	pluginregistry.Register(actualusageevictor.PluginName, actualusageevictor.New, &actualusageevictor.ActualUsageEvictor{}, &actualusageevictor.ActualUsageEvictorArgs{}, actualusageevictor.ValidateActualUsageEvictorArgs, actualusageevictor.SetDefaults_ActualUsageEvictorArgs, registry)
 	pluginregistry.Register(defaultevictor.PluginName, defaultevictor.New, &defaultevictor.DefaultEvictor{}, &defaultevictor.DefaultEvictorArgs{}, defaultevictor.ValidateDefaultEvictorArgs, defaultevictor.SetDefaults_DefaultEvictorArgs, registry)
 	pluginregistry.Register(networkcostevictor.PluginName, networkcostevictor.New, &networkcostevictor.NetworkCostEvictor{}, &networkcostevictor.NetworkCostEvictorArgs{}, networkcostevictor.ValidateNetworkCostEvictorArgs, networkcostevictor.SetDefaults_NetworkCostEvictorArgs, registry)
 	pluginregistry.Register(nodeutilization.LowNodeUtilizationPluginName, nodeutilization.NewLowNodeUtilization, &nodeutilization.LowNodeUtilization{}, &nodeutilization.LowNodeUtilizationArgs{}, nodeutilization.ValidateLowNodeUtilizationArgs, nodeutilization.SetDefaults_LowNodeUtilizationArgs, registry)

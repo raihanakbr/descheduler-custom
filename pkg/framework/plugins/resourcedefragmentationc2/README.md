@@ -1,10 +1,10 @@
 # ResourceDefragmentationC2
 
 A single-criterion sibling of the `ResourceDefragmentation` plugin: it is the
-TOPSIS plugin's **C2 criterion, standalone**, run on **real usage**.
+TOPSIS plugin's **C2 criterion, standalone**, run on **resource requests**.
 
 It keeps the same consolidation/defragmentation pipeline (build node state from
-actual usage, pick under-utilized/imbalanced drain candidates, drain worst-first,
+requests, pick under-utilized/imbalanced drain candidates, drain worst-first,
 partial drain, anti-churn bins) but replaces the multi-criteria TOPSIS selector
 with a single rule:
 
@@ -18,8 +18,9 @@ the bin-score argmax, `binScore(target)` is the pod's **best achievable balance*
 which is aligned with the stranding objective `S = Σ|cpuFrac − memFrac|`.
 
 The ablation on the parent plugin showed C2 is the workhorse; this plugin is that
-selector on its own, so it tracks the `just-c2` result while reading **real
-(metrics-server) usage** by default.
+selector on its own, so it tracks the `just-c2` result. Runtime usage is not a
+placement input here. `ActualUsageEvictor` may be added independently as a
+pre-eviction safety filter.
 
 ## Scheduler precondition
 
@@ -45,7 +46,6 @@ profiles:
       - name: "ResourceDefragmentationC2"
         args:
           namespaces: { include: [defrag-exp] }
-          usageMode: actual-ewma        # real usage (needs metrics-server); else falls back to requests
           consolidationThreshold: 0.40
           consolidationTarget: 0.90
           maxEvictions: 50
@@ -60,7 +60,7 @@ profiles:
 |---|---|---|
 | Pod selection | 4-criteria TOPSIS | single criterion (C2: best achievable balance) |
 | Placement prediction | lightweight `nodeBinScore` | same lightweight bin score |
-| Usage signal | requests (configurable) | actual usage (`actual-ewma`) by default |
+| Usage signal | configurable legacy modes | requests only |
 
 The `consolidationThreshold` candidacy gate uses the same lightweight `[0,1]` node
 score — the descheduler's own "is this a bad bin" trigger.

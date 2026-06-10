@@ -17,6 +17,9 @@ limitations under the License.
 package resourcedefragmentationc2
 
 import (
+	"bytes"
+	"encoding/json"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/descheduler/pkg/api"
 )
@@ -29,11 +32,6 @@ type ResourceDefragmentationC2Args struct {
 
 	Namespaces *api.Namespaces `json:"namespaces,omitempty"`
 
-	// UsageMode selects the node-utilisation signal: "requests", "actual-raw", or
-	// "actual-ewma". Empty defaults to actual-ewma when a metrics collector is
-	// present (real usage), else requests.
-	UsageMode string `json:"usageMode,omitempty"`
-
 	MaxEvictions int `json:"maxEvictions,omitempty"`
 
 	// ConsolidationThreshold: a node whose avg utilisation OR bin score is below
@@ -43,4 +41,14 @@ type ResourceDefragmentationC2Args struct {
 	// ConsolidationTarget: packing ceiling for a destination node. Range [0,1].
 	// Default 0.90.
 	ConsolidationTarget float64 `json:"consolidationTarget,omitempty"`
+}
+
+// UnmarshalJSON rejects removed and misspelled fields instead of silently
+// accepting a policy with ineffective configuration.
+func (a *ResourceDefragmentationC2Args) UnmarshalJSON(data []byte) error {
+	type argsAlias ResourceDefragmentationC2Args
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.DisallowUnknownFields()
+	return decoder.Decode((*argsAlias)(a))
 }

@@ -15,7 +15,7 @@ def pending(path):
 
 logs='\n'.join(p.read_text(errors='ignore') for p in result.glob('descheduler-*.log'))
 evicted=len(re.findall(r'Evicted pod', logs))
-print(f'# E0-E5 summary: {group}')
+print(f'# E0-E4 summary: {group}')
 print(f'- namespace: `{ns}`')
 print(f'- generated_at_utc: `{datetime.datetime.utcnow().isoformat()}Z`')
 print(f'- pods_evicted: {evicted}')

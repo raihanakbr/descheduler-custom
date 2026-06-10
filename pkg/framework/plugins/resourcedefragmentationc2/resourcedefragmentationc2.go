@@ -25,9 +25,8 @@ limitations under the License.
 //     achievable balance), aligned with the stranding objective
 //     S = Σ|cpuFrac − memFrac|. This is exactly the TOPSIS plugin's `just-c2`
 //     selector, standalone.
-//   - Real usage. Node utilisation is read from actual metrics-server usage by
-//     default, and the landing node is predicted with the same lightweight
-//     MostAllocated + BalancedAllocation bin score the TOPSIS plugin uses.
+//   - Requests only. Node utilisation and placement prediction use Kubernetes
+//     resource requests, matching the scheduler's fit model.
 package resourcedefragmentationc2
 
 import (
@@ -37,7 +36,6 @@ import (
 	"sort"
 
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/klog/v2"
@@ -50,10 +48,6 @@ import (
 const PluginName = "ResourceDefragmentationC2"
 
 const (
-	UsageModeRequests   = "requests"
-	UsageModeActualRaw  = "actual-raw"
-	UsageModeActualEWMA = "actual-ewma"
-
 	defaultConsolidationThreshold = 0.40
 	defaultConsolidationTarget    = 0.90
 )
@@ -73,8 +67,6 @@ type nodeState struct {
 	allocatableMem int64
 	requestedCPU   int64
 	requestedMem   int64
-	usedCPU        int64
-	usedMem        int64
 }
 
 type drainCandidate struct {
@@ -128,7 +120,7 @@ func (r *ResourceDefragmentationC2) Balance(ctx context.Context, nodes []*v1.Nod
 	logger := klog.FromContext(klog.NewContext(ctx, r.logger)).WithValues("ExtensionPoint", frameworktypes.BalanceExtensionPoint)
 	logger.V(1).Info("Starting ResourceDefragmentationC2 balance pass", "nodeCount", len(nodes))
 
-	// Step 1: cluster resource state (real usage).
+	// Step 1: cluster resource state from resource requests.
 	states := make(map[string]*nodeState)
 	for _, node := range nodes {
 		if isControlPlaneNode(node) {
@@ -150,10 +142,9 @@ func (r *ResourceDefragmentationC2) Balance(ctx context.Context, nodes []*v1.Nod
 		if allocCpu <= 0 || allocMem <= 0 {
 			continue
 		}
-		usedCpu, usedMem := r.nodeUsage(ctx, node, reqCpu, reqMem)
 		states[node.Name] = &nodeState{
 			node: node, allocatableCPU: allocCpu, allocatableMem: allocMem,
-			requestedCPU: reqCpu, requestedMem: reqMem, usedCPU: usedCpu, usedMem: usedMem,
+			requestedCPU: reqCpu, requestedMem: reqMem,
 		}
 	}
 
@@ -166,7 +157,7 @@ func (r *ResourceDefragmentationC2) Balance(ctx context.Context, nodes []*v1.Nod
 			continue
 		}
 		threshold := r.consolidationThreshold()
-		if avgUtilization(s) >= threshold && binScore(s.usedCPU, s.usedMem, s.allocatableCPU, s.allocatableMem) >= threshold {
+		if avgUtilization(s) >= threshold && binScore(s.requestedCPU, s.requestedMem, s.allocatableCPU, s.allocatableMem) >= threshold {
 			continue
 		}
 		pods, err := podutil.ListPodsOnANode(node.Name, r.handle.GetPodsAssignedToNodeFunc(), r.podFilter)
@@ -177,8 +168,8 @@ func (r *ResourceDefragmentationC2) Balance(ctx context.Context, nodes []*v1.Nod
 		if len(pods) == 0 {
 			continue
 		}
-		imbalance := resourceImbalance(s.allocatableCPU, s.allocatableMem, s.usedCPU, s.usedMem)
-		fsi := freeSpaceIndex(s.allocatableCPU, s.allocatableMem, s.usedCPU, s.usedMem)
+		imbalance := resourceImbalance(s.allocatableCPU, s.allocatableMem, s.requestedCPU, s.requestedMem)
+		fsi := freeSpaceIndex(s.allocatableCPU, s.allocatableMem, s.requestedCPU, s.requestedMem)
 		candidates = append(candidates, drainCandidate{node: node, pods: pods, priority: priorityIndex(imbalance, fsi)})
 	}
 
@@ -219,18 +210,13 @@ func (r *ResourceDefragmentationC2) Balance(ctx context.Context, nodes []*v1.Nod
 				}
 			}
 			evCpu, evMem := getPodRequests(pod)
-			evUCpu, evUMem := r.podUsage(ctx, pod)
 			if s, ok := states[dc.node.Name]; ok {
 				s.requestedCPU -= evCpu
 				s.requestedMem -= evMem
-				s.usedCPU -= evUCpu
-				s.usedMem -= evUMem
 			}
 			if t, ok := states[target]; ok {
 				t.requestedCPU += evCpu
 				t.requestedMem += evMem
-				t.usedCPU += evUCpu
-				t.usedMem += evUMem
 			}
 			bins.Insert(target)
 			remaining = removePodFromList(remaining, pod)
@@ -320,11 +306,11 @@ func binScore(reqCpu, reqMem, allocCpu, allocMem int64) float64 {
 }
 
 func avgUtilization(s *nodeState) float64 {
-	return (float64(s.usedCPU)/float64(s.allocatableCPU) + float64(s.usedMem)/float64(s.allocatableMem)) / 2.0
+	return (float64(s.requestedCPU)/float64(s.allocatableCPU) + float64(s.requestedMem)/float64(s.allocatableMem)) / 2.0
 }
 
 func minUtilization(s *nodeState) float64 {
-	return math.Min(float64(s.usedCPU)/float64(s.allocatableCPU), float64(s.usedMem)/float64(s.allocatableMem))
+	return math.Min(float64(s.requestedCPU)/float64(s.allocatableCPU), float64(s.requestedMem)/float64(s.allocatableMem))
 }
 
 func resourceImbalance(allocCpu, allocMem, reqCpu, reqMem int64) float64 {
@@ -357,64 +343,6 @@ func removePodFromList(pods []*v1.Pod, target *v1.Pod) []*v1.Pod {
 		}
 	}
 	return out
-}
-
-func (r *ResourceDefragmentationC2) usageMode() string {
-	switch r.args.UsageMode {
-	case UsageModeRequests, UsageModeActualRaw, UsageModeActualEWMA:
-		return r.args.UsageMode
-	default:
-		if r.handle.MetricsCollector() != nil {
-			return UsageModeActualEWMA // "real usage" by default
-		}
-		return UsageModeRequests
-	}
-}
-
-func (r *ResourceDefragmentationC2) nodeUsage(ctx context.Context, node *v1.Node, reqCpu, reqMem int64) (int64, int64) {
-	switch r.usageMode() {
-	case UsageModeActualRaw:
-		if r.handle.MetricsCollector() == nil {
-			return reqCpu, reqMem
-		}
-		nm, err := r.handle.MetricsCollector().MetricsClient().MetricsV1beta1().NodeMetricses().Get(ctx, node.Name, metav1.GetOptions{})
-		if err != nil {
-			r.logger.Error(err, "raw node metrics unavailable; using requests", "node", node.Name)
-			return reqCpu, reqMem
-		}
-		return nm.Usage.Cpu().MilliValue(), nm.Usage.Memory().Value()
-	case UsageModeActualEWMA:
-		if r.handle.MetricsCollector() == nil {
-			return reqCpu, reqMem
-		}
-		if !r.handle.MetricsCollector().HasSynced() {
-			if err := r.handle.MetricsCollector().Collect(ctx); err != nil {
-				return reqCpu, reqMem
-			}
-		}
-		if u, err := r.handle.MetricsCollector().NodeUsage(node); err == nil {
-			return u[v1.ResourceCPU].MilliValue(), u[v1.ResourceMemory].Value()
-		}
-		return reqCpu, reqMem
-	default:
-		return reqCpu, reqMem
-	}
-}
-
-func (r *ResourceDefragmentationC2) podUsage(ctx context.Context, pod *v1.Pod) (int64, int64) {
-	if r.usageMode() == UsageModeRequests || r.handle.MetricsCollector() == nil {
-		return getPodRequests(pod)
-	}
-	pm, err := r.handle.MetricsCollector().MetricsClient().MetricsV1beta1().PodMetricses(pod.Namespace).Get(ctx, pod.Name, metav1.GetOptions{})
-	if err != nil {
-		return getPodRequests(pod)
-	}
-	var cpu, mem int64
-	for _, c := range pm.Containers {
-		cpu += c.Usage.Cpu().MilliValue()
-		mem += c.Usage.Memory().Value()
-	}
-	return cpu, mem
 }
 
 func isControlPlaneNode(node *v1.Node) bool {

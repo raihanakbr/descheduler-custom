@@ -60,25 +60,36 @@ all: build
 
 build:
 	CGO_ENABLED=0 go build ${LDFLAGS} -o _output/bin/descheduler sigs.k8s.io/descheduler/cmd/descheduler
-	CGO_ENABLED=0 go build ${LDFLAGS} -o _output/bin/actual-usage-agent sigs.k8s.io/descheduler/cmd/actual-usage-agent
 
 build.amd64:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ${LDFLAGS} -o _output/bin/descheduler sigs.k8s.io/descheduler/cmd/descheduler
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build ${LDFLAGS} -o _output/bin/actual-usage-agent sigs.k8s.io/descheduler/cmd/actual-usage-agent
 
 build.arm:
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build ${LDFLAGS} -o _output/bin/descheduler sigs.k8s.io/descheduler/cmd/descheduler
-	CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build ${LDFLAGS} -o _output/bin/actual-usage-agent sigs.k8s.io/descheduler/cmd/actual-usage-agent
 
 build.arm64:
 	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ${LDFLAGS} -o _output/bin/descheduler sigs.k8s.io/descheduler/cmd/descheduler
-	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build ${LDFLAGS} -o _output/bin/actual-usage-agent sigs.k8s.io/descheduler/cmd/actual-usage-agent
+
+build-experiment:
+	CGO_ENABLED=0 go build -tags=experiment_plugins ${LDFLAGS} -o _output/bin/descheduler-experiment sigs.k8s.io/descheduler/cmd/descheduler
+
+build-experiment.amd64:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags=experiment_plugins ${LDFLAGS} -o _output/bin/descheduler-experiment sigs.k8s.io/descheduler/cmd/descheduler
+
+build-experiment.arm:
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -tags=experiment_plugins ${LDFLAGS} -o _output/bin/descheduler-experiment sigs.k8s.io/descheduler/cmd/descheduler
+
+build-experiment.arm64:
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -tags=experiment_plugins ${LDFLAGS} -o _output/bin/descheduler-experiment sigs.k8s.io/descheduler/cmd/descheduler
 
 dev-image: build
 	$(CONTAINER_ENGINE) build -f Dockerfile.dev -t $(IMAGE) .
 
 image:
 	$(CONTAINER_ENGINE) build --build-arg VERSION="$(VERSION)" --build-arg ARCH="amd64" -t $(IMAGE) .
+
+image-experiment:
+	$(CONTAINER_ENGINE) build -f Dockerfile.experiment --build-arg VERSION="$(VERSION)" --build-arg ARCH="amd64" -t $(IMAGE)-experiment .
 
 image.amd64:
 	$(CONTAINER_ENGINE) build --build-arg VERSION="$(VERSION)" --build-arg ARCH="amd64" -t $(IMAGE)-amd64 .
