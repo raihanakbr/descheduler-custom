@@ -157,7 +157,9 @@ For `R1`, the expected smoke-test evidence is:
 
 - two threshold samples are `true`;
 - the hotspot Pod is logged as blocked;
-- total eviction is zero in this deterministic layout;
+- the hotspot Pod is not deleted;
+- any fallback eviction, if present, is for a non-hotspot Pod whose actual usage
+  is below the configured threshold;
 - foreground k6 continues through the event.
 
 ## 8. Run baseline smoke tests
@@ -215,8 +217,9 @@ Expected: both HNU cells evict zero Pods because no worker is below `40%` on
 both CPU and memory. `H1` therefore does not reach an eviction decision for
 ActualUsageEvictor to block.
 
-Do not start the full experiment until `R0` evicts the intended Pod, `R1`
-blocks the same Pod, and `H0`/`H1` both report zero evictions.
+Do not start the full experiment until `R0` evicts the intended hotspot Pod,
+`R1` blocks that same hotspot Pod without deleting it, and `H0`/`H1` both report
+zero evictions.
 
 ## 9. Calibrate CPU load if needed
 
@@ -405,7 +408,8 @@ comparison, verify:
 
 ```text
 R0: eviction=1, active workers decrease, S decreases, H_balanced increases
-R1: blocked=1, eviction=0, request-space metrics remain unchanged
+R1: blocked>=1 for the hotspot; hotspot deletion is not observed; any eviction
+    is a below-threshold fallback Pod, not the hotspot
 H0/H1: eviction=0 (negative HNU baseline)
 ```
 

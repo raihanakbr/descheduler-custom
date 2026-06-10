@@ -142,9 +142,12 @@ Cluster trade-off metrics reuse Ian's definitions:
 - balanced and CPU-skewed schedulability headroom
 - total evictions and pending Pod-seconds
 
-For `R0`, the expected request-space result is one fewer active application
-worker, lower `S`, and higher balanced headroom. For `R1`, the busy hotspot is
-blocked, so those values remain at the pre-event layout during that pass.
+For `R0`, the expected request-space result is eviction of the busy hotspot,
+one fewer active application worker, lower `S`, and higher balanced headroom.
+For `R1`, the busy hotspot must be blocked. `ResourceDefragmentationC2` may then
+continue to another feasible Pod; that fallback eviction is acceptable only when
+the fallback Pod is below the actual-usage thresholds. The primary R1 evidence is
+therefore hotspot protection, not necessarily zero total evictions.
 
 ## Prerequisites
 
