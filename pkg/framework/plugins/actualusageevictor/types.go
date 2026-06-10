@@ -33,7 +33,7 @@ type ActualUsageEvictorArgs struct {
 	CPUUsageThreshold float64 `json:"cpuUsageThreshold,omitempty"`
 
 	// MemoryUsageThreshold is the actual memory usage divided by requested
-	// memory at which eviction is blocked. Default: 0.90.
+	// memory at which eviction is blocked. Default: 0.80.
 	MemoryUsageThreshold float64 `json:"memoryUsageThreshold,omitempty"`
 
 	// Namespaces optionally limits the pods evaluated by this plugin.

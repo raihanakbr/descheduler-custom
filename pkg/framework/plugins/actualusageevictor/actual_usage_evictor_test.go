@@ -40,8 +40,8 @@ func TestDefaultsAndValidation(t *testing.T) {
 	if args.CPUUsageThreshold != 0.80 {
 		t.Errorf("CPU threshold = %v, want 0.80", args.CPUUsageThreshold)
 	}
-	if args.MemoryUsageThreshold != 0.90 {
-		t.Errorf("memory threshold = %v, want 0.90", args.MemoryUsageThreshold)
+	if args.MemoryUsageThreshold != 0.80 {
+		t.Errorf("memory threshold = %v, want 0.80", args.MemoryUsageThreshold)
 	}
 	if err := ValidateActualUsageEvictorArgs(args); err != nil {
 		t.Fatalf("default args should be valid: %v", err)
@@ -103,7 +103,7 @@ func TestPreEvictionFilter(t *testing.T) {
 			name:    "allows usage below both thresholds",
 			args:    testArgs(),
 			pod:     testPod("default", map[string]string{}, "1000m", "1Gi"),
-			metrics: testPodMetrics("default", []containerUsage{{name: "app", cpuMilli: 799, memoryBytes: 900 * 1024 * 1024}}),
+			metrics: testPodMetrics("default", []containerUsage{{name: "app", cpuMilli: 799, memoryBytes: 700 * 1024 * 1024}}),
 			want:    true,
 		},
 		{
@@ -266,7 +266,7 @@ type containerUsage struct {
 }
 
 func testArgs() *ActualUsageEvictorArgs {
-	return &ActualUsageEvictorArgs{CPUUsageThreshold: 0.8, MemoryUsageThreshold: 0.9}
+	return &ActualUsageEvictorArgs{CPUUsageThreshold: 0.8, MemoryUsageThreshold: 0.8}
 }
 
 func testPod(namespace string, podLabels map[string]string, cpu, memory string) *v1.Pod {

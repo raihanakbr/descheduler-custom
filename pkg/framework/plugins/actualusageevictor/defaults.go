@@ -20,7 +20,7 @@ import "k8s.io/apimachinery/pkg/runtime"
 
 const (
 	defaultCPUUsageThreshold    = 0.80
-	defaultMemoryUsageThreshold = 0.90
+	defaultMemoryUsageThreshold = 0.80
 )
 
 func addDefaultingFuncs(scheme *runtime.Scheme) error {
