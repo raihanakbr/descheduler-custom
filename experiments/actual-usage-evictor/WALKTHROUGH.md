@@ -266,22 +266,27 @@ HOTSPOT_DURATION=4m \
 Memory defaults:
 
 ```text
-HOTSPOT_RPS=2
-HOTSPOT_MEM_MB=80
-HOTSPOT_HOLD_MS=3000
+HOTSPOT_RPS=1
+HOTSPOT_MEM_MB=40
+HOTSPOT_HOLD_MS=9000
 Memory request=480Mi
-Memory threshold=0.90
+Memory threshold=0.80
+Approximate threshold usage=384Mi
 ```
 
-If the ratio does not reach `0.90`, first increase hold duration or RPS:
+Use the lower-churn memory settings explicitly for the smoke test:
 
 ```bash
-export HOTSPOT_HOLD_MS=4000
-export HOTSPOT_RPS=3
+export HOTSPOT_RPS=1
+export HOTSPOT_MEM_MB=40
+export HOTSPOT_HOLD_MS=9000
 ```
 
-Avoid increasing load until the Pod is OOMKilled or the node enters
-`MemoryPressure`. Check:
+If the ratio does not reach `0.80`, increase `HOTSPOT_MEM_MB` in small steps,
+for example from `40` to `45`, while keeping RPS at `1`. The threshold is based
+on the Pod's `480Mi` memory request, not the node's allocatable memory. Avoid
+increasing load until the Pod is OOMKilled or the node enters `MemoryPressure`.
+Check:
 
 ```bash
 kubectl get pods -n actual-usage-exp

@@ -14,7 +14,7 @@ export const options = {
   scenarios: {
     hotspot: {
       executor: 'constant-arrival-rate',
-      rate: intEnv('HOTSPOT_RPS', resource === 'memory' ? 2 : 8),
+      rate: intEnv('HOTSPOT_RPS', resource === 'memory' ? 1 : 8),
       timeUnit: '1s',
       duration: __ENV.HOTSPOT_DURATION || '5m',
       preAllocatedVUs: intEnv('HOTSPOT_VUS', 60),
@@ -28,7 +28,7 @@ export const options = {
 
 export default function () {
   const query = resource === 'memory'
-    ? `cpu_units=0&mem_mb=${intEnv('HOTSPOT_MEM_MB', 80)}&hold_ms=${intEnv('HOTSPOT_HOLD_MS', 3000)}`
+    ? `cpu_units=0&mem_mb=${intEnv('HOTSPOT_MEM_MB', 40)}&hold_ms=${intEnv('HOTSPOT_HOLD_MS', 9000)}`
     : `cpu_units=${intEnv('HOTSPOT_CPU_UNITS', 900)}&mem_mb=0&hold_ms=0`;
   const response = http.get(`${url}/work?${query}`, {
     timeout: __ENV.REQUEST_TIMEOUT || '15s',

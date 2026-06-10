@@ -38,7 +38,7 @@ eviction allowed =
     AND ActualUsageEvictor considers the Pod not busy
 ```
 
-The current defaults are CPU ratio `0.80` and memory ratio `0.90`.
+The current defaults are CPU ratio `0.80` and memory ratio `0.80`.
 
 ## Controlled layout
 
@@ -75,7 +75,7 @@ Two k6 processes run concurrently:
 1. **Foreground load** sends a constant request rate to the normal Service. Its
    latency and failure metrics are the application result.
 2. **Hotspot load** sends extra work only to the source Pod. It raises either
-   CPU usage/request above `0.80` or memory usage/request above `0.90`.
+   CPU usage/request above `0.80` or memory usage/request above `0.80`.
 
 The run timeline is:
 

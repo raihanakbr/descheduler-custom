@@ -12,7 +12,7 @@ profiles:
   - name: ActualUsageEvictor
     args:
       cpuUsageThreshold: 0.80
-      memoryUsageThreshold: 0.90
+      memoryUsageThreshold: 0.80
       namespaces:
         include:
         - actual-usage-exp

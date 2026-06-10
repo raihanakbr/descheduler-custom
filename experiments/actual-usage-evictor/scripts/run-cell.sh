@@ -100,7 +100,6 @@ log "stabilizing foreground load for ${FOREGROUND_STABILIZE_SECONDS:-60}s"
 sleep "${FOREGROUND_STABILIZE_SECONDS:-60}"
 
 threshold=0.80
-[[ "$RESOURCE" == "memory" ]] && threshold=0.90
 
 log "confirming two pre-hotspot ${RESOURCE} samples below ratio ${threshold}"
 python3 "$ROOT/scripts/wait-threshold.py" \
