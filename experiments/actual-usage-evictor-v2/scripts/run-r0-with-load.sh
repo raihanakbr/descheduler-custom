@@ -135,7 +135,7 @@ log "=== RESULTS ==="
 
 echo ""
 echo "--- Eviction Target ---"
-grep "Evicting pod" "$OUTPUT_DIR/descheduler.log" || echo "(no eviction)"
+grep -E "(Evicted pod|Eviction decision)" "$OUTPUT_DIR/descheduler.log" || echo "(no eviction)"
 
 echo ""
 echo "--- k6 Summary ---"
