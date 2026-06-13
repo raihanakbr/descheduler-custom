@@ -43,6 +43,9 @@ func TestDefaultsAndValidation(t *testing.T) {
 	if args.MemoryUsageThreshold != 0.80 {
 		t.Errorf("memory threshold = %v, want 0.80", args.MemoryUsageThreshold)
 	}
+	if args.MissingRequestPolicy != AllowMissingRequest {
+		t.Errorf("missing request policy = %q, want %q", args.MissingRequestPolicy, AllowMissingRequest)
+	}
 	if err := ValidateActualUsageEvictorArgs(args); err != nil {
 		t.Fatalf("default args should be valid: %v", err)
 	}
@@ -75,6 +78,13 @@ func TestDefaultsAndValidation(t *testing.T) {
 				}}},
 			},
 		},
+		{
+			name: "invalid missing request policy",
+			args: &ActualUsageEvictorArgs{
+				CPUUsageThreshold: 0.8, MemoryUsageThreshold: 0.9,
+				MissingRequestPolicy: MissingRequestPolicy("Invalid"),
+			},
+		},
 	}
 	for _, tc := range invalid {
 		t.Run(tc.name, func(t *testing.T) {
@@ -84,7 +94,10 @@ func TestDefaultsAndValidation(t *testing.T) {
 		})
 	}
 
-	aboveOne := &ActualUsageEvictorArgs{CPUUsageThreshold: 1.2, MemoryUsageThreshold: 1.5}
+	aboveOne := &ActualUsageEvictorArgs{
+		CPUUsageThreshold: 1.2, MemoryUsageThreshold: 1.5,
+		MissingRequestPolicy: BlockMissingRequest,
+	}
 	if err := ValidateActualUsageEvictorArgs(aboveOne); err != nil {
 		t.Fatalf("thresholds above 1 must be valid: %v", err)
 	}
@@ -121,18 +134,52 @@ func TestPreEvictionFilter(t *testing.T) {
 			want:    false,
 		},
 		{
-			name:    "zero request and positive usage blocks",
+			name:    "missing CPU request allows that dimension by default",
 			args:    testArgs(),
-			pod:     testPod("default", nil, "0", "0"),
+			pod:     testPod("default", nil, "0", "1Gi"),
+			metrics: testPodMetrics("default", []containerUsage{{name: "app", cpuMilli: 1, memoryBytes: 0}}),
+			want:    true,
+		},
+		{
+			name: "missing CPU request blocks with block policy",
+			args: &ActualUsageEvictorArgs{
+				CPUUsageThreshold: 0.8, MemoryUsageThreshold: 0.8,
+				MissingRequestPolicy: BlockMissingRequest,
+			},
+			pod:     testPod("default", nil, "0", "1Gi"),
 			metrics: testPodMetrics("default", []containerUsage{{name: "app", cpuMilli: 1, memoryBytes: 0}}),
 			want:    false,
 		},
 		{
-			name:    "zero request and zero usage allows",
+			name:    "both missing requests allow with allow policy",
 			args:    testArgs(),
 			pod:     testPod("default", nil, "0", "0"),
 			metrics: testPodMetrics("default", []containerUsage{{name: "app"}}),
 			want:    true,
+		},
+		{
+			name: "both missing requests block with block policy",
+			args: &ActualUsageEvictorArgs{
+				CPUUsageThreshold: 0.8, MemoryUsageThreshold: 0.8,
+				MissingRequestPolicy: BlockMissingRequest,
+			},
+			pod:     testPod("default", nil, "0", "0"),
+			metrics: testPodMetrics("default", []containerUsage{{name: "app"}}),
+			want:    false,
+		},
+		{
+			name:    "missing CPU request does not suppress busy memory",
+			args:    testArgs(),
+			pod:     testPod("default", nil, "0", "1Gi"),
+			metrics: testPodMetrics("default", []containerUsage{{name: "app", cpuMilli: 1, memoryBytes: 900 * 1024 * 1024}}),
+			want:    false,
+		},
+		{
+			name:    "missing memory request does not suppress busy CPU",
+			args:    testArgs(),
+			pod:     testPod("default", nil, "1000m", "0"),
+			metrics: testPodMetrics("default", []containerUsage{{name: "app", cpuMilli: 900, memoryBytes: 1}}),
+			want:    false,
 		},
 		{
 			name: "namespace outside include scope allows without metrics",
@@ -209,6 +256,19 @@ func TestPreEvictionFilter(t *testing.T) {
 			}),
 			want: false,
 		},
+		{
+			name: "one missing container request skips the whole resource dimension",
+			args: testArgs(),
+			pod: testPodWithContainers("default", nil, []containerRequest{
+				{name: "app", cpu: "1000m", memory: "512Mi"},
+				{name: "sidecar", cpu: "0", memory: "512Mi"},
+			}),
+			metrics: testPodMetrics("default", []containerUsage{
+				{name: "app", cpuMilli: 900, memoryBytes: 100 * 1024 * 1024},
+				{name: "sidecar", cpuMilli: 1, memoryBytes: 100 * 1024 * 1024},
+			}),
+			want: true,
+		},
 	}
 
 	for _, tc := range tests {
@@ -248,7 +308,7 @@ func TestAggregatePodResourcesRejectsMissingResourceMetric(t *testing.T) {
 		},
 	}}
 
-	if _, _, _, _, err := aggregatePodResources(pod, metrics); err == nil {
+	if _, err := aggregatePodResources(pod, metrics); err == nil {
 		t.Fatal("expected missing CPU metric to be rejected")
 	}
 }
@@ -266,7 +326,10 @@ type containerUsage struct {
 }
 
 func testArgs() *ActualUsageEvictorArgs {
-	return &ActualUsageEvictorArgs{CPUUsageThreshold: 0.8, MemoryUsageThreshold: 0.8}
+	return &ActualUsageEvictorArgs{
+		CPUUsageThreshold: 0.8, MemoryUsageThreshold: 0.8,
+		MissingRequestPolicy: AllowMissingRequest,
+	}
 }
 
 func testPod(namespace string, podLabels map[string]string, cpu, memory string) *v1.Pod {

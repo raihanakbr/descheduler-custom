@@ -13,6 +13,7 @@ profiles:
     args:
       cpuUsageThreshold: 0.80
       memoryUsageThreshold: 0.80
+      missingRequestPolicy: Allow
       namespaces:
         include:
         - actual-usage-exp

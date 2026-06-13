@@ -21,6 +21,16 @@ import (
 	"sigs.k8s.io/descheduler/pkg/api"
 )
 
+// MissingRequestPolicy controls eviction when a resource request is missing.
+type MissingRequestPolicy string
+
+const (
+	// AllowMissingRequest skips a resource dimension without a valid request.
+	AllowMissingRequest MissingRequestPolicy = "Allow"
+	// BlockMissingRequest blocks eviction when a resource request is missing.
+	BlockMissingRequest MissingRequestPolicy = "Block"
+)
+
 // +k8s:deepcopy-gen=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -35,6 +45,11 @@ type ActualUsageEvictorArgs struct {
 	// MemoryUsageThreshold is the actual memory usage divided by requested
 	// memory at which eviction is blocked. Default: 0.80.
 	MemoryUsageThreshold float64 `json:"memoryUsageThreshold,omitempty"`
+
+	// MissingRequestPolicy controls how a missing CPU or memory request is
+	// evaluated. Allow skips that resource dimension; Block prevents eviction.
+	// Default: Allow.
+	MissingRequestPolicy MissingRequestPolicy `json:"missingRequestPolicy,omitempty"`
 
 	// Namespaces optionally limits the pods evaluated by this plugin.
 	Namespaces *api.Namespaces `json:"namespaces,omitempty"`

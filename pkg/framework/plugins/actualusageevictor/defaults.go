@@ -21,6 +21,7 @@ import "k8s.io/apimachinery/pkg/runtime"
 const (
 	defaultCPUUsageThreshold    = 0.80
 	defaultMemoryUsageThreshold = 0.80
+	defaultMissingRequestPolicy = AllowMissingRequest
 )
 
 func addDefaultingFuncs(scheme *runtime.Scheme) error {
@@ -35,5 +36,8 @@ func SetDefaults_ActualUsageEvictorArgs(obj runtime.Object) {
 	}
 	if args.MemoryUsageThreshold == 0 {
 		args.MemoryUsageThreshold = defaultMemoryUsageThreshold
+	}
+	if args.MissingRequestPolicy == "" {
+		args.MissingRequestPolicy = defaultMissingRequestPolicy
 	}
 }

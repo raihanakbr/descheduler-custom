@@ -19,7 +19,6 @@ package actualusageevictor
 import (
 	"context"
 	"fmt"
-	"math"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -107,25 +106,42 @@ func (a *ActualUsageEvictor) PreEvictionFilter(pod *v1.Pod) bool {
 		return false
 	}
 
-	requestCPU, requestMemory, usageCPU, usageMemory, err := aggregatePodResources(pod, metrics.Containers)
+	resources, err := aggregatePodResources(pod, metrics.Containers)
 	if err != nil {
 		a.logger.Error(err, "Incomplete pod metrics, blocking eviction", "pod", klog.KObj(pod))
 		return false
 	}
 
-	cpuRatio, cpuBusy := usageRatio(requestCPU, usageCPU, a.args.CPUUsageThreshold)
-	memoryRatio, memoryBusy := usageRatio(requestMemory, usageMemory, a.args.MemoryUsageThreshold)
+	cpuRatio, cpuBusy := a.evaluateResource(
+		pod,
+		v1.ResourceCPU,
+		resources.requestCPU,
+		resources.usageCPU,
+		resources.cpuRequestMissing,
+		a.args.CPUUsageThreshold,
+	)
+	memoryRatio, memoryBusy := a.evaluateResource(
+		pod,
+		v1.ResourceMemory,
+		resources.requestMemory,
+		resources.usageMemory,
+		resources.memoryRequestMissing,
+		a.args.MemoryUsageThreshold,
+	)
 	if cpuBusy || memoryBusy {
 		a.logger.V(1).Info("Pod usage is above eviction threshold, blocking eviction",
 			"pod", klog.KObj(pod),
-			"cpuUsageMilli", usageCPU,
-			"cpuRequestMilli", requestCPU,
+			"cpuUsageMilli", resources.usageCPU,
+			"cpuRequestMilli", resources.requestCPU,
+			"cpuRequestMissing", resources.cpuRequestMissing,
 			"cpuRatio", cpuRatio,
 			"cpuThreshold", a.args.CPUUsageThreshold,
-			"memoryUsageBytes", usageMemory,
-			"memoryRequestBytes", requestMemory,
+			"memoryUsageBytes", resources.usageMemory,
+			"memoryRequestBytes", resources.requestMemory,
+			"memoryRequestMissing", resources.memoryRequestMissing,
 			"memoryRatio", memoryRatio,
 			"memoryThreshold", a.args.MemoryUsageThreshold,
+			"missingRequestPolicy", a.args.MissingRequestPolicy,
 		)
 		return false
 	}
@@ -136,8 +152,23 @@ func (a *ActualUsageEvictor) PreEvictionFilter(pod *v1.Pod) bool {
 		"cpuThreshold", a.args.CPUUsageThreshold,
 		"memoryRatio", memoryRatio,
 		"memoryThreshold", a.args.MemoryUsageThreshold,
+		"missingRequestPolicy", a.args.MissingRequestPolicy,
 	)
 	return true
+}
+
+func (a *ActualUsageEvictor) evaluateResource(pod *v1.Pod, resourceName v1.ResourceName, request, usage int64, requestMissing bool, threshold float64) (float64, bool) {
+	if requestMissing {
+		block := a.args.MissingRequestPolicy == BlockMissingRequest
+		a.logger.V(1).Info("Pod resource request is missing, applying configured policy",
+			"pod", klog.KObj(pod),
+			"resource", resourceName,
+			"missingRequestPolicy", a.args.MissingRequestPolicy,
+			"blocking", block,
+		)
+		return 0, block
+	}
+	return usageRatio(request, usage, threshold)
 }
 
 func (a *ActualUsageEvictor) inScope(pod *v1.Pod) bool {
@@ -153,42 +184,56 @@ func (a *ActualUsageEvictor) inScope(pod *v1.Pod) bool {
 	return true
 }
 
-func aggregatePodResources(pod *v1.Pod, containerMetrics []metricsv1beta1.ContainerMetrics) (requestCPU, requestMemory, usageCPU, usageMemory int64, err error) {
+type podResources struct {
+	requestCPU           int64
+	requestMemory        int64
+	usageCPU             int64
+	usageMemory          int64
+	cpuRequestMissing    bool
+	memoryRequestMissing bool
+}
+
+func aggregatePodResources(pod *v1.Pod, containerMetrics []metricsv1beta1.ContainerMetrics) (podResources, error) {
 	metricsByContainer := make(map[string]v1.ResourceList, len(containerMetrics))
 	for _, metrics := range containerMetrics {
 		metricsByContainer[metrics.Name] = metrics.Usage
 	}
 
+	var resources podResources
 	for _, container := range pod.Spec.Containers {
-		requestCPU += container.Resources.Requests.Cpu().MilliValue()
-		requestMemory += container.Resources.Requests.Memory().Value()
+		cpuRequest := container.Resources.Requests.Cpu()
+		memoryRequest := container.Resources.Requests.Memory()
+		if cpuRequest.IsZero() {
+			resources.cpuRequestMissing = true
+		} else {
+			resources.requestCPU += cpuRequest.MilliValue()
+		}
+		if memoryRequest.IsZero() {
+			resources.memoryRequestMissing = true
+		} else {
+			resources.requestMemory += memoryRequest.Value()
+		}
 
 		usage, ok := metricsByContainer[container.Name]
 		if !ok {
-			return 0, 0, 0, 0, fmt.Errorf("container %q has no metrics", container.Name)
+			return podResources{}, fmt.Errorf("container %q has no metrics", container.Name)
 		}
 		cpu, ok := usage[v1.ResourceCPU]
 		if !ok {
-			return 0, 0, 0, 0, fmt.Errorf("container %q metrics have no CPU usage", container.Name)
+			return podResources{}, fmt.Errorf("container %q metrics have no CPU usage", container.Name)
 		}
 		memory, ok := usage[v1.ResourceMemory]
 		if !ok {
-			return 0, 0, 0, 0, fmt.Errorf("container %q metrics have no memory usage", container.Name)
+			return podResources{}, fmt.Errorf("container %q metrics have no memory usage", container.Name)
 		}
-		usageCPU += cpu.MilliValue()
-		usageMemory += memory.Value()
+		resources.usageCPU += cpu.MilliValue()
+		resources.usageMemory += memory.Value()
 	}
 
-	return requestCPU, requestMemory, usageCPU, usageMemory, nil
+	return resources, nil
 }
 
 func usageRatio(request, usage int64, threshold float64) (float64, bool) {
-	if request == 0 {
-		if usage > 0 {
-			return math.Inf(1), true
-		}
-		return 0, false
-	}
 	ratio := float64(usage) / float64(request)
 	return ratio, ratio >= threshold
 }

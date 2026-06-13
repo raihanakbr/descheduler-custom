@@ -35,6 +35,9 @@ func ValidateActualUsageEvictorArgs(obj runtime.Object) error {
 	if args.MemoryUsageThreshold <= 0 {
 		allErrs = append(allErrs, fmt.Errorf("memoryUsageThreshold must be greater than 0, got %v", args.MemoryUsageThreshold))
 	}
+	if args.MissingRequestPolicy != AllowMissingRequest && args.MissingRequestPolicy != BlockMissingRequest {
+		allErrs = append(allErrs, fmt.Errorf("missingRequestPolicy must be one of %q or %q, got %q", AllowMissingRequest, BlockMissingRequest, args.MissingRequestPolicy))
+	}
 	if args.Namespaces != nil && len(args.Namespaces.Include) > 0 && len(args.Namespaces.Exclude) > 0 {
 		allErrs = append(allErrs, fmt.Errorf("only one of Include/Exclude namespaces can be set"))
 	}
