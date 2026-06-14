@@ -109,7 +109,8 @@ RDC2 comparison.
 
 The runners do not modify kube-scheduler. They require the default
 LeastAllocated behavior. If HNU was run previously, restore the original
-kube-scheduler manifest before running LNU.
+kube-scheduler manifest with `hnu/scripts/restore-scheduler.sh` before running
+LNU. The LNU runner fails fast when it detects the HNU scheduler config.
 
 ## Acceptance Criteria
 

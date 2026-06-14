@@ -29,7 +29,14 @@ fallback.
 
 The scheduler must use its default LeastAllocated behavior. LNU does not
 install scheduler configuration. If the HNU experiment changed the scheduler,
-restore `/etc/kubernetes/kube-scheduler.yaml.pre-hnu` before this experiment.
+restore it before this experiment:
+
+```bash
+./hnu/scripts/restore-scheduler.sh
+```
+
+The LNU runner exits before changing workload state when it detects the HNU
+`/etc/kubernetes/scheduler-config.yaml` argument.
 
 ## Run L0
 

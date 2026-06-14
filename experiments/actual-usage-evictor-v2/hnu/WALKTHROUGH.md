@@ -57,6 +57,14 @@ kubectl -n kube-system get pod -l component=kube-scheduler \
 echo
 ```
 
+The HNU scheduler configuration remains active after a successful run. Restore
+the original scheduler before running experiments that require default
+LeastAllocated behavior:
+
+```bash
+./hnu/scripts/restore-scheduler.sh
+```
+
 ## Run H0
 
 ```bash
