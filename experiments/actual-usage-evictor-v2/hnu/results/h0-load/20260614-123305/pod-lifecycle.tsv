@@ -1,0 +1,27 @@
+timestamp	pod	uid	owner	node	phase	ready	deletionTimestamp
+2026-06-14T12:34:25.353912+00:00	workload-api-5dd89457c6-9vt2z	d62c36aa-fa08-48aa-8c44-aeda5aba3cf7	workload-api-5dd89457c6	worker-6	Running	true	
+2026-06-14T12:34:25.353912+00:00	workload-destination-1-5f6d897967-6zsjn	618bceb7-b192-487f-b305-42db86302e80	workload-destination-1-5f6d897967	worker-1	Running	true	
+2026-06-14T12:34:25.353912+00:00	workload-destination-1-5f6d897967-lncjv	420884d3-5d05-4b97-a385-49a1ff146469	workload-destination-1-5f6d897967	worker-1	Running	true	
+2026-06-14T12:34:25.353912+00:00	workload-destination-2-7c84d94cdb-9x4f2	84c1f765-fe89-4d8c-a55c-cecd544e7209	workload-destination-2-7c84d94cdb	worker-2	Running	true	
+2026-06-14T12:34:25.353912+00:00	workload-destination-2-7c84d94cdb-dcblj	87ba4877-97eb-48bf-88ac-8b7f46ac75e5	workload-destination-2-7c84d94cdb	worker-2	Running	true	
+2026-06-14T12:34:25.353912+00:00	workload-destination-3-57957d8b7c-9xl9m	fcb39773-a373-4f1b-b0e6-80415d041439	workload-destination-3-57957d8b7c	worker-3	Running	true	
+2026-06-14T12:34:25.353912+00:00	workload-destination-3-57957d8b7c-ctvgg	bcf4d62e-f0fd-4540-bdb6-f563b2850f26	workload-destination-3-57957d8b7c	worker-3	Running	true	
+2026-06-14T12:34:25.353912+00:00	workload-idle-source-1-649f7d9b48-bsmdv	1cd18574-c768-41c3-bfd4-5289d85d4905	workload-idle-source-1-649f7d9b48	worker-4	Running	true	
+2026-06-14T12:34:25.353912+00:00	workload-idle-source-2-958bdc7ff-sw6cr	67cdecef-5363-41a3-945e-56d5bfd9b6cb	workload-idle-source-2-958bdc7ff	worker-5	Running	true	
+2026-06-14T12:35:09.638989+00:00	workload-api-5dd89457c6-9vt2z	d62c36aa-fa08-48aa-8c44-aeda5aba3cf7	workload-api-5dd89457c6	worker-6	Running	true	2026-06-14T12:35:44Z
+2026-06-14T12:35:09.638989+00:00	workload-api-5dd89457c6-j6xgn	48d83cd8-abf9-4820-b95c-faf0205ccd80	workload-api-5dd89457c6	worker-3	Pending	false	
+2026-06-14T12:35:09.638989+00:00	workload-idle-source-1-649f7d9b48-bsmdv	1cd18574-c768-41c3-bfd4-5289d85d4905	workload-idle-source-1-649f7d9b48	worker-4	Running	true	2026-06-14T12:35:43Z
+2026-06-14T12:35:09.638989+00:00	workload-idle-source-1-649f7d9b48-xtfrm	d0d03d84-c525-49d6-a43f-882ed57d3a76	workload-idle-source-1-649f7d9b48	worker-1	Pending	false	
+2026-06-14T12:35:09.638989+00:00	workload-idle-source-2-958bdc7ff-flqk9	22155f12-9182-489a-9679-4120c52c4284	workload-idle-source-2-958bdc7ff	worker-1	Pending	false	
+2026-06-14T12:35:09.638989+00:00	workload-idle-source-2-958bdc7ff-sw6cr	67cdecef-5363-41a3-945e-56d5bfd9b6cb	workload-idle-source-2-958bdc7ff	worker-5	Running	true	2026-06-14T12:35:43Z
+2026-06-14T12:35:10.740844+00:00	workload-api-5dd89457c6-9vt2z	d62c36aa-fa08-48aa-8c44-aeda5aba3cf7	workload-api-5dd89457c6	worker-6	Running	false	2026-06-14T12:35:44Z
+2026-06-14T12:35:10.740844+00:00	workload-api-5dd89457c6-j6xgn	48d83cd8-abf9-4820-b95c-faf0205ccd80	workload-api-5dd89457c6	worker-3	Running	false	
+2026-06-14T12:35:10.740844+00:00	workload-idle-source-1-649f7d9b48-bsmdv	1cd18574-c768-41c3-bfd4-5289d85d4905	workload-idle-source-1-649f7d9b48	worker-4	Running	false	2026-06-14T12:35:43Z
+2026-06-14T12:35:10.740844+00:00	workload-idle-source-1-649f7d9b48-xtfrm	d0d03d84-c525-49d6-a43f-882ed57d3a76	workload-idle-source-1-649f7d9b48	worker-1	Running	false	
+2026-06-14T12:35:10.740844+00:00	workload-idle-source-2-958bdc7ff-flqk9	22155f12-9182-489a-9679-4120c52c4284	workload-idle-source-2-958bdc7ff	worker-1	Running	false	
+2026-06-14T12:35:10.740844+00:00	workload-idle-source-2-958bdc7ff-sw6cr	67cdecef-5363-41a3-945e-56d5bfd9b6cb	workload-idle-source-2-958bdc7ff	worker-5	Running	false	2026-06-14T12:35:43Z
+2026-06-14T12:35:11.918521+00:00	workload-api-5dd89457c6-j6xgn	48d83cd8-abf9-4820-b95c-faf0205ccd80	workload-api-5dd89457c6	worker-3	Running	true	
+2026-06-14T12:35:11.918521+00:00	workload-idle-source-1-649f7d9b48-xtfrm	d0d03d84-c525-49d6-a43f-882ed57d3a76	workload-idle-source-1-649f7d9b48	worker-1	Running	true	
+2026-06-14T12:35:11.918521+00:00	workload-idle-source-2-958bdc7ff-flqk9	22155f12-9182-489a-9679-4120c52c4284	workload-idle-source-2-958bdc7ff	worker-1	Running	true	
+2026-06-14T12:35:14.148786+00:00	workload-idle-source-1-649f7d9b48-bsmdv	1cd18574-c768-41c3-bfd4-5289d85d4905	workload-idle-source-1-649f7d9b48	worker-4	Succeeded	false	2026-06-14T12:35:14Z
+2026-06-14T12:35:14.148786+00:00	workload-idle-source-2-958bdc7ff-sw6cr	67cdecef-5363-41a3-945e-56d5bfd9b6cb	workload-idle-source-2-958bdc7ff	worker-5	Succeeded	false	2026-06-14T12:35:43Z

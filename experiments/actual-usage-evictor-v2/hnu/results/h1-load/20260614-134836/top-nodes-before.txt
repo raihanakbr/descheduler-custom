@@ -1,0 +1,8 @@
+NAME           CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)   
+controlplane   376m         18%      1687Mi          45%         
+worker-1       128m         6%       341Mi           42%         
+worker-2       125m         6%       343Mi           42%         
+worker-3       33m          1%       287Mi           35%         
+worker-4       28m          1%       410Mi           50%         
+worker-5       30m          1%       345Mi           42%         
+worker-6       36m          1%       399Mi           49%         
