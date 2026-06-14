@@ -40,8 +40,9 @@ Run the experiment from the control plane. Each H0/H1 runner automatically:
 3. Adds the scheduler `--config` argument and hostPath mount idempotently.
 4. Waits until the recreated kube-scheduler Pod is Ready.
 
-The setup requires interactive `sudo` access and `python3-yaml` on the control
-plane. It is safe to run again: existing arguments, mounts, and volumes are
+The setup requires passwordless `sudo` and `python3-yaml` on the control plane.
+All privileged commands use `sudo -n`, so the script never prompts for a
+password. It is safe to run again: existing arguments, mounts, and volumes are
 replaced rather than duplicated, and an unchanged manifest is not rewritten.
 If the scheduler fails to become Ready, the script restores the backup.
 

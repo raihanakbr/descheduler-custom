@@ -20,23 +20,26 @@ command -v sudo >/dev/null || {
   exit 1
 }
 
-echo "[hnu-scheduler] requesting sudo access"
-sudo -v
-sudo python3 -c 'import yaml' >/dev/null 2>&1 || {
+echo "[hnu-scheduler] verifying passwordless sudo access"
+sudo -n true >/dev/null 2>&1 || {
+  echo "ERROR: passwordless sudo is required on the control plane" >&2
+  exit 1
+}
+sudo -n python3 -c 'import yaml' >/dev/null 2>&1 || {
   echo "ERROR: PyYAML is required for root's python3 (install python3-yaml)" >&2
   exit 1
 }
 
-if ! sudo test -f "$BACKUP"; then
+if ! sudo -n test -f "$BACKUP"; then
   echo "[hnu-scheduler] backing up static Pod manifest to $BACKUP"
-  sudo cp --preserve=mode,ownership,timestamps "$MANIFEST" "$BACKUP"
+  sudo -n cp --preserve=mode,ownership,timestamps "$MANIFEST" "$BACKUP"
 fi
 
 echo "[hnu-scheduler] installing NodeResourcesFit/MostAllocated config"
-sudo install -o root -g root -m 0644 "$SOURCE_CONFIG" "$TARGET_CONFIG"
+sudo -n install -o root -g root -m 0644 "$SOURCE_CONFIG" "$TARGET_CONFIG"
 
 echo "[hnu-scheduler] configuring kube-scheduler static Pod"
-sudo python3 "$HNU_ROOT/scripts/configure-scheduler-manifest.py" \
+sudo -n python3 "$HNU_ROOT/scripts/configure-scheduler-manifest.py" \
   --manifest "$MANIFEST"
 
 echo "[hnu-scheduler] waiting for kube-scheduler to reload"
@@ -62,7 +65,7 @@ echo "ERROR: kube-scheduler did not become Ready with the HNU config" >&2
 kubectl -n kube-system get pods -l component=kube-scheduler -o wide >&2 || true
 kubectl -n kube-system logs -l component=kube-scheduler --tail=80 >&2 || true
 echo "[hnu-scheduler] restoring $BACKUP" >&2
-sudo cp --preserve=mode,ownership,timestamps "$BACKUP" "$MANIFEST"
+sudo -n cp --preserve=mode,ownership,timestamps "$BACKUP" "$MANIFEST"
 kubectl -n kube-system wait \
   --for=condition=Ready pod \
   -l component=kube-scheduler \
