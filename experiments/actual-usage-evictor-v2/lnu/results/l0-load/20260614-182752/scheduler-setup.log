@@ -1,0 +1,5 @@
+[lnu-scheduler] HNU MostAllocated configuration detected
+[hnu-scheduler] restoring original static Pod manifest from /etc/kubernetes/kube-scheduler.yaml.pre-hnu
+[hnu-scheduler] waiting for kube-scheduler to reload
+[hnu-scheduler] original scheduler manifest restored
+["kube-scheduler","--authentication-kubeconfig=/etc/kubernetes/scheduler.conf","--authorization-kubeconfig=/etc/kubernetes/scheduler.conf","--bind-address=127.0.0.1","--kubeconfig=/etc/kubernetes/scheduler.conf","--leader-elect=true"]

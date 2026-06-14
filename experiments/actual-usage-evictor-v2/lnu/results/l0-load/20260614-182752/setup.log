@@ -1,0 +1,111 @@
+namespace/actual-usage-exp created
+deployment.apps/workload-destination-1 created
+deployment.apps/workload-destination-2 created
+deployment.apps/workload-destination-3 created
+deployment.apps/workload-idle-source-1 created
+deployment.apps/workload-idle-source-2 created
+deployment.apps/workload-api created
+deployment.apps/workload-api-fallback created
+service/workload-api created
+poddisruptionbudget.policy/workload created
+deployment.apps/workload-api condition met
+deployment.apps/workload-api-fallback condition met
+deployment.apps/workload-destination-1 condition met
+deployment.apps/workload-destination-2 condition met
+deployment.apps/workload-destination-3 condition met
+deployment.apps/workload-idle-source-1 condition met
+deployment.apps/workload-idle-source-2 condition met
+{
+  "api_pod": "workload-api-6bb6488d57-lmg8v",
+  "busy_source": "worker-6",
+  "destinations": [
+    "worker-1",
+    "worker-2",
+    "worker-3"
+  ],
+  "experiment_pods": 9,
+  "node_details": {
+    "worker-1": {
+      "cpu_fraction": 0.075,
+      "experiment_pods": [
+        "workload-destination-1-547b7db457-8cdsk"
+      ],
+      "memory_fraction": 0.123652,
+      "overutilized": false,
+      "underutilized": true
+    },
+    "worker-2": {
+      "cpu_fraction": 0.075,
+      "experiment_pods": [
+        "workload-destination-2-868fd7d4d-m98sj"
+      ],
+      "memory_fraction": 0.123652,
+      "overutilized": false,
+      "underutilized": true
+    },
+    "worker-3": {
+      "cpu_fraction": 0.075,
+      "experiment_pods": [
+        "workload-destination-3-69c558f7f5-5pxzh"
+      ],
+      "memory_fraction": 0.123652,
+      "overutilized": false,
+      "underutilized": true
+    },
+    "worker-4": {
+      "cpu_fraction": 0.1,
+      "experiment_pods": [
+        "workload-idle-source-1-686899d487-khfb5",
+        "workload-idle-source-1-686899d487-z9g9p"
+      ],
+      "memory_fraction": 0.556441,
+      "overutilized": true,
+      "underutilized": false
+    },
+    "worker-5": {
+      "cpu_fraction": 0.1,
+      "experiment_pods": [
+        "workload-idle-source-2-5b6d84f756-lkx6k",
+        "workload-idle-source-2-5b6d84f756-qw8kp"
+      ],
+      "memory_fraction": 0.556436,
+      "overutilized": true,
+      "underutilized": false
+    },
+    "worker-6": {
+      "cpu_fraction": 0.1,
+      "experiment_pods": [
+        "workload-api-6bb6488d57-lmg8v",
+        "workload-api-fallback-cdfb4b6c7-qtlvd"
+      ],
+      "memory_fraction": 0.556436,
+      "overutilized": true,
+      "underutilized": false
+    }
+  },
+  "overutilized_sources": [
+    "worker-4",
+    "worker-5",
+    "worker-6"
+  ],
+  "sources": [
+    "worker-4",
+    "worker-5",
+    "worker-6"
+  ],
+  "underutilized_destinations": [
+    "worker-1",
+    "worker-2",
+    "worker-3"
+  ]
+}
+NAME                                      READY   STATUS    RESTARTS   AGE   IP             NODE       NOMINATED NODE   READINESS GATES
+workload-destination-1-547b7db457-8cdsk   1/1     Running   0          26s   10.244.1.127   worker-1   <none>           <none>
+workload-destination-2-868fd7d4d-m98sj    1/1     Running   0          22s   10.244.2.134   worker-2   <none>           <none>
+workload-destination-3-69c558f7f5-5pxzh   1/1     Running   0          19s   10.244.3.86    worker-3   <none>           <none>
+workload-idle-source-1-686899d487-khfb5   1/1     Running   0          16s   10.244.4.81    worker-4   <none>           <none>
+workload-idle-source-1-686899d487-z9g9p   1/1     Running   0          16s   10.244.4.80    worker-4   <none>           <none>
+workload-idle-source-2-5b6d84f756-lkx6k   1/1     Running   0          12s   10.244.5.74    worker-5   <none>           <none>
+workload-idle-source-2-5b6d84f756-qw8kp   1/1     Running   0          12s   10.244.5.75    worker-5   <none>           <none>
+workload-api-6bb6488d57-lmg8v             1/1     Running   0          9s    10.244.6.43    worker-6   <none>           <none>
+workload-api-fallback-cdfb4b6c7-qtlvd     1/1     Running   0          6s    10.244.6.44    worker-6   <none>           <none>

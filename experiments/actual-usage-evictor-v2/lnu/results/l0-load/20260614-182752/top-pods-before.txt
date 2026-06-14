@@ -1,0 +1,4 @@
+POD                                       NAME       CPU(cores)   MEMORY(bytes)   
+workload-destination-1-547b7db457-8cdsk   workload   2m           1Mi             
+workload-destination-2-868fd7d4d-m98sj    workload   2m           1Mi             
+workload-destination-3-69c558f7f5-5pxzh   workload   3m           1Mi             

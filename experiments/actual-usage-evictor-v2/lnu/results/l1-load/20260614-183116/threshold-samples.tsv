@@ -1,0 +1,3 @@
+timestamp	pod	resource	usage	request	ratio	threshold	above
+2026-06-14T18:32:44.000705+00:00	workload-api-6bb6488d57-vpz65	cpu	505041149n	50m	10.100823	0.80	true
+2026-06-14T18:32:54.067674+00:00	workload-api-6bb6488d57-vpz65	cpu	505041149n	50m	10.100823	0.80	true

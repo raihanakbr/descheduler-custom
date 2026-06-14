@@ -1,0 +1,17 @@
+{
+  "active_node_names": [
+    "worker-1",
+    "worker-2",
+    "worker-3",
+    "worker-4",
+    "worker-5",
+    "worker-6"
+  ],
+  "active_nodes_after": 6,
+  "actual_usage_blocks": 1,
+  "api_node_after": "worker-6",
+  "api_pod_after": "workload-api-6bb6488d57-vpz65",
+  "evictions": 3,
+  "original_api_remains": true,
+  "system": "L1"
+}
