@@ -1,5 +1,9 @@
 apiVersion: kubescheduler.config.k8s.io/v1
 kind: KubeSchedulerConfiguration
+clientConnection:
+  kubeconfig: /etc/kubernetes/scheduler.conf
+leaderElection:
+  leaderElect: true
 profiles:
 - schedulerName: default-scheduler
   pluginConfig:

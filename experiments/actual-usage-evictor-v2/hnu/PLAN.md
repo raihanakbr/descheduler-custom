@@ -120,6 +120,10 @@ kube-scheduler static Pod idempotently, and waits for it to become Ready. The
 original manifest is backed up once outside the static-manifest directory as
 `/etc/kubernetes/kube-scheduler.yaml.pre-hnu`.
 
+The scheduler configuration sets
+`clientConnection.kubeconfig: /etc/kubernetes/scheduler.conf`; static
+kube-scheduler Pods do not have an in-cluster service-account token.
+
 ## Reused Parent Components
 
 The HNU runner reuses the parent v2 preflight, cleanup, k6 workload, Metrics

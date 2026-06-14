@@ -29,6 +29,18 @@ sudo -n python3 -c 'import yaml' >/dev/null 2>&1 || {
   echo "ERROR: PyYAML is required for root's python3 (install python3-yaml)" >&2
   exit 1
 }
+python3 - "$SOURCE_CONFIG" <<'PY'
+import sys
+import yaml
+
+config = yaml.safe_load(open(sys.argv[1]))
+kubeconfig = config.get("clientConnection", {}).get("kubeconfig")
+if kubeconfig != "/etc/kubernetes/scheduler.conf":
+    raise SystemExit(
+        "ERROR: scheduler config must set "
+        "clientConnection.kubeconfig=/etc/kubernetes/scheduler.conf"
+    )
+PY
 
 if ! sudo -n test -f "$BACKUP"; then
   echo "[hnu-scheduler] backing up static Pod manifest to $BACKUP"

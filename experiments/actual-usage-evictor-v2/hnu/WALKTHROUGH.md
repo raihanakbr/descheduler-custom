@@ -34,7 +34,8 @@ Run the experiment from the control plane. Each H0/H1 runner automatically:
 
 1. Installs the NodeResourcesFit/MostAllocated configuration from
    `hnu/scheduler/most-allocated-config.yaml` as
-   `/etc/kubernetes/scheduler-config.yaml`.
+   `/etc/kubernetes/scheduler-config.yaml`. The config explicitly uses
+   `/etc/kubernetes/scheduler.conf` for API access.
 2. Creates the one-time backup
    `/etc/kubernetes/kube-scheduler.yaml.pre-hnu`.
 3. Adds the scheduler `--config` argument and hostPath mount idempotently.
