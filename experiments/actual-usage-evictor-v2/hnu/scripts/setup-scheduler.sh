@@ -57,14 +57,13 @@ sudo -n python3 "$HNU_ROOT/scripts/configure-scheduler-manifest.py" \
 echo "[hnu-scheduler] waiting for kube-scheduler to reload"
 deadline=$((SECONDS + 180))
 while (( SECONDS < deadline )); do
-  command_line="$(kubectl -n kube-system get pods -l component=kube-scheduler \
-    -o jsonpath='{range .items[*]}{.status.phase}{"|"}{range .spec.containers[?(@.name=="kube-scheduler")].command[*]}{.}{" "}{end}{"\n"}{end}' \
-    2>/dev/null || true)"
-  if grep -q 'Running|.*--config=/etc/kubernetes/scheduler-config.yaml' <<<"$command_line"; then
-    if kubectl -n kube-system wait \
-      --for=condition=Ready pod \
-      -l component=kube-scheduler \
-      --timeout=10s >/dev/null 2>&1; then
+  if kubectl -n kube-system wait \
+    --for=condition=Ready pod \
+    -l component=kube-scheduler \
+    --timeout=5s >/dev/null 2>&1; then
+    command_line="$(kubectl -n kube-system get pods -l component=kube-scheduler \
+      -o jsonpath='{.items[0].spec.containers[0].command}' 2>/dev/null || true)"
+    if grep -q -- '--config=/etc/kubernetes/scheduler-config.yaml' <<<"$command_line"; then
       echo "[hnu-scheduler] scheduler is Ready with $TARGET_CONFIG"
       printf '%s\n' "$command_line"
       exit 0
