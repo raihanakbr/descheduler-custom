@@ -1,0 +1,47 @@
+apiVersion: descheduler/v1alpha2
+kind: DeschedulerPolicy
+metricsProviders:
+- source: KubernetesMetrics
+maxNoOfPodsToEvictTotal: 3
+profiles:
+- name: actual-usage-lnu-l1
+  pluginConfig:
+  - name: DefaultEvictor
+    args:
+      nodeFit: true
+  - name: ActualUsageEvictor
+    args:
+      cpuUsageThreshold: 0.80
+      memoryUsageThreshold: 0.80
+      missingRequestPolicy: Allow
+      namespaces:
+        include:
+        - actual-usage-exp
+      labelSelector:
+        matchLabels:
+          experiment: actual-usage-evictor
+  - name: LowNodeUtilization
+    args:
+      thresholds:
+        cpu: 20
+        memory: 20
+      targetThresholds:
+        cpu: 50
+        memory: 50
+      evictableNamespaces:
+        exclude:
+        - kube-system
+        - kube-public
+        - kube-node-lease
+        - default
+  plugins:
+    filter:
+      enabled:
+      - DefaultEvictor
+    preevictionfilter:
+      enabled:
+      - DefaultEvictor
+      - ActualUsageEvictor
+    balance:
+      enabled:
+      - LowNodeUtilization
