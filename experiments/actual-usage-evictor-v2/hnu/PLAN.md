@@ -113,6 +113,13 @@ Each comparison is a single independent run:
 There is no repeat loop or run suite. Each runner resets and recreates the
 layout before running.
 
+Each H0/H1 runner automatically installs
+`hnu/scheduler/most-allocated-config.yaml` as
+`/etc/kubernetes/scheduler-config.yaml`, patches the control-plane
+kube-scheduler static Pod idempotently, and waits for it to become Ready. The
+original manifest is backed up once outside the static-manifest directory as
+`/etc/kubernetes/kube-scheduler.yaml.pre-hnu`.
+
 ## Reused Parent Components
 
 The HNU runner reuses the parent v2 preflight, cleanup, k6 workload, Metrics
@@ -137,8 +144,8 @@ The runner defaults to
 
 ## Threats to Validity
 
-1. The active-node result assumes the cluster scheduler uses the existing
-   MostAllocated + BalancedAllocation packing configuration.
+1. The active-node result assumes the cluster scheduler uses
+   NodeResourcesFit with the MostAllocated scoring strategy.
 2. HNU source ordering uses aggregate requested resources. The unequal source
    memory requests make the busy source sort after the idle sources.
 3. A single API replica intentionally amplifies eviction impact. The experiment

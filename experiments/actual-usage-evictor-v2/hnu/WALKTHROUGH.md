@@ -28,6 +28,33 @@ export ACTIVE_WORKERS="worker-1 worker-2 worker-3 worker-4 worker-5 worker-6"
 The order matters: the first three are destinations, workers four and five
 are idle sources, and worker six is the busy API source.
 
+## Control-Plane Scheduler
+
+Run the experiment from the control plane. Each H0/H1 runner automatically:
+
+1. Installs the NodeResourcesFit/MostAllocated configuration from
+   `hnu/scheduler/most-allocated-config.yaml` as
+   `/etc/kubernetes/scheduler-config.yaml`.
+2. Creates the one-time backup
+   `/etc/kubernetes/kube-scheduler.yaml.pre-hnu`.
+3. Adds the scheduler `--config` argument and hostPath mount idempotently.
+4. Waits until the recreated kube-scheduler Pod is Ready.
+
+The setup requires interactive `sudo` access and `python3-yaml` on the control
+plane. It is safe to run again: existing arguments, mounts, and volumes are
+replaced rather than duplicated, and an unchanged manifest is not rewritten.
+If the scheduler fails to become Ready, the script restores the backup.
+
+To run only the scheduler setup or inspect its output:
+
+```bash
+./hnu/scripts/setup-scheduler.sh
+
+kubectl -n kube-system get pod -l component=kube-scheduler \
+  -o jsonpath='{.items[0].spec.containers[0].command}'
+echo
+```
+
 ## Run H0
 
 ```bash
@@ -36,13 +63,14 @@ are idle sources, and worker six is the busy API source.
 
 The script:
 
-1. Cleans the previous namespace and descheduler Job.
-2. Runs the parent six-worker preflight.
-3. Creates and validates the HNU layout.
-4. Starts the API lifecycle watcher and k6.
-5. Waits for two API CPU samples at or above ratio 0.80.
-6. Runs HNU without ActualUsageEvictor.
-7. Captures the final layout and validates the expected result.
+1. Configures and verifies the control-plane packing scheduler.
+2. Cleans the previous namespace and descheduler Job.
+3. Runs the parent six-worker preflight.
+4. Creates and validates the HNU layout.
+5. Starts the API lifecycle watcher and k6.
+6. Waits for two API CPU samples at or above ratio 0.80.
+7. Runs HNU without ActualUsageEvictor.
+8. Captures the final layout and validates the expected result.
 
 Expected validation:
 
@@ -96,6 +124,7 @@ Important files:
 | File | Purpose |
 |---|---|
 | `layout-validation.json` | Initial source/destination classification |
+| `scheduler-setup.log` | Automatic scheduler installation and readiness |
 | `threshold-samples.tsv` | Actual API CPU ratio before descheduling |
 | `descheduler.log` | HNU evictions and ActualUsageEvictor decisions |
 | `pod-lifecycle.tsv` | Original and replacement API lifecycle |

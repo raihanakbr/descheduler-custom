@@ -52,13 +52,16 @@ trap cleanup_processes EXIT
 : "${WORKLOAD_IMAGE:=docker.io/matthewhjt/workload-http:actual-usage-v1}"
 export DESCHEDULER_IMAGE WORKLOAD_IMAGE
 
-log "step 1/11: cleanup previous state"
+log "step 1/12: configure control-plane scheduler"
+"$HNU_ROOT/scripts/setup-scheduler.sh" | tee "$OUTPUT_DIR/scheduler-setup.log"
+
+log "step 2/12: cleanup previous state"
 "$PARENT_ROOT/scripts/cleanup.sh"
 
-log "step 2/11: parent preflight"
+log "step 3/12: parent preflight"
 "$PARENT_ROOT/scripts/preflight.sh" | tee "$OUTPUT_DIR/preflight.txt"
 
-log "step 3/11: deploy and validate HNU layout"
+log "step 4/12: deploy and validate HNU layout"
 "$HNU_ROOT/scripts/setup-layout.sh" | tee "$OUTPUT_DIR/setup.log"
 
 source_node="$(cat "$OUTPUT_DIR/source-node.txt")"
@@ -78,10 +81,10 @@ PRE_EVENT_SECONDS=30
 POST_EVENT_SECONDS=$POST_EVENT_SECONDS
 EOF
 
-log "step 4/11: before snapshot"
+log "step 5/12: before snapshot"
 "$PARENT_ROOT/scripts/snapshot.sh" before "$OUTPUT_DIR"
 
-log "step 5/11: start lifecycle watcher and k6"
+log "step 6/12: start lifecycle watcher and k6"
 python3 "$PARENT_ROOT/scripts/watch-pods.py" \
   --namespace "$NS" --output "$OUTPUT_DIR/pod-lifecycle.tsv" &
 WATCH_PID=$!
@@ -98,11 +101,11 @@ k6 run \
   "$PARENT_ROOT/k6/api-load.js" > "$OUTPUT_DIR/api-load.log" 2>&1 &
 K6_PID=$!
 
-log "step 6/11: stabilize load for ${STABILIZE_SECONDS}s"
+log "step 7/12: stabilize load for ${STABILIZE_SECONDS}s"
 sleep "$STABILIZE_SECONDS"
 kubectl -n "$NS" top pod -l app=workload-api 2>&1 | tee "$OUTPUT_DIR/api-pod-metrics.txt"
 
-log "step 7/11: require two CPU samples at or above ${THRESHOLD}"
+log "step 8/12: require two CPU samples at or above ${THRESHOLD}"
 python3 "$PARENT_ROOT/scripts/wait-threshold.py" \
   --namespace "$NS" \
   --pod "$api_pod" \
@@ -113,7 +116,7 @@ python3 "$PARENT_ROOT/scripts/wait-threshold.py" \
   --timeout 120 \
   --output "$OUTPUT_DIR/threshold-samples.tsv"
 
-log "step 8/11: capture event snapshot and run $SYSTEM"
+log "step 9/12: capture event snapshot and run $SYSTEM"
 date -Ins > "$OUTPUT_DIR/event-time.txt"
 "$PARENT_ROOT/scripts/snapshot.sh" event "$OUTPUT_DIR"
 if [[ "$SYSTEM" == "H0" ]]; then
@@ -125,11 +128,11 @@ fi
 grep -E "(Evicted pod|blocking eviction|ActualUsageEvictor|Node has been classified)" \
   "$OUTPUT_DIR/descheduler.log" || true
 
-log "step 9/11: wait ${POST_EVENT_SECONDS}s for replacements and traffic capture"
+log "step 10/12: wait ${POST_EVENT_SECONDS}s for replacements and traffic capture"
 sleep "$POST_EVENT_SECONDS"
 kubectl -n "$NS" wait --for=condition=available deployment --all --timeout=180s
 
-log "step 10/11: after snapshot and result validation"
+log "step 11/12: after snapshot and result validation"
 "$PARENT_ROOT/scripts/snapshot.sh" after "$OUTPUT_DIR"
 python3 "$HNU_ROOT/scripts/validate-result.py" \
   --system "$SYSTEM" \
@@ -141,7 +144,7 @@ python3 "$HNU_ROOT/scripts/validate-result.py" \
   --api-uid "$api_uid" \
   | tee "$OUTPUT_DIR/result-validation.json"
 
-log "step 11/11: stop load and generate summary"
+log "step 12/12: stop load and generate summary"
 cleanup_processes
 K6_PID=""
 WATCH_PID=""

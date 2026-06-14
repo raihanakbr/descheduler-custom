@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+HNU_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SOURCE_CONFIG="$HNU_ROOT/scheduler/most-allocated-config.yaml"
+TARGET_CONFIG="/etc/kubernetes/scheduler-config.yaml"
+MANIFEST="/etc/kubernetes/manifests/kube-scheduler.yaml"
+BACKUP="/etc/kubernetes/kube-scheduler.yaml.pre-hnu"
+
+[[ -f "$SOURCE_CONFIG" ]] || {
+  echo "ERROR: scheduler config not found: $SOURCE_CONFIG" >&2
+  exit 1
+}
+[[ -f "$MANIFEST" ]] || {
+  echo "ERROR: $MANIFEST not found; run this experiment on the control plane" >&2
+  exit 1
+}
+command -v sudo >/dev/null || {
+  echo "ERROR: sudo is required to configure the control-plane scheduler" >&2
+  exit 1
+}
+
+echo "[hnu-scheduler] requesting sudo access"
+sudo -v
+sudo python3 -c 'import yaml' >/dev/null 2>&1 || {
+  echo "ERROR: PyYAML is required for root's python3 (install python3-yaml)" >&2
+  exit 1
+}
+
+if ! sudo test -f "$BACKUP"; then
+  echo "[hnu-scheduler] backing up static Pod manifest to $BACKUP"
+  sudo cp --preserve=mode,ownership,timestamps "$MANIFEST" "$BACKUP"
+fi
+
+echo "[hnu-scheduler] installing NodeResourcesFit/MostAllocated config"
+sudo install -o root -g root -m 0644 "$SOURCE_CONFIG" "$TARGET_CONFIG"
+
+echo "[hnu-scheduler] configuring kube-scheduler static Pod"
+sudo python3 "$HNU_ROOT/scripts/configure-scheduler-manifest.py" \
+  --manifest "$MANIFEST"
+
+echo "[hnu-scheduler] waiting for kube-scheduler to reload"
+deadline=$((SECONDS + 180))
+while (( SECONDS < deadline )); do
+  command_line="$(kubectl -n kube-system get pods -l component=kube-scheduler \
+    -o jsonpath='{range .items[*]}{.status.phase}{"|"}{range .spec.containers[?(@.name=="kube-scheduler")].command[*]}{.}{" "}{end}{"\n"}{end}' \
+    2>/dev/null || true)"
+  if grep -q 'Running|.*--config=/etc/kubernetes/scheduler-config.yaml' <<<"$command_line"; then
+    if kubectl -n kube-system wait \
+      --for=condition=Ready pod \
+      -l component=kube-scheduler \
+      --timeout=10s >/dev/null 2>&1; then
+      echo "[hnu-scheduler] scheduler is Ready with $TARGET_CONFIG"
+      printf '%s\n' "$command_line"
+      exit 0
+    fi
+  fi
+  sleep 3
+done
+
+echo "ERROR: kube-scheduler did not become Ready with the HNU config" >&2
+kubectl -n kube-system get pods -l component=kube-scheduler -o wide >&2 || true
+kubectl -n kube-system logs -l component=kube-scheduler --tail=80 >&2 || true
+echo "[hnu-scheduler] restoring $BACKUP" >&2
+sudo cp --preserve=mode,ownership,timestamps "$BACKUP" "$MANIFEST"
+kubectl -n kube-system wait \
+  --for=condition=Ready pod \
+  -l component=kube-scheduler \
+  --timeout=180s >/dev/null 2>&1 || true
+exit 1
