@@ -122,6 +122,10 @@ descheduler Job runner, and single-run summarizer.
 HNU-specific files only define its placement, policies, result assertions,
 plan, walkthrough, and entrypoint scripts.
 
+The runner defaults to
+`docker.io/matthewhjt/descheduler-custom:actual-usage-v1` and allows
+`DESCHEDULER_IMAGE` to override it.
+
 ## Acceptance Criteria
 
 1. Initial validation finds exactly three source and three destination nodes.

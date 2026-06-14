@@ -10,12 +10,14 @@ Run one H0 comparison and one H1 comparison under sustained API load.
 
 ## Prerequisites
 
-Run from `experiments/actual-usage-evictor-v2`:
+Run from `experiments/actual-usage-evictor-v2`. The scripts default to:
 
 ```bash
-export DESCHEDULER_IMAGE=<image-containing-ActualUsageEvictor>
-export WORKLOAD_IMAGE=docker.io/matthewhjt/workload-http:actual-usage-v1
+DESCHEDULER_IMAGE=docker.io/matthewhjt/descheduler-custom:actual-usage-v1
+WORKLOAD_IMAGE=docker.io/matthewhjt/workload-http:actual-usage-v1
 ```
+
+Export either variable only when overriding the default.
 
 Optionally select six workers explicitly:
 

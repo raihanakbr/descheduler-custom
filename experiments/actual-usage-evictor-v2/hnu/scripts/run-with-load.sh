@@ -48,7 +48,7 @@ cleanup_processes() {
 }
 trap cleanup_processes EXIT
 
-: "${DESCHEDULER_IMAGE:?DESCHEDULER_IMAGE is required}"
+: "${DESCHEDULER_IMAGE:=docker.io/matthewhjt/descheduler-custom:actual-usage-v1}"
 : "${WORKLOAD_IMAGE:=docker.io/matthewhjt/workload-http:actual-usage-v1}"
 export DESCHEDULER_IMAGE WORKLOAD_IMAGE
 
