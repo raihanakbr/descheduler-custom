@@ -1,0 +1,3 @@
+timestamp	pod	resource	usage	request	ratio	threshold	above
+2026-06-14T16:30:40.827833+00:00	workload-api-5dd89457c6-lj4mh	cpu	495052266n	50m	9.901045	0.80	true
+2026-06-14T16:30:50.899810+00:00	workload-api-5dd89457c6-lj4mh	cpu	495052266n	50m	9.901045	0.80	true
