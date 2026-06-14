@@ -1,0 +1,41 @@
+apiVersion: descheduler/v1alpha2
+kind: DeschedulerPolicy
+metricsProviders:
+- source: KubernetesMetrics
+maxNoOfPodsToEvictTotal: 3
+profiles:
+- name: actual-usage-hnu-h1
+  pluginConfig:
+  - name: DefaultEvictor
+    args:
+      nodeFit: true
+  - name: ActualUsageEvictor
+    args:
+      cpuUsageThreshold: 0.80
+      memoryUsageThreshold: 0.80
+      missingRequestPolicy: Allow
+      namespaces:
+        include:
+        - actual-usage-exp
+      labelSelector:
+        matchLabels:
+          experiment: actual-usage-evictor
+  - name: HighNodeUtilization
+    args:
+      thresholds:
+        cpu: 40
+        memory: 40
+      evictableNamespaces:
+        include:
+        - actual-usage-exp
+  plugins:
+    filter:
+      enabled:
+      - DefaultEvictor
+    preevictionfilter:
+      enabled:
+      - DefaultEvictor
+      - ActualUsageEvictor
+    balance:
+      enabled:
+      - HighNodeUtilization
