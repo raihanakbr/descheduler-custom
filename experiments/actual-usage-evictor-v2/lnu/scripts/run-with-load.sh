@@ -52,14 +52,8 @@ trap cleanup_processes EXIT
 : "${WORKLOAD_IMAGE:=docker.io/matthewhjt/workload-http:actual-usage-v1}"
 export DESCHEDULER_IMAGE WORKLOAD_IMAGE
 
-log "step 1/12: verify default scheduler"
-scheduler_command="$(kubectl -n kube-system get pods -l component=kube-scheduler \
-  -o jsonpath='{.items[0].spec.containers[0].command}' 2>/dev/null || true)"
-if grep -q -- '--config=/etc/kubernetes/scheduler-config.yaml' <<<"$scheduler_command"; then
-  echo "ERROR: kube-scheduler still uses the HNU MostAllocated configuration." >&2
-  echo "Run ./hnu/scripts/restore-scheduler.sh before the LNU experiment." >&2
-  exit 1
-fi
+log "step 1/12: configure and verify default scheduler"
+"$LNU_ROOT/scripts/setup-scheduler.sh" | tee "$OUTPUT_DIR/scheduler-setup.log"
 
 log "step 2/12: cleanup previous state"
 "$PARENT_ROOT/scripts/cleanup.sh"

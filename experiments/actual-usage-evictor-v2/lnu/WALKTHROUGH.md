@@ -27,16 +27,20 @@ The first three workers are underutilized destinations. Workers four and five
 are idle overutilized sources. Worker six contains the busy API and its idle
 fallback.
 
-The scheduler must use its default LeastAllocated behavior. LNU does not
-install scheduler configuration. If the HNU experiment changed the scheduler,
-restore it before this experiment:
+The scheduler must use its default LeastAllocated behavior. At the start of
+each run, `lnu/scripts/setup-scheduler.sh` checks the active scheduler:
+
+- if the default scheduler is active, it makes no changes;
+- if the HNU MostAllocated configuration is active, it automatically restores
+  `/etc/kubernetes/kube-scheduler.yaml.pre-hnu` and waits for readiness;
+- if an unrelated custom scheduler config is active, it exits instead of
+  overwriting configuration not owned by these experiments.
+
+To run only this check and automatic restore:
 
 ```bash
-./hnu/scripts/restore-scheduler.sh
+./lnu/scripts/setup-scheduler.sh
 ```
-
-The LNU runner exits before changing workload state when it detects the HNU
-`/etc/kubernetes/scheduler-config.yaml` argument.
 
 ## Run L0
 
@@ -106,6 +110,7 @@ Important files:
 | File | Purpose |
 |---|---|
 | `layout-validation.json` | Initial LNU source/destination classification |
+| `scheduler-setup.log` | Scheduler detection and automatic HNU restore |
 | `threshold-samples.tsv` | Actual API CPU ratio before descheduling |
 | `descheduler.log` | LNU evictions and ActualUsageEvictor decisions |
 | `pod-lifecycle.tsv` | Original and replacement API lifecycle |
