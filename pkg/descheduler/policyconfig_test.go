@@ -19,6 +19,7 @@ package descheduler
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -159,6 +160,33 @@ profiles:
 				t.Errorf("test '%s' failed. Results are not deep equal. mismatch (-want +got):\n%s", tc.description, diff)
 			}
 		})
+	}
+}
+
+func TestDecodeRejectsRemovedResourceDefragmentationC2UsageMode(t *testing.T) {
+	client := fakeclientset.NewSimpleClientset()
+	SetupPlugins()
+
+	policy := []byte(`apiVersion: "descheduler/v1alpha2"
+kind: "DeschedulerPolicy"
+profiles:
+  - name: ProfileName
+    pluginConfig:
+      - name: "ResourceDefragmentationC2"
+        args:
+          usageMode: actual-ewma
+    plugins:
+      balance:
+        enabled:
+          - "ResourceDefragmentationC2"
+`)
+
+	_, err := decode("filename", policy, client, pluginregistry.PluginRegistry)
+	if err == nil {
+		t.Fatal("expected removed usageMode field to be rejected")
+	}
+	if !strings.Contains(err.Error(), `unknown field "usageMode"`) {
+		t.Fatalf("unexpected error: %v", err)
 	}
 }
 

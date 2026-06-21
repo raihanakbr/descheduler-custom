@@ -1,0 +1,60 @@
+/*
+Copyright 2026 The Kubernetes Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package actualusageevictor
+
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/descheduler/pkg/api"
+)
+
+// MissingRequestPolicy controls eviction when a resource request is missing.
+type MissingRequestPolicy string
+
+const (
+	// AllowMissingRequest skips a resource dimension without a valid request.
+	AllowMissingRequest MissingRequestPolicy = "Allow"
+	// BlockMissingRequest blocks eviction when a resource request is missing.
+	BlockMissingRequest MissingRequestPolicy = "Block"
+)
+
+// +k8s:deepcopy-gen=true
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
+// ActualUsageEvictorArgs configures runtime-usage-based eviction filtering.
+type ActualUsageEvictorArgs struct {
+	metav1.TypeMeta `json:",inline"`
+
+	// CPUUsageThreshold is the actual CPU usage divided by requested CPU at
+	// which eviction is blocked. Default: 0.80.
+	CPUUsageThreshold float64 `json:"cpuUsageThreshold,omitempty"`
+
+	// MemoryUsageThreshold is the actual memory usage divided by requested
+	// memory at which eviction is blocked. Default: 0.80.
+	MemoryUsageThreshold float64 `json:"memoryUsageThreshold,omitempty"`
+
+	// MissingRequestPolicy controls how a missing CPU or memory request is
+	// evaluated. Allow skips that resource dimension; Block prevents eviction.
+	// Default: Allow.
+	MissingRequestPolicy MissingRequestPolicy `json:"missingRequestPolicy,omitempty"`
+
+	// Namespaces optionally limits the pods evaluated by this plugin.
+	Namespaces *api.Namespaces `json:"namespaces,omitempty"`
+
+	// LabelSelector optionally limits the pods evaluated by this plugin.
+	// When Namespaces is also set, both scopes must match.
+	LabelSelector *metav1.LabelSelector `json:"labelSelector,omitempty"`
+}

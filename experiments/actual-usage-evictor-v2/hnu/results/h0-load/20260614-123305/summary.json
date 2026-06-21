@@ -1,0 +1,68 @@
+{
+  "actual_usage_blocks": 0,
+  "api_load": {
+    "after": {
+      "dropped_iterations": 0.0,
+      "failure_rate": 0.1111111111111111,
+      "p50_ms": 64.019574,
+      "p95_ms": 80.497967,
+      "p99_ms": 95.965934,
+      "requests": 360,
+      "status_counts": {
+        "200": 320,
+        "503": 40
+      },
+      "successful_rps": 7.111111111111111
+    },
+    "before": {
+      "dropped_iterations": 0.0,
+      "failure_rate": 0.0,
+      "p50_ms": 61.990358,
+      "p95_ms": 503.484739,
+      "p99_ms": 651.751567,
+      "requests": 240,
+      "status_counts": {
+        "200": 240
+      },
+      "successful_rps": 8.0
+    }
+  },
+  "cluster": {
+    "after": {
+      "H_balanced": 33,
+      "H_skewed": 6,
+      "N_active": 3,
+      "N_empty": 3,
+      "S": 0.385724,
+      "label": "after"
+    },
+    "before": {
+      "H_balanced": 29,
+      "H_skewed": 6,
+      "N_active": 6,
+      "N_empty": 0,
+      "S": 1.454583,
+      "label": "before"
+    },
+    "event": {
+      "H_balanced": 29,
+      "H_skewed": 6,
+      "N_active": 6,
+      "N_empty": 0,
+      "S": 1.454583,
+      "label": "event"
+    }
+  },
+  "event_time": "2026-06-14T12:35:05.547206+00:00",
+  "evictions": 3,
+  "lifecycle": {
+    "deletion_observed_at": "2026-06-14T12:35:09.638989+00:00",
+    "event_to_ready_seconds": 6.371315,
+    "event_to_scheduled_seconds": 4.091783,
+    "original_pod": "workload-api-5dd89457c6-9vt2z",
+    "original_uid": "d62c36aa-fa08-48aa-8c44-aeda5aba3cf7",
+    "owner": "workload-api-5dd89457c6",
+    "replacement_ready_at": "2026-06-14T12:35:11.918521+00:00",
+    "replacement_scheduled_at": "2026-06-14T12:35:09.638989+00:00"
+  }
+}

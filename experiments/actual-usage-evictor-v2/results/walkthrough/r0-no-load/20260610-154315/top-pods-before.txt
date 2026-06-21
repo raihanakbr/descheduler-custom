@@ -1,0 +1,7 @@
+POD                               NAME       CPU(cores)   MEMORY(bytes)   
+workload-cpu-1-6d58864d46-5ww7c   workload   3m           1Mi             
+workload-cpu-1-6d58864d46-qrxpf   workload   1m           1Mi             
+workload-cpu-2-679766cbf5-f7jdd   workload   2m           1Mi             
+workload-cpu-2-679766cbf5-qgmzp   workload   2m           1Mi             
+workload-cpu-3-7c59447b64-8696m   workload   2m           1Mi             
+workload-cpu-3-7c59447b64-r687z   workload   2m           1Mi             

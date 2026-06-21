@@ -1,0 +1,6 @@
+[hnu-scheduler] verifying passwordless sudo access
+[hnu-scheduler] installing NodeResourcesFit/MostAllocated config
+[hnu-scheduler] configuring kube-scheduler static Pod
+[hnu-scheduler] waiting for kube-scheduler to reload
+[hnu-scheduler] scheduler is Ready with /etc/kubernetes/scheduler-config.yaml
+["kube-scheduler","--authentication-kubeconfig=/etc/kubernetes/scheduler.conf","--authorization-kubeconfig=/etc/kubernetes/scheduler.conf","--bind-address=127.0.0.1","--kubeconfig=/etc/kubernetes/scheduler.conf","--leader-elect=true","--config=/etc/kubernetes/scheduler-config.yaml"]

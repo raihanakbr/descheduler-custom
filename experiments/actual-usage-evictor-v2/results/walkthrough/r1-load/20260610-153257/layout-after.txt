@@ -1,0 +1,13 @@
+NAME                              READY   STATUS    RESTARTS   AGE    IP            NODE       NOMINATED NODE   READINESS GATES
+workload-cpu-1-6d58864d46-hwp9n   1/1     Running   0          104s   10.244.1.95   worker-1   <none>           <none>
+workload-cpu-1-6d58864d46-j5plm   1/1     Running   0          104s   10.244.1.94   worker-1   <none>           <none>
+workload-cpu-2-679766cbf5-chrxn   1/1     Running   0          100s   10.244.2.96   worker-2   <none>           <none>
+workload-cpu-2-679766cbf5-wcprk   1/1     Running   0          101s   10.244.2.95   worker-2   <none>           <none>
+workload-cpu-3-7c59447b64-mtsgr   1/1     Running   0          96s    10.244.3.56   worker-3   <none>           <none>
+workload-cpu-3-7c59447b64-nrv5m   1/1     Running   0          97s    10.244.3.55   worker-3   <none>           <none>
+workload-mem-4-9bf84d8bb-956kk    1/1     Running   0          94s    10.244.4.58   worker-4   <none>           <none>
+workload-mem-4-9bf84d8bb-gmfvk    1/1     Running   0          94s    10.244.4.57   worker-4   <none>           <none>
+workload-mem-6-6649876fdf-hctrb   1/1     Running   0          33s    10.244.4.59   worker-4   <none>           <none>
+workload-mem-5-859c899f5f-b2w88   1/1     Running   0          90s    10.244.5.56   worker-5   <none>           <none>
+workload-mem-5-859c899f5f-h48fw   1/1     Running   0          90s    10.244.5.55   worker-5   <none>           <none>
+workload-api-5c9bf65f57-6h82g     1/1     Running   0          87s    10.244.6.21   worker-6   <none>           <none>

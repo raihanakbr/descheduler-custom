@@ -29,11 +29,6 @@ func ValidateResourceDefragmentationC2Args(obj runtime.Object) error {
 	if args.Namespaces != nil && len(args.Namespaces.Include) > 0 && len(args.Namespaces.Exclude) > 0 {
 		allErrs = append(allErrs, fmt.Errorf("only one of Include/Exclude namespaces can be set"))
 	}
-	switch args.UsageMode {
-	case "", UsageModeRequests, UsageModeActualRaw, UsageModeActualEWMA:
-	default:
-		allErrs = append(allErrs, fmt.Errorf("unsupported usageMode %q", args.UsageMode))
-	}
 	if args.ConsolidationThreshold < 0 || args.ConsolidationThreshold > 1 {
 		allErrs = append(allErrs, fmt.Errorf("consolidationThreshold must be in range [0, 1], got %v", args.ConsolidationThreshold))
 	}

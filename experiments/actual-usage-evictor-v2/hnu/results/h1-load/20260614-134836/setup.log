@@ -1,0 +1,98 @@
+namespace/actual-usage-exp created
+deployment.apps/workload-destination-1 created
+deployment.apps/workload-destination-2 created
+deployment.apps/workload-destination-3 created
+deployment.apps/workload-idle-source-1 created
+deployment.apps/workload-idle-source-2 created
+deployment.apps/workload-api created
+service/workload-api created
+poddisruptionbudget.policy/workload created
+deployment.apps/workload-api condition met
+deployment.apps/workload-destination-1 condition met
+deployment.apps/workload-destination-2 condition met
+deployment.apps/workload-destination-3 condition met
+deployment.apps/workload-idle-source-1 condition met
+deployment.apps/workload-idle-source-2 condition met
+{
+  "api_pod": "workload-api-5dd89457c6-bdmc9",
+  "busy_source": "worker-6",
+  "destinations": [
+    "worker-1",
+    "worker-2",
+    "worker-3"
+  ],
+  "experiment_pods": 9,
+  "node_details": {
+    "worker-1": {
+      "cpu_fraction": 0.7,
+      "experiment_pods": [
+        "workload-destination-1-5f6d897967-vqblz",
+        "workload-destination-1-5f6d897967-zpg4n"
+      ],
+      "memory_fraction": 0.432785,
+      "underutilized": false
+    },
+    "worker-2": {
+      "cpu_fraction": 0.7,
+      "experiment_pods": [
+        "workload-destination-2-7c84d94cdb-v2nzx",
+        "workload-destination-2-7c84d94cdb-wh7qx"
+      ],
+      "memory_fraction": 0.432783,
+      "underutilized": false
+    },
+    "worker-3": {
+      "cpu_fraction": 0.7,
+      "experiment_pods": [
+        "workload-destination-3-57957d8b7c-74lcw",
+        "workload-destination-3-57957d8b7c-rvw2r"
+      ],
+      "memory_fraction": 0.432785,
+      "underutilized": false
+    },
+    "worker-4": {
+      "cpu_fraction": 0.075,
+      "experiment_pods": [
+        "workload-idle-source-1-649f7d9b48-j2mgr"
+      ],
+      "memory_fraction": 0.259673,
+      "underutilized": true
+    },
+    "worker-5": {
+      "cpu_fraction": 0.075,
+      "experiment_pods": [
+        "workload-idle-source-2-958bdc7ff-dzjpj"
+      ],
+      "memory_fraction": 0.259671,
+      "underutilized": true
+    },
+    "worker-6": {
+      "cpu_fraction": 0.075,
+      "experiment_pods": [
+        "workload-api-5dd89457c6-bdmc9"
+      ],
+      "memory_fraction": 0.358594,
+      "underutilized": true
+    }
+  },
+  "sources": [
+    "worker-4",
+    "worker-5",
+    "worker-6"
+  ],
+  "underutilized_sources": [
+    "worker-4",
+    "worker-5",
+    "worker-6"
+  ]
+}
+NAME                                      READY   STATUS    RESTARTS   AGE   IP             NODE       NOMINATED NODE   READINESS GATES
+workload-destination-1-5f6d897967-vqblz   1/1     Running   0          24s   10.244.1.119   worker-1   <none>           <none>
+workload-destination-1-5f6d897967-zpg4n   1/1     Running   0          24s   10.244.1.120   worker-1   <none>           <none>
+workload-destination-2-7c84d94cdb-v2nzx   1/1     Running   0          20s   10.244.2.117   worker-2   <none>           <none>
+workload-destination-2-7c84d94cdb-wh7qx   1/1     Running   0          20s   10.244.2.118   worker-2   <none>           <none>
+workload-destination-3-57957d8b7c-74lcw   1/1     Running   0          15s   10.244.3.78    worker-3   <none>           <none>
+workload-destination-3-57957d8b7c-rvw2r   1/1     Running   0          15s   10.244.3.79    worker-3   <none>           <none>
+workload-idle-source-1-649f7d9b48-j2mgr   1/1     Running   0          11s   10.244.4.76    worker-4   <none>           <none>
+workload-idle-source-2-958bdc7ff-dzjpj    1/1     Running   0          8s    10.244.5.70    worker-5   <none>           <none>
+workload-api-5dd89457c6-bdmc9             1/1     Running   0          4s    10.244.6.37    worker-6   <none>           <none>

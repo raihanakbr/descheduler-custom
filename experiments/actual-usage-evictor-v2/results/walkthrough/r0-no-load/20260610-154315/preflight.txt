@@ -1,0 +1,12 @@
+Context: kubernetes-admin@kubernetes
+Workers (6): worker-1 worker-2 worker-3 worker-4 worker-5 worker-6
+NAME       CPU   MEMORY     UNSCHEDULABLE
+worker-1   2     828128Ki   <none>
+worker-2   2     828128Ki   <none>
+worker-3   2     828120Ki   <none>
+worker-4   2     828124Ki   <none>
+worker-5   2     828128Ki   <none>
+worker-6   2     828128Ki   <none>
+Metrics API: available
+Descheduler image: docker.io/matthewhjt/descheduler-custom:actual-usage-v1
+Experiment root: /home/ubuntu/descheduler-custom/experiments/actual-usage-evictor-v2

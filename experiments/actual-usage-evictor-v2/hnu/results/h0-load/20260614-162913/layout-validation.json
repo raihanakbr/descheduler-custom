@@ -1,0 +1,73 @@
+{
+  "api_pod": "workload-api-5dd89457c6-lj4mh",
+  "busy_source": "worker-6",
+  "destinations": [
+    "worker-1",
+    "worker-2",
+    "worker-3"
+  ],
+  "experiment_pods": 9,
+  "node_details": {
+    "worker-1": {
+      "cpu_fraction": 0.7,
+      "experiment_pods": [
+        "workload-destination-1-5f6d897967-b8xkf",
+        "workload-destination-1-5f6d897967-g6b7s"
+      ],
+      "memory_fraction": 0.432783,
+      "underutilized": false
+    },
+    "worker-2": {
+      "cpu_fraction": 0.7,
+      "experiment_pods": [
+        "workload-destination-2-7c84d94cdb-5ds4f",
+        "workload-destination-2-7c84d94cdb-blptt"
+      ],
+      "memory_fraction": 0.432783,
+      "underutilized": false
+    },
+    "worker-3": {
+      "cpu_fraction": 0.7,
+      "experiment_pods": [
+        "workload-destination-3-57957d8b7c-5nh5l",
+        "workload-destination-3-57957d8b7c-pmtx5"
+      ],
+      "memory_fraction": 0.432783,
+      "underutilized": false
+    },
+    "worker-4": {
+      "cpu_fraction": 0.075,
+      "experiment_pods": [
+        "workload-idle-source-1-649f7d9b48-9m9qg"
+      ],
+      "memory_fraction": 0.259673,
+      "underutilized": true
+    },
+    "worker-5": {
+      "cpu_fraction": 0.075,
+      "experiment_pods": [
+        "workload-idle-source-2-958bdc7ff-xjr5h"
+      ],
+      "memory_fraction": 0.25967,
+      "underutilized": true
+    },
+    "worker-6": {
+      "cpu_fraction": 0.075,
+      "experiment_pods": [
+        "workload-api-5dd89457c6-lj4mh"
+      ],
+      "memory_fraction": 0.358592,
+      "underutilized": true
+    }
+  },
+  "sources": [
+    "worker-4",
+    "worker-5",
+    "worker-6"
+  ],
+  "underutilized_sources": [
+    "worker-4",
+    "worker-5",
+    "worker-6"
+  ]
+}

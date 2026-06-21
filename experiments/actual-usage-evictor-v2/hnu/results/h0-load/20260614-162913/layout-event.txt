@@ -1,0 +1,10 @@
+NAME                                      READY   STATUS    RESTARTS   AGE   IP             NODE       NOMINATED NODE   READINESS GATES
+workload-destination-1-5f6d897967-b8xkf   1/1     Running   0          66s   10.244.1.123   worker-1   <none>           <none>
+workload-destination-1-5f6d897967-g6b7s   1/1     Running   0          66s   10.244.1.124   worker-1   <none>           <none>
+workload-destination-2-7c84d94cdb-5ds4f   1/1     Running   0          62s   10.244.2.127   worker-2   <none>           <none>
+workload-destination-2-7c84d94cdb-blptt   1/1     Running   0          62s   10.244.2.126   worker-2   <none>           <none>
+workload-destination-3-57957d8b7c-5nh5l   1/1     Running   0          59s   10.244.3.83    worker-3   <none>           <none>
+workload-destination-3-57957d8b7c-pmtx5   1/1     Running   0          59s   10.244.3.82    worker-3   <none>           <none>
+workload-idle-source-1-649f7d9b48-9m9qg   1/1     Running   0          55s   10.244.4.77    worker-4   <none>           <none>
+workload-idle-source-2-958bdc7ff-xjr5h    1/1     Running   0          51s   10.244.5.71    worker-5   <none>           <none>
+workload-api-5dd89457c6-lj4mh             1/1     Running   0          47s   10.244.6.39    worker-6   <none>           <none>
